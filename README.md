@@ -6,19 +6,24 @@ AI-Powered Receptionist Service for Real Estate - Frontend Application
 
 - **Framework**: Next.js 14
 - **Language**: TypeScript
-- **Styling**: (To be added)
-- **State Management**: (To be added)
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
 
 ## Project Structure
 
 ```
 PropTalk-Frontend/
-├── app/              # Next.js App Router
+├── app/
+│   ├── login/        # Login pages (admin, agent, user)
+│   ├── layout.tsx    # Root layout
+│   └── page.tsx      # Home page
 ├── components/       # Reusable components
+│   └── LoginLayout.tsx
 ├── lib/             # Utilities and API services
+│   ├── api.ts       # API functions
+│   └── utils.ts     # Utility functions
 ├── types/           # TypeScript types
-├── public/          # Static assets
-└── styles/          # Global styles
+└── public/          # Static assets
 ```
 
 ## Setup
@@ -39,6 +44,12 @@ npm run dev
 ```
 
 4. Open [http://localhost:3000](http://localhost:3000)
+
+## Login Pages
+
+- **Admin Login**: `/login/admin`
+- **Agent Login**: `/login/agent`
+- **User Login**: `/login/user`
 
 ## Backend API
 
