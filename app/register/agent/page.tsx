@@ -1,11 +1,14 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import '@/styles/animations.css'
+import { loadGoogleScript } from '@/lib/googleAuth'
 
 export default function AgentSignUpPage() {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -17,6 +20,71 @@ export default function AgentSignUpPage() {
   })
   const [focusedField, setFocusedField] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
+  const googleButtonRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    // Load Google script and initialize
+    const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+    if (clientId) {
+      loadGoogleScript()
+        .then(() => {
+          // Initialize Google Sign In
+          if (window.google) {
+            window.google.accounts.id.initialize({
+              client_id: clientId,
+              callback: handleGoogleSuccess,
+            })
+            
+            // Render button after a short delay to ensure DOM is ready
+            setTimeout(() => {
+              const buttonElement = document.getElementById('google-signup-button')
+              if (buttonElement && window.google) {
+                window.google.accounts.id.renderButton(buttonElement, {
+                  theme: 'outline',
+                  size: 'large',
+                  text: 'signup_with',
+                  width: '100%',
+                })
+              }
+            }, 500)
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to load Google script:', error)
+        })
+    }
+  }, [])
+
+  const handleGoogleSuccess = async (response: { credential: string }) => {
+    setIsGoogleLoading(true)
+    try {
+      const apiResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: response.credential,
+          user_type: 'agent',
+        }),
+      })
+
+      if (!apiResponse.ok) {
+        const error = await apiResponse.json()
+        throw new Error(error.detail || 'Google sign-up failed')
+      }
+
+      const data = await apiResponse.json()
+      localStorage.setItem('agent_token', data.access_token)
+      router.push('/agent/dashboard')
+    } catch (error: any) {
+      console.error('Google sign-up error:', error)
+      alert(error.message || 'Google sign-up failed. Please try again.')
+    } finally {
+      setIsGoogleLoading(false)
+    }
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -307,7 +375,7 @@ export default function AgentSignUpPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isGoogleLoading}
               className="w-full py-3 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 background: 'linear-gradient(135deg, #3b9eff 0%, #1e5fb8 100%)',
@@ -317,6 +385,23 @@ export default function AgentSignUpPage() {
               {isLoading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t" style={{ borderColor: 'rgba(77, 184, 255, 0.2)' }}></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 text-blue-300" style={{ background: 'rgba(15, 31, 58, 0.9)' }}>
+                or continue with
+              </span>
+            </div>
+          </div>
+
+          {/* Google Sign Up Button */}
+          <div className="mb-6">
+            <div id="google-signup-button" ref={googleButtonRef}></div>
+          </div>
 
           {/* Sign In Link */}
           <div className="mt-6 text-center">

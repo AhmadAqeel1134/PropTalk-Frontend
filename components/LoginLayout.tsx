@@ -1,9 +1,11 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import Link from 'next/link'
 import { ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import '@/styles/animations.css'
+import { loadGoogleScript, initializeGoogleSignIn, loginWithGoogle } from '@/lib/googleAuth'
 
 interface LoginLayoutProps {
   title: string
@@ -24,17 +26,99 @@ export default function LoginLayout({
   showSignUp = false,
   signUpLink
 }: LoginLayoutProps) {
+  const router = useRouter()
   const [isVisible, setIsVisible] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const [focusedField, setFocusedField] = useState('')
   const [rememberMe, setRememberMe] = useState(false)
+  const googleButtonRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setIsVisible(true)
-  }, [])
+    
+    // Load Google script and initialize
+    if (userType === 'admin' || userType === 'agent') {
+      const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
+      if (clientId) {
+        loadGoogleScript()
+          .then(() => {
+            // Initialize Google Sign In
+            if (window.google) {
+              window.google.accounts.id.initialize({
+                client_id: clientId,
+                callback: (response: { credential: string }) => {
+                  handleGoogleSuccess(response.credential)
+                },
+              })
+              
+              // Render button after a short delay to ensure DOM is ready
+              setTimeout(() => {
+                const buttonElement = document.getElementById('google-signin-button')
+                if (buttonElement && window.google) {
+                  window.google.accounts.id.renderButton(buttonElement, {
+                    theme: 'outline',
+                    size: 'large',
+                    text: 'signin_with',
+                    width: '100%',
+                  })
+                }
+              }, 500)
+            }
+          })
+          .catch((error) => {
+            console.error('Failed to load Google script:', error)
+          })
+      }
+    }
+  }, [userType])
+
+  const handleGoogleSuccess = async (credential: string) => {
+    if (userType !== 'admin' && userType !== 'agent') return
+    
+    setIsGoogleLoading(true)
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: credential,
+          user_type: userType,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.detail || 'Google login failed')
+      }
+
+      const data = await response.json()
+      
+      // Store token
+      if (userType === 'admin') {
+        localStorage.setItem('admin_token', data.access_token)
+        router.push('/admin/dashboard')
+      } else if (userType === 'agent') {
+        localStorage.setItem('agent_token', data.access_token)
+        router.push('/agent/dashboard')
+      }
+    } catch (error: any) {
+      console.error('Google login error:', error)
+      alert(error.message || 'Google login failed. Please try again.')
+    } finally {
+      setIsGoogleLoading(false)
+    }
+  }
+
+  const handleGoogleError = (error: string) => {
+    console.error('Google auth error:', error)
+    alert('Google authentication failed. Please try again.')
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -181,7 +265,7 @@ export default function LoginLayout({
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || isGoogleLoading}
               className="w-full py-3 rounded-lg font-semibold text-white transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 background: 'linear-gradient(135deg, #3b9eff 0%, #1e5fb8 100%)',
@@ -191,6 +275,27 @@ export default function LoginLayout({
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
+
+          {/* Divider */}
+          {(userType === 'admin' || userType === 'agent') && (
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t" style={{ borderColor: 'rgba(77, 184, 255, 0.2)' }}></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 text-blue-300" style={{ background: 'rgba(15, 31, 58, 0.9)' }}>
+                  or continue with
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Google Sign In Button */}
+          {(userType === 'admin' || userType === 'agent') && (
+            <div className="mb-6">
+              <div id="google-signin-button" ref={googleButtonRef}></div>
+            </div>
+          )}
 
           {/* Sign Up Link */}
           {showSignUp && signUpLink && (
