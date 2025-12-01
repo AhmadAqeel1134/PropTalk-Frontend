@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -20,6 +20,13 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState<string>('admin@proptalk.com');
+
+  useEffect(() => {
+    // Only access localStorage on client side after mount
+    const email = localStorage.getItem('user_email') || 'admin@proptalk.com';
+    setUserEmail(email);
+  }, []);
 
   const navigation = [
     {
@@ -176,8 +183,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
             >
               <p className="text-sm font-semibold text-white mb-1">Admin User</p>
               <p className="text-xs text-blue-300">
-                {typeof window !== 'undefined' &&
-                  (localStorage.getItem('user_email') || 'admin@proptalk.com')}
+                {userEmail}
               </p>
             </div>
             <button

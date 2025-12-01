@@ -95,6 +95,20 @@ export interface DashboardStats {
   };
 }
 
+export interface PaginatedDocuments {
+  items: Document[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
+export interface PaginatedProperties {
+  items: Property[];
+  total: number;
+  page: number;
+  page_size: number;
+}
+
 export interface ApiError {
   message: string;
   status?: number;
