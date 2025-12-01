@@ -127,8 +127,16 @@ export async function getAgentProperties(agentId: string) {
   return authenticatedFetch(`/admin/real-estate-agents/${agentId}/properties`)
 }
 
+export async function getAgentPropertiesPaginated(agentId: string, page: number = 1, pageSize: number = 16) {
+  return authenticatedFetch(`/admin/real-estate-agents/${agentId}/properties/paginated?page=${page}&page_size=${pageSize}`)
+}
+
 export async function getAgentDocuments(agentId: string) {
   return authenticatedFetch(`/admin/real-estate-agents/${agentId}/documents`)
+}
+
+export async function getAgentDocumentsPaginated(agentId: string, page: number = 1, pageSize: number = 16) {
+  return authenticatedFetch(`/admin/real-estate-agents/${agentId}/documents/paginated?page=${page}&page_size=${pageSize}`)
 }
 
 export async function getAgentContacts(agentId: string) {
