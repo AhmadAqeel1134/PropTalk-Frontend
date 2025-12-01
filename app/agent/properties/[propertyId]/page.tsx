@@ -1,10 +1,9 @@
 'use client'
 
-import { use } from 'react'
 import PropertyDetails from '@/components/agent/PropertyDetails'
 
-export default function PropertyDetailsPage({ params }: { params: Promise<{ propertyId: string }> }) {
-  const { propertyId } = use(params)
-  return <PropertyDetails propertyId={propertyId} />
+// `params` is a plain object in app router, not a Promise
+export default function PropertyDetailsPage({ params }: { params: { propertyId: string } }) {
+  return <PropertyDetails propertyId={params.propertyId} />
 }
 

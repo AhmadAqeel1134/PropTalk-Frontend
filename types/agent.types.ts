@@ -55,6 +55,13 @@ export interface Property {
   owner_phone: string
 }
 
+export interface PaginatedProperties {
+  items: Property[]
+  total: number
+  page: number
+  page_size: number
+}
+
 export interface Document {
   id: string
   file_name: string
@@ -62,5 +69,8 @@ export interface Document {
   file_size: string | null
   cloudinary_url: string
   description: string | null
+  properties_count: number
+  contacts_count: number
   created_at: string
+  updated_at?: string
 }

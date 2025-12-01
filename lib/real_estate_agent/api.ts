@@ -41,7 +41,23 @@ async function authenticatedFetch(endpoint: string, options: RequestInit = {}) {
     throw new Error(error.detail || `HTTP error! status: ${response.status}`)
   }
 
-  return response.json()
+  // Handle 204/empty responses (e.g. DELETE) gracefully
+  if (response.status === 204 || response.status === 205) {
+    return {}
+  }
+
+  // Some backends may return no body with 200; guard against that
+  const text = await response.text()
+  if (!text) {
+    return {}
+  }
+
+  try {
+    return JSON.parse(text)
+  } catch {
+    // Fallback to raw text if it's not JSON
+    return text as any
+  }
 }
 
 // Agent Dashboard
@@ -94,6 +110,8 @@ export const getMyProperties = async (filters?: {
   city?: string
   is_available?: boolean
   contact_id?: string
+  page?: number
+  page_size?: number
 }) => {
   const params = new URLSearchParams()
   if (filters?.search) params.append('search', filters.search)
@@ -101,6 +119,8 @@ export const getMyProperties = async (filters?: {
   if (filters?.city) params.append('city', filters.city)
   if (filters?.is_available !== undefined) params.append('is_available', String(filters.is_available))
   if (filters?.contact_id) params.append('contact_id', filters.contact_id)
+  if (filters?.page) params.append('page', String(filters.page))
+  if (filters?.page_size) params.append('page_size', String(filters.page_size))
   const queryString = params.toString()
   const endpoint = queryString ? `/properties/my-properties?${queryString}` : '/properties/my-properties'
   return authenticatedFetch(endpoint)

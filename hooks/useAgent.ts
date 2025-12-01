@@ -24,7 +24,7 @@ import {
   updateAgentProfile,
   changePassword,
 } from '@/lib/real_estate_agent/api'
-import type { AgentDashboardData, Contact, Property, Document } from '@/types/agent.types'
+import type { AgentDashboardData, Contact, Property, Document, PaginatedProperties } from '@/types/agent.types'
 import { getSmartRefetchInterval } from './useVisibilityRefetch'
 
 const SMART_REFETCH_INTERVAL = getSmartRefetchInterval(60000)
@@ -97,7 +97,28 @@ export function useDeleteContact() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: deleteContact,
-    onSuccess: () => {
+    // Optimistic update for snappy UI
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: ['agent', 'contacts'] })
+
+      const previous = queryClient.getQueryData<Contact[]>(['agent', 'contacts', '', undefined])
+
+      // Optimistically remove from any cached contacts lists
+      queryClient.setQueriesData<Contact[]>(
+        { queryKey: ['agent', 'contacts'] },
+        (old) => old?.filter((c) => c.id !== id) || []
+      )
+
+      return { previous }
+    },
+    onError: (_err, _id, context) => {
+      // Rollback if something goes wrong
+      if (context?.previous) {
+        queryClient.setQueriesData(['agent','contacts', '', undefined], context.previous)
+      }
+    },
+    onSettled: () => {
+      // Always refetch to ensure server truth
       queryClient.invalidateQueries({ queryKey: ['agent', 'contacts'] })
       queryClient.invalidateQueries({ queryKey: ['agent', 'dashboard'] })
     },
@@ -112,7 +133,7 @@ export function useMyProperties(filters?: {
   is_available?: boolean
   contact_id?: string
 }) {
-  return useQuery<Property[]>({
+  return useQuery<PaginatedProperties>({
     queryKey: ['agent', 'properties', filters],
     queryFn: () => getMyProperties(filters),
     staleTime: 0,
