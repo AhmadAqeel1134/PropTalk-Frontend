@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useAgentDetails } from '@/hooks/useAdmin';
+import { useAgentDetails, useAgentDocumentsPaginated, useAgentPropertiesPaginated } from '@/hooks/useAdmin';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ErrorMessage from '@/components/common/ErrorMessage';
 import PageTransition from '@/components/common/PageTransition';
@@ -20,6 +20,8 @@ import {
   Download,
   Eye,
   RefreshCw,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 
 interface AgentFullDetailsProps {
@@ -32,12 +34,39 @@ type TabType = 'info' | 'properties' | 'documents' | 'contacts' | 'phone';
 const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) => {
   const { data, isLoading, error, refetch } = useAgentDetails(agentId);
   const [activeTab, setActiveTab] = useState<TabType>('info');
+  const [documentsPage, setDocumentsPage] = useState(1);
+  const documentsPageSize = 16;
+  const [propertiesPage, setPropertiesPage] = useState(1);
+  const propertiesPageSize = 16;
+  
+  const { data: paginatedDocuments, isLoading: documentsLoading } = useAgentDocumentsPaginated(
+    agentId,
+    documentsPage,
+    documentsPageSize
+  );
+  
+  const { data: paginatedProperties, isLoading: propertiesLoading } = useAgentPropertiesPaginated(
+    agentId,
+    propertiesPage,
+    propertiesPageSize
+  );
 
   const handleBack = () => {
     if (onBack) {
       onBack();
     } else {
       window.history.back();
+    }
+  };
+
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+    // Reset pagination when switching tabs
+    if (tab !== 'documents') {
+      setDocumentsPage(1);
+    }
+    if (tab !== 'properties') {
+      setPropertiesPage(1);
     }
   };
 
@@ -60,11 +89,15 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
   }
 
   const { agent, properties, documents, phone_number, contacts } = data;
+  
+  // Use paginated counts if available, otherwise fallback to full details count
+  const documentsCount = paginatedDocuments?.total ?? documents.length;
+  const propertiesCount = paginatedProperties?.total ?? properties.length;
 
   const tabs = [
     { id: 'info' as TabType, label: 'Agent Info', icon: User },
-    { id: 'properties' as TabType, label: 'Properties', icon: Building, count: properties.length },
-    { id: 'documents' as TabType, label: 'Documents', icon: FileText, count: documents.length },
+    { id: 'properties' as TabType, label: 'Properties', icon: Building, count: propertiesCount },
+    { id: 'documents' as TabType, label: 'Documents', icon: FileText, count: documentsCount },
     { id: 'contacts' as TabType, label: 'Contacts', icon: Contact, count: contacts.length },
     { id: 'phone' as TabType, label: 'Phone Number', icon: Phone },
   ];
@@ -138,7 +171,7 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all duration-300 whitespace-nowrap ${
                     isActive ? 'text-white bg-gray-800' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'
                   }`}
@@ -165,8 +198,26 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
             className="animate-in fade-in slide-in-from-right-4 duration-500"
           >
             {activeTab === 'info' && <AgentInfo agent={agent} />}
-            {activeTab === 'properties' && <PropertiesTab properties={properties} />}
-            {activeTab === 'documents' && <DocumentsTab documents={documents} />}
+            {activeTab === 'properties' && (
+              <PropertiesTab
+                properties={paginatedProperties?.items ?? []}
+                total={paginatedProperties?.total ?? 0}
+                page={propertiesPage}
+                pageSize={propertiesPageSize}
+                isLoading={propertiesLoading}
+                onPageChange={setPropertiesPage}
+              />
+            )}
+            {activeTab === 'documents' && (
+              <DocumentsTab
+                documents={paginatedDocuments?.items ?? []}
+                total={paginatedDocuments?.total ?? 0}
+                page={documentsPage}
+                pageSize={documentsPageSize}
+                isLoading={documentsLoading}
+                onPageChange={setDocumentsPage}
+              />
+            )}
             {activeTab === 'contacts' && <ContactsTab contacts={contacts} />}
             {activeTab === 'phone' && <PhoneTab phoneNumber={phone_number} />}
           </div>
@@ -219,7 +270,26 @@ const InfoItem: React.FC<{ icon: any; label: string; value: string }> = ({ icon:
 };
 
 // Properties Tab Component
-const PropertiesTab: React.FC<{ properties: any[] }> = ({ properties }) => {
+interface PropertiesTabProps {
+  properties: any[];
+  total: number;
+  page: number;
+  pageSize: number;
+  isLoading: boolean;
+  onPageChange: (page: number) => void;
+}
+
+const PropertiesTab: React.FC<PropertiesTabProps> = ({ properties, total, page, pageSize, isLoading, onPageChange }) => {
+  const totalPages = Math.ceil(total / pageSize);
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <LoadingSpinner text="Loading properties..." />
+      </div>
+    );
+  }
+
   if (properties.length === 0) {
     return (
       <div className="text-center py-12 animate-in fade-in duration-500">
@@ -230,9 +300,27 @@ const PropertiesTab: React.FC<{ properties: any[] }> = ({ properties }) => {
     );
   }
 
+  // Format price with commas
+  const formatPrice = (price: string | null) => {
+    if (!price) return 'N/A';
+    const numPrice = parseFloat(price);
+    if (isNaN(numPrice)) return price;
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(numPrice);
+  };
+
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-white mb-6">Properties ({properties.length})</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-white">Properties ({total})</h2>
+        <p className="text-sm text-gray-400">
+          Showing {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, total)} of {total}
+        </p>
+      </div>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -253,19 +341,19 @@ const PropertiesTab: React.FC<{ properties: any[] }> = ({ properties }) => {
               >
                 <td className="py-4 px-4 text-white">{property.address}</td>
                 <td className="py-4 px-4 text-gray-400">{property.property_type || 'N/A'}</td>
-                <td className="py-4 px-4 text-white font-semibold">{property.price || 'N/A'}</td>
+                <td className="py-4 px-4 text-white font-semibold">{formatPrice(property.price)}</td>
                 <td className="py-4 px-4 text-gray-400">
                   {property.bedrooms || 0} / {property.bathrooms || 0}
                 </td>
                 <td className="py-4 px-4">
                   <span
                     className={`px-2.5 py-1 rounded-md text-xs font-medium ${
-                      property.is_available === 'yes'
+                      property.is_available === 'yes' || property.is_available === 'true'
                         ? 'text-green-400 bg-green-400/10 border border-green-400/20'
                         : 'text-red-400 bg-red-400/10 border border-red-400/20'
                     }`}
                   >
-                    {property.is_available === 'yes' ? 'Available' : 'Unavailable'}
+                    {property.is_available === 'yes' || property.is_available === 'true' ? 'Available' : 'Unavailable'}
                   </span>
                 </td>
               </tr>
@@ -273,12 +361,91 @@ const PropertiesTab: React.FC<{ properties: any[] }> = ({ properties }) => {
           </tbody>
         </table>
       </div>
+      
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center space-x-2 mt-8 pt-6 border-t border-gray-800">
+          <button
+            onClick={() => onPageChange(page - 1)}
+            disabled={page === 1}
+            className={`flex items-center space-x-1 px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+              page === 1
+                ? 'text-gray-600 bg-gray-800 border border-gray-700 cursor-not-allowed'
+                : 'text-white bg-gray-700 hover:bg-gray-600 border border-gray-600 hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
+            }`}
+          >
+            <ChevronLeft size={18} />
+            <span>Previous</span>
+          </button>
+          
+          <div className="flex items-center space-x-1">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum: number;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (page <= 3) {
+                pageNum = i + 1;
+              } else if (page >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = page - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => onPageChange(pageNum)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+                    page === pageNum
+                      ? 'text-white bg-gray-700 border border-gray-600'
+                      : 'text-gray-400 bg-gray-800 border border-gray-700 hover:text-white hover:bg-gray-700'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+          
+          <button
+            onClick={() => onPageChange(page + 1)}
+            disabled={page === totalPages}
+            className={`flex items-center space-x-1 px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+              page === totalPages
+                ? 'text-gray-600 bg-gray-800 border border-gray-700 cursor-not-allowed'
+                : 'text-white bg-gray-700 hover:bg-gray-600 border border-gray-600 hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
+            }`}
+          >
+            <span>Next</span>
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 // Documents Tab Component
-const DocumentsTab: React.FC<{ documents: any[] }> = ({ documents }) => {
+interface DocumentsTabProps {
+  documents: any[];
+  total: number;
+  page: number;
+  pageSize: number;
+  isLoading: boolean;
+  onPageChange: (page: number) => void;
+}
+
+const DocumentsTab: React.FC<DocumentsTabProps> = ({ documents, total, page, pageSize, isLoading, onPageChange }) => {
+  const totalPages = Math.ceil(total / pageSize);
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <LoadingSpinner text="Loading documents..." />
+      </div>
+    );
+  }
+
   if (documents.length === 0) {
     return (
       <div className="text-center py-12">
@@ -291,7 +458,12 @@ const DocumentsTab: React.FC<{ documents: any[] }> = ({ documents }) => {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold text-white mb-6">Documents ({documents.length})</h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-xl font-semibold text-white">Documents ({total})</h2>
+        <p className="text-sm text-gray-400">
+          Showing {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, total)} of {total}
+        </p>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {documents.map((doc, index) => (
           <div
@@ -321,17 +493,115 @@ const DocumentsTab: React.FC<{ documents: any[] }> = ({ documents }) => {
           </div>
         ))}
       </div>
+      
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center space-x-2 mt-8 pt-6 border-t border-gray-800">
+          <button
+            onClick={() => onPageChange(page - 1)}
+            disabled={page === 1}
+            className={`flex items-center space-x-1 px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+              page === 1
+                ? 'text-gray-600 bg-gray-800 border border-gray-700 cursor-not-allowed'
+                : 'text-white bg-gray-700 hover:bg-gray-600 border border-gray-600 hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
+            }`}
+          >
+            <ChevronLeft size={18} />
+            <span>Previous</span>
+          </button>
+          
+          <div className="flex items-center space-x-1">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              let pageNum: number;
+              if (totalPages <= 5) {
+                pageNum = i + 1;
+              } else if (page <= 3) {
+                pageNum = i + 1;
+              } else if (page >= totalPages - 2) {
+                pageNum = totalPages - 4 + i;
+              } else {
+                pageNum = page - 2 + i;
+              }
+              
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => onPageChange(pageNum)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+                    page === pageNum
+                      ? 'text-white bg-gray-700 border border-gray-600'
+                      : 'text-gray-400 bg-gray-800 border border-gray-700 hover:text-white hover:bg-gray-700'
+                  }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+          </div>
+          
+          <button
+            onClick={() => onPageChange(page + 1)}
+            disabled={page === totalPages}
+            className={`flex items-center space-x-1 px-4 py-2 rounded-lg font-semibold transition-all duration-200 ${
+              page === totalPages
+                ? 'text-gray-600 bg-gray-800 border border-gray-700 cursor-not-allowed'
+                : 'text-white bg-gray-700 hover:bg-gray-600 border border-gray-600 hover:-translate-y-0.5 hover:shadow-md hover:shadow-black/20'
+            }`}
+          >
+            <span>Next</span>
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
 // Contacts Tab Component
 const ContactsTab: React.FC<{ contacts: any[] }> = ({ contacts }) => {
+  if (contacts.length === 0) {
+    return (
+      <div className="text-center py-12 animate-in fade-in duration-500">
+        <Contact size={48} className="text-gray-400 mx-auto mb-4" />
+        <h3 className="text-xl font-semibold text-white mb-2">No Contacts Available</h3>
+        <p className="text-gray-400">This agent hasn't added any contacts yet</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="text-center py-12 animate-in fade-in duration-500">
-      <Contact size={48} className="text-gray-400 mx-auto mb-4" />
-      <h3 className="text-xl font-semibold text-white mb-2">No Contacts Available</h3>
-      <p className="text-gray-400">Contact management feature coming soon</p>
+    <div className="space-y-4">
+      <h2 className="text-xl font-semibold text-white mb-6">Contacts ({contacts.length})</h2>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="border-b border-gray-800">
+              <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase tracking-wide">Name</th>
+              <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase tracking-wide">Phone</th>
+              <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase tracking-wide">Email</th>
+              <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase tracking-wide">Notes</th>
+              <th className="text-left py-3 px-4 text-gray-400 font-semibold text-sm uppercase tracking-wide">Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            {contacts.map((contact, index) => (
+              <tr
+                key={contact.id}
+                className="border-b border-gray-800 hover:bg-gray-800/50 transition-all duration-200 opacity-0 animate-in fade-in slide-in-from-left-4"
+                style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'forwards' }}
+              >
+                <td className="py-4 px-4 text-white font-semibold">{contact.name || 'N/A'}</td>
+                <td className="py-4 px-4 text-gray-400">{contact.phone_number || 'N/A'}</td>
+                <td className="py-4 px-4 text-gray-400">{contact.email || 'N/A'}</td>
+                <td className="py-4 px-4 text-gray-400 max-w-xs truncate">{contact.notes || '—'}</td>
+                <td className="py-4 px-4 text-gray-500 text-sm">
+                  {contact.created_at ? new Date(contact.created_at).toLocaleDateString() : 'N/A'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

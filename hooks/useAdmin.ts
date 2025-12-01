@@ -6,7 +6,9 @@ import {
   getAllAgents,
   getAgentFullDetails,
   getAgentProperties,
+  getAgentPropertiesPaginated,
   getAgentDocuments,
+  getAgentDocumentsPaginated,
   getAgentContacts,
   getAgentPhoneNumber,
 } from '@/lib/api';
@@ -15,7 +17,9 @@ import type {
   AgentWithStats,
   AgentFullDetails,
   Property,
+  PaginatedProperties,
   Document,
+  PaginatedDocuments,
   Contact,
   PhoneNumber,
 } from '@/types/admin.types';
@@ -73,11 +77,31 @@ export function useAgentProperties(agentId: string) {
   });
 }
 
+// Agent Properties Paginated Hook
+export function useAgentPropertiesPaginated(agentId: string, page: number = 1, pageSize: number = 16) {
+  return useQuery<PaginatedProperties>({
+    queryKey: ['admin', 'agents', agentId, 'properties', 'paginated', page, pageSize],
+    queryFn: () => getAgentPropertiesPaginated(agentId, page, pageSize),
+    enabled: !!agentId,
+    staleTime: 30000,
+  });
+}
+
 // Agent Documents Hook
 export function useAgentDocuments(agentId: string) {
   return useQuery<Document[]>({
     queryKey: ['admin', 'agents', agentId, 'documents'],
     queryFn: () => getAgentDocuments(agentId),
+    enabled: !!agentId,
+    staleTime: 30000,
+  });
+}
+
+// Agent Documents Paginated Hook
+export function useAgentDocumentsPaginated(agentId: string, page: number = 1, pageSize: number = 16) {
+  return useQuery<PaginatedDocuments>({
+    queryKey: ['admin', 'agents', agentId, 'documents', 'paginated', page, pageSize],
+    queryFn: () => getAgentDocumentsPaginated(agentId, page, pageSize),
     enabled: !!agentId,
     staleTime: 30000,
   });
