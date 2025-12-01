@@ -1,5 +1,5 @@
 // components/agent/ContactCard.tsx
-import { Phone, Mail, Building, ChevronRight } from 'lucide-react'
+import { Phone, Mail, Building, ChevronRight, Trash2 } from 'lucide-react'
 
 interface ContactCardProps {
   contact: {
@@ -11,9 +11,10 @@ interface ContactCardProps {
   }
   onViewDetails: (id: string) => void
   onCall?: (id: string) => void
+  onDelete?: (id: string) => void
 }
 
-export default function ContactCard({ contact, onViewDetails, onCall }: ContactCardProps) {
+export default function ContactCard({ contact, onViewDetails, onCall, onDelete }: ContactCardProps) {
   return (
     <div className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20 transition-all duration-300">
       <div className="flex justify-between items-start mb-4">
@@ -39,7 +40,7 @@ export default function ContactCard({ contact, onViewDetails, onCall }: ContactC
         )}
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-2">
         <button
           onClick={() => onCall?.(contact.id)}
           className="flex-1 flex items-center justify-center gap-2 bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white py-2 rounded-lg transition-all"
@@ -54,6 +55,15 @@ export default function ContactCard({ contact, onViewDetails, onCall }: ContactC
           View
           <ChevronRight className="size-4" />
         </button>
+        {onDelete && (
+          <button
+            onClick={() => onDelete(contact.id)}
+            className="p-2 border border-red-900/60 hover:border-red-700 rounded-lg transition-all"
+            title="Delete contact"
+          >
+            <Trash2 className="size-4 text-red-400" />
+          </button>
+        )}
       </div>
     </div>
   )
