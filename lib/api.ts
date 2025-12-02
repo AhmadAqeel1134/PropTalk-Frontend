@@ -153,9 +153,10 @@ export async function getVoiceAgentRequests(status?: string) {
   return authenticatedFetch(endpoint)
 }
 
-export async function approveVoiceAgentRequest(requestId: string) {
+export async function approveVoiceAgentRequest(requestId: string, phoneNumber: string) {
   return authenticatedFetch(`/admin/voice-agent-requests/${requestId}/approve`, {
     method: 'POST',
+    body: JSON.stringify({ phone_number: phoneNumber }),
   })
 }
 

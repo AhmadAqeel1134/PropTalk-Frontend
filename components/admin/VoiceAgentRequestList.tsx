@@ -32,7 +32,8 @@ export default function VoiceAgentRequestList() {
   })
 
   const approveMutation = useMutation({
-    mutationFn: (requestId: string) => approveVoiceAgentRequest(requestId),
+    mutationFn: ({ requestId, phoneNumber }: { requestId: string; phoneNumber: string }) =>
+      approveVoiceAgentRequest(requestId, phoneNumber),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['voice-agent-requests'] })
       queryClient.invalidateQueries({ queryKey: ['voice-agents-admin'] })
@@ -179,7 +180,9 @@ export default function VoiceAgentRequestList() {
           requestId={approveRequestId}
           isOpen={!!approveRequestId}
           onClose={() => setApproveRequestId(null)}
-          onApprove={() => approveMutation.mutate(approveRequestId)}
+          onApprove={(phoneNumber) =>
+            approveMutation.mutate({ requestId: approveRequestId, phoneNumber })
+          }
           isPending={approveMutation.isPending}
         />
       )}
