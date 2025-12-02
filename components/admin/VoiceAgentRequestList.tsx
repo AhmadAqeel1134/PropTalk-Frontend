@@ -18,10 +18,12 @@ interface VoiceAgentRequest {
   rejection_reason: string | null
   agent_name?: string
   agent_email?: string
+  voice_agent_id?: string | null
+  voice_agent_phone_number?: string | null
 }
 
 export default function VoiceAgentRequestList() {
-  const [statusFilter, setStatusFilter] = useState<string>('pending')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
   const [approveRequestId, setApproveRequestId] = useState<string | null>(null)
   const [rejectRequestId, setRejectRequestId] = useState<string | null>(null)
   const queryClient = useQueryClient()
@@ -60,7 +62,7 @@ export default function VoiceAgentRequestList() {
     <div className="space-y-6">
       {/* Filter */}
       <div className="flex items-center gap-4">
-        <label className="text-sm font-medium text-gray-300">Filter by Status:</label>
+                <label className="text-sm font-medium text-gray-300">Filter by status</label>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
@@ -86,7 +88,7 @@ export default function VoiceAgentRequestList() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {requests.map((request) => {
+          {requests.map((request, index) => {
             const statusConfig = {
               pending: {
                 icon: Clock,
@@ -117,7 +119,8 @@ export default function VoiceAgentRequestList() {
             return (
               <div
                 key={request.id}
-                className="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:border-gray-700 transition-all"
+                className="rounded-xl bg-gray-900 border border-gray-800 p-6 transition-all duration-300 ease-out hover:-translate-y-2 hover:scale-[1.01] hover:shadow-lg hover:shadow-black/20 hover:border-gray-700 opacity-0 animate-in card-pop-in duration-500"
+                style={{ animationDelay: `${index * 60}ms` }}
               >
                 {/* Status Badge */}
                 <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full mb-4 ${config.bg} ${config.border} border`}>
@@ -125,22 +128,38 @@ export default function VoiceAgentRequestList() {
                   <span className={`text-sm font-medium ${config.color}`}>{config.label}</span>
                 </div>
 
-                {/* Agent Info */}
+                {/* Agent & Voice Agent Info */}
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center gap-2">
                     <User className="text-gray-400" size={16} />
-                    <span className="text-white font-medium">{request.agent_name || 'Unknown'}</span>
+                    <span className="text-white font-medium">
+                      {request.agent_name || 'Unknown agent'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Mail className="text-gray-400" size={16} />
-                    <span className="text-gray-400 text-sm">{request.agent_email || 'N/A'}</span>
+                    <span className="text-gray-400 text-sm">
+                      {request.agent_email || 'Email not available'}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="text-gray-400" size={16} />
                     <span className="text-gray-400 text-sm">
-                      {new Date(request.requested_at).toLocaleDateString()}
+                      Requested on {new Date(request.requested_at).toLocaleDateString()}
                     </span>
                   </div>
+
+                  {/* For approved requests, surface the assigned voice agent number if we have it */}
+                  {request.status === 'approved' && request.voice_agent_phone_number && (
+                    <div className="mt-2">
+                      <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">
+                        Assigned Voice Agent Number
+                      </p>
+                      <p className="text-sm font-medium text-white">
+                        {request.voice_agent_phone_number}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Rejection Reason */}
@@ -156,13 +175,13 @@ export default function VoiceAgentRequestList() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => setApproveRequestId(request.id)}
-                      className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded-lg transition-all text-sm font-medium"
+                      className="flex-1 px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-gray-300 hover:border-gray-500 hover:text-white transition-all text-sm font-medium"
                     >
                       Approve
                     </button>
                     <button
                       onClick={() => setRejectRequestId(request.id)}
-                      className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg transition-all text-sm font-medium"
+                      className="flex-1 px-4 py-2 rounded-lg bg-gray-900 border border-gray-700 text-gray-300 hover:border-gray-500 hover:text-white transition-all text-sm font-medium"
                     >
                       Reject
                     </button>

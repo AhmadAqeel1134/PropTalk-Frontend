@@ -7,7 +7,7 @@ import ErrorMessage from '@/components/common/ErrorMessage';
 import StatsCard from '@/components/common/StatsCard';
 import PageTransition from '@/components/common/PageTransition';
 import VerificationRequestsSheet from './VerificationRequestsSheet';
-import VoiceAgentRequestList from './VoiceAgentRequestList';
+import VoiceAgentRequestsSheet from './VoiceAgentRequestsSheet';
 import {
   Users,
   Building,
@@ -27,7 +27,7 @@ const AdminDashboard: React.FC = () => {
   const { data, isLoading, error, refetch, dataUpdatedAt, isFetching } = useAdminDashboard();
   const [isMounted, setIsMounted] = useState(false);
   const [isVerificationSheetOpen, setIsVerificationSheetOpen] = useState(false);
-  const [showVoiceAgentRequests, setShowVoiceAgentRequests] = useState(false);
+  const [isVoiceAgentSheetOpen, setIsVoiceAgentSheetOpen] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -82,7 +82,7 @@ const AdminDashboard: React.FC = () => {
                 <span className="md:hidden">Verification</span>
               </button>
               <button
-                onClick={() => setShowVoiceAgentRequests(!showVoiceAgentRequests)}
+                onClick={() => setIsVoiceAgentSheetOpen(true)}
                 className="px-4 py-2 rounded-lg bg-gray-900 border border-gray-800 text-gray-300 hover:border-gray-700 hover:text-white transition-all duration-200 flex items-center gap-2"
               >
                 <Radio size={18} />
@@ -281,29 +281,6 @@ const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Voice Agent Requests Section */}
-        {showVoiceAgentRequests && (
-          <div
-            className={`mt-8 transition-all duration-500 ease-out ${
-              isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-            }`}
-            style={{ transitionDelay: '500ms' }}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-semibold text-white flex items-center gap-2">
-                <Radio size={24} />
-                Voice Agent Requests
-              </h2>
-              <button
-                onClick={() => setShowVoiceAgentRequests(false)}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <XCircle size={20} />
-              </button>
-            </div>
-            <VoiceAgentRequestList />
-          </div>
-        )}
         </div>
       </div>
       
@@ -312,9 +289,14 @@ const AdminDashboard: React.FC = () => {
         isOpen={isVerificationSheetOpen}
         onClose={() => setIsVerificationSheetOpen(false)}
       />
+
+      {/* Voice Agent Requests Sheet */}
+      <VoiceAgentRequestsSheet
+        isOpen={isVoiceAgentSheetOpen}
+        onClose={() => setIsVoiceAgentSheetOpen(false)}
+      />
     </PageTransition>
   );
 };
 
 export default AdminDashboard;
-

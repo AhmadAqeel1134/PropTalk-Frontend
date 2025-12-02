@@ -32,7 +32,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onViewDetails }) => {
 
   return (
     <div
-      className="rounded-lg p-6 bg-gray-900 border border-gray-800 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20 hover:border-gray-700 cursor-pointer"
+      className="rounded-lg p-6 bg-gray-900 border border-gray-800 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20 hover:border-gray-700 cursor-pointer flex flex-col justify-between h-full min-h-[260px] md:min-h-[280px]"
       onClick={handleViewDetails}
     >
       {/* Header */}
@@ -76,7 +76,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onViewDetails }) => {
 
       {/* Stats */}
       {agent.stats && (
-        <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-800">
+        <div className="grid grid-cols-2 gap-3 pt-4 border-t border-gray-800 mt-auto">
           <div className="flex items-center space-x-2">
             <Building size={16} className="text-gray-400" />
             <div>

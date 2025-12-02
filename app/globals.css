@@ -150,6 +150,26 @@ a {
   animation: fadeIn 0.5s ease-out forwards;
 }
 
+/* Pop-in card animation with slight "jump" */
+@keyframes card-pop-in {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.card-pop-in {
+  animation-name: card-pop-in;
+}
+
 /* Pulse animation for status indicators */
 @keyframes pulse {
   0%, 100% {
