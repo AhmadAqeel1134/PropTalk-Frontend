@@ -102,14 +102,14 @@ export default function RejectVoiceAgentModal({
           <button
             onClick={onClose}
             disabled={isPending}
-            className="flex-1 px-6 py-3 rounded-xl bg-gray-900 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white font-medium transition-all disabled:opacity-50"
+            className="flex-1 px-6 py-3 rounded-xl bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white font-medium transition-all disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleReject}
             disabled={isPending || !reason.trim() || reason.trim().length < 10}
-            className="flex-1 px-6 py-3 rounded-xl bg-gray-900 border border-gray-700 hover:border-gray-500 text-gray-100 hover:text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-medium transition-all duration-300 hover:scale-105 shadow-lg shadow-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {isPending ? (
               <span className="flex items-center justify-center gap-2">

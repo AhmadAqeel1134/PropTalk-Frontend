@@ -2,7 +2,8 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, PhoneCall, Users, Loader2, X, CheckCircle } from 'lucide-react'
+import { Phone, PhoneCall, Users, Loader2, X, CheckCircle, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { initiateBatchCalls } from '@/lib/real_estate_agent/api'
 
 interface Contact {
   id: string
@@ -24,12 +25,17 @@ export default function BatchCallButton({
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isInitiating, setIsInitiating] = useState(false)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [delaySeconds, setDelaySeconds] = useState(30) // Default 30 seconds, minimum 3 seconds
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<{ callCount: number; errors: any[] } | null>(null)
 
   const count = contacts.length
 
   const handleOpenModal = () => {
     setSelectedIds(new Set(contacts.map(c => c.id)))
     setIsModalOpen(true)
+    setError(null)
+    setSuccess(null)
   }
 
   const toggleContact = (id: string) => {
@@ -46,19 +52,37 @@ export default function BatchCallButton({
     if (selectedIds.size === 0) return
     
     setIsInitiating(true)
+    setError(null)
+    setSuccess(null)
     
     try {
-      // TODO: Integrate with Twilio batch call API
-      console.log('Initiating batch call for contacts:', Array.from(selectedIds))
+      const contactIdsArray = Array.from(selectedIds)
+      console.log('📞 Initiating batch call for contacts:', contactIdsArray)
+      console.log('⏱️ Delay between calls:', delaySeconds, 'seconds')
       
-      onBatchCallInitiated?.(Array.from(selectedIds))
+      const result = await initiateBatchCalls({
+        contact_ids: contactIdsArray,
+        delay_seconds: delaySeconds
+      })
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      console.log('✅ Batch call initiated successfully:', result)
       
-      setIsModalOpen(false)
-    } catch (error) {
-      console.error('Failed to initiate batch call:', error)
+      setSuccess({
+        callCount: result.call_count || 0,
+        errors: result.errors || []
+      })
+      
+      onBatchCallInitiated?.(contactIdsArray)
+      
+      // Close modal after 2 seconds if successful
+      setTimeout(() => {
+        setIsModalOpen(false)
+        setSuccess(null)
+      }, 2000)
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to initiate batch call'
+      console.error('❌ Failed to initiate batch call:', error)
+      setError(errorMessage)
     } finally {
       setIsInitiating(false)
     }
@@ -101,11 +125,70 @@ export default function BatchCallButton({
 
             {/* Selection Summary */}
             <div className="bg-gray-800/50 rounded-lg p-4 mb-4 border border-gray-700/50">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between mb-3">
                 <span className="text-gray-400">Selected contacts:</span>
                 <span className="text-white font-bold text-lg">{selectedIds.size} / {count}</span>
               </div>
+              
+              {/* Delay Input */}
+              <div className="mt-3 pt-3 border-t border-gray-700/50">
+                <label className="block text-sm text-gray-400 mb-2">
+                  Delay between calls (seconds)
+                </label>
+                <input
+                  type="number"
+                  min="3"
+                  max="300"
+                  value={delaySeconds}
+                  onChange={(e) => setDelaySeconds(Math.max(3, Math.min(300, parseInt(e.target.value) || 3)))}
+                  disabled={isInitiating}
+                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-gray-600 disabled:opacity-50"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Calls will be made with {delaySeconds} second{delaySeconds !== 1 ? 's' : ''} delay between each
+                </p>
+                {delaySeconds < 3 && (
+                  <p className="text-xs text-amber-400 mt-1">
+                    ⚠️ Minimum 3 seconds recommended to prevent webhook conflicts
+                  </p>
+                )}
+              </div>
             </div>
+
+            {/* Success Message */}
+            {success && (
+              <div className="bg-emerald-900/20 border border-emerald-700/50 rounded-lg p-4 mb-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="size-5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-emerald-400 font-medium">
+                      Batch call initiated successfully!
+                    </p>
+                    <p className="text-emerald-300/80 text-sm mt-1">
+                      {success.callCount} call{success.callCount !== 1 ? 's' : ''} initiated
+                      {success.errors.length > 0 && (
+                        <span className="block mt-1 text-amber-400">
+                          {success.errors.length} error{success.errors.length !== 1 ? 's' : ''} occurred
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {error && (
+              <div className="bg-red-900/20 border border-red-700/50 rounded-lg p-4 mb-4">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="size-5 text-red-400 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-red-400 font-medium">Failed to initiate batch call</p>
+                    <p className="text-red-300/80 text-sm mt-1">{error}</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Contacts List */}
             <div className="flex-1 overflow-y-auto mb-6 space-y-2">
