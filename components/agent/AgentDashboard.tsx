@@ -6,9 +6,44 @@ import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ErrorMessage from '@/components/common/ErrorMessage'
 import PageTransition from '@/components/common/PageTransition'
 import { useAgentDashboard } from '@/hooks/useAgent'
+import VoiceAgentRequestCard from './VoiceAgentRequestCard'
+import VoiceAgentStatusCard from './VoiceAgentStatusCard'
+import { useQuery } from '@tanstack/react-query'
 
 export default function AgentDashboard() {
   const { data: dashboard, isLoading, error } = useAgentDashboard()
+  
+  // Check if agent has voice agent request or active voice agent
+  const { data: voiceAgentRequest } = useQuery({
+    queryKey: ['voice-agent-status'],
+    queryFn: async () => {
+      try {
+        const { getVoiceAgentStatus } = await import('@/lib/real_estate_agent/api')
+        return await getVoiceAgentStatus()
+      } catch (error: any) {
+        // If 404, agent hasn't requested yet
+        if (error?.response?.status === 404) return null
+        throw error
+      }
+    },
+    retry: false
+  })
+
+  const { data: voiceAgent } = useQuery({
+    queryKey: ['voice-agent'],
+    queryFn: async () => {
+      try {
+        const { getVoiceAgent } = await import('@/lib/real_estate_agent/api')
+        return await getVoiceAgent()
+      } catch (error: any) {
+        // If 404, agent doesn't have voice agent yet
+        if (error?.response?.status === 404) return null
+        throw error
+      }
+    },
+    retry: false,
+    enabled: voiceAgentRequest?.status === 'approved'
+  })
 
   if (isLoading) return <LoadingSpinner />
   if (error) return <ErrorMessage message={(error as Error).message} />
@@ -66,6 +101,31 @@ export default function AgentDashboard() {
             )}
           </div>
 
+          {/* Voice Agent Section */}
+          <div className="mb-8">
+            {voiceAgent ? (
+              <VoiceAgentStatusCard />
+            ) : voiceAgentRequest ? (
+              <VoiceAgentRequestCard />
+            ) : (
+              <div className="bg-gray-900 border border-gray-800 rounded-lg p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-semibold text-white mb-2">Voice Agent</h3>
+                    <p className="text-gray-400">Request an AI-powered voice agent to automate your calls</p>
+                  </div>
+                  <button
+                    onClick={() => window.location.href = '/agent/voice-agent'}
+                    className="flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-6 py-3 rounded-lg transition-all"
+                  >
+                    <Phone className="size-5" />
+                    Request Voice Agent
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Quick Actions */}
           <div className="flex flex-wrap gap-4 mb-12">
             <button
@@ -89,6 +149,15 @@ export default function AgentDashboard() {
               <Users className="size-5" />
               View All Contacts
             </button>
+            {voiceAgent && (
+              <button
+                onClick={() => window.location.href = '/agent/voice-agent'}
+                className="flex items-center gap-2 bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white px-6 py-3 rounded-lg transition-all"
+              >
+                <Phone className="size-5" />
+                Voice Agent
+              </button>
+            )}
           </div>
 
           <div className="grid lg:grid-cols-2 gap-8 gap-8">

@@ -216,3 +216,90 @@ export const changePassword = async (data: { old_password: string; new_password:
   })
 }
 
+// Voice Agent API functions
+export const requestVoiceAgent = async () => {
+  return authenticatedFetch('/agent/voice-agent/request', {
+    method: 'POST',
+  })
+}
+
+export const getVoiceAgent = async () => {
+  return authenticatedFetch('/agent/voice-agent')
+}
+
+export const getVoiceAgentStatus = async () => {
+  return authenticatedFetch('/agent/voice-agent/status')
+}
+
+export const updateVoiceAgent = async (data: {
+  name?: string
+  use_default_prompt?: boolean
+  system_prompt?: string
+  settings?: {
+    voice_gender?: 'female' | 'male'
+    voice_speed?: 'normal' | 'slow' | 'fast'
+    language?: string
+    greeting_message?: string
+    custom_commands?: string[]
+    recording_enabled?: boolean
+  }
+}) => {
+  return authenticatedFetch('/agent/voice-agent', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  })
+}
+
+export const toggleVoiceAgentStatus = async (status: 'active' | 'inactive') => {
+  return authenticatedFetch('/agent/voice-agent/toggle-status', {
+    method: 'POST',
+    body: JSON.stringify({ status }),
+  })
+}
+
+// Call API functions
+export const initiateCall = async (data: { contact_id?: string; phone_number: string }) => {
+  return authenticatedFetch('/agent/calls/initiate', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const initiateBatchCalls = async (data: { contact_ids: string[]; delay_seconds: number }) => {
+  return authenticatedFetch('/agent/calls/batch', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const getCalls = async (params?: {
+  page?: number
+  page_size?: number
+  status?: string
+  direction?: string
+  search?: string
+}) => {
+  const queryParams = new URLSearchParams()
+  if (params?.page) queryParams.append('page', params.page.toString())
+  if (params?.page_size) queryParams.append('page_size', params.page_size.toString())
+  if (params?.status) queryParams.append('status', params.status)
+  if (params?.direction) queryParams.append('direction', params.direction)
+  if (params?.search) queryParams.append('search', params.search)
+  
+  const queryString = queryParams.toString()
+  const endpoint = queryString ? `/agent/calls?${queryString}` : '/agent/calls'
+  return authenticatedFetch(endpoint)
+}
+
+export const getCallById = async (callId: string) => {
+  return authenticatedFetch(`/agent/calls/${callId}`)
+}
+
+export const getCallRecording = async (callId: string) => {
+  return authenticatedFetch(`/agent/calls/${callId}/recording`)
+}
+
+export const getCallTranscript = async (callId: string) => {
+  return authenticatedFetch(`/agent/calls/${callId}/transcript`)
+}
+

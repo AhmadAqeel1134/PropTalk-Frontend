@@ -147,3 +147,35 @@ export async function getAgentPhoneNumber(agentId: string) {
   return authenticatedFetch(`/admin/real-estate-agents/${agentId}/phone-number`)
 }
 
+// Admin Voice Agent API functions
+export async function getVoiceAgentRequests(status?: string) {
+  const endpoint = status ? `/admin/voice-agent-requests?status=${status}` : '/admin/voice-agent-requests'
+  return authenticatedFetch(endpoint)
+}
+
+export async function approveVoiceAgentRequest(requestId: string, phoneNumber: string) {
+  return authenticatedFetch(`/admin/voice-agent-requests/${requestId}/approve`, {
+    method: 'POST',
+    body: JSON.stringify({ phone_number: phoneNumber }),
+  })
+}
+
+export async function rejectVoiceAgentRequest(requestId: string, reason: string) {
+  return authenticatedFetch(`/admin/voice-agent-requests/${requestId}/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  })
+}
+
+export async function getAllVoiceAgents() {
+  return authenticatedFetch('/admin/voice-agents')
+}
+
+export async function getVoiceAgentByAgentId(agentId: string) {
+  return authenticatedFetch(`/admin/voice-agents/${agentId}`)
+}
+
+export async function getCallStatistics(agentId: string, period: 'day' | 'week' | 'month' = 'week') {
+  return authenticatedFetch(`/admin/voice-agents/${agentId}/call-stats?period=${period}`)
+}
+
