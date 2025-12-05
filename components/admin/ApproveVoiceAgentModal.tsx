@@ -115,14 +115,14 @@ export default function ApproveVoiceAgentModal({
           <button
             onClick={onClose}
             disabled={isPending}
-            className="flex-1 px-6 py-3 rounded-xl bg-gray-900 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white font-medium transition-all disabled:opacity-50"
+            className="flex-1 px-6 py-3 rounded-xl bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white font-medium transition-all disabled:opacity-50"
           >
             Cancel
           </button>
           <button
             onClick={handleApproveClick}
             disabled={isPending}
-            className="flex-1 px-6 py-3 rounded-xl bg-gray-900 border border-gray-700 hover:border-gray-500 text-gray-100 hover:text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white font-medium transition-all duration-300 hover:scale-105 shadow-lg shadow-green-500/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
           >
             {isPending ? (
               <span className="flex items-center justify-center gap-2">

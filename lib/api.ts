@@ -149,12 +149,8 @@ export async function getAgentPhoneNumber(agentId: string) {
 
 // Admin Voice Agent API functions
 export async function getVoiceAgentRequests(status?: string) {
-  // For "all", don't send a status filter so backend returns every request
-  const endpoint =
-    status && status !== 'all'
-      ? `/admin/voice-agent-requests?status=${status}`
-      : '/admin/voice-agent-requests';
-  return authenticatedFetch(endpoint);
+  const endpoint = status ? `/admin/voice-agent-requests?status=${status}` : '/admin/voice-agent-requests'
+  return authenticatedFetch(endpoint)
 }
 
 export async function approveVoiceAgentRequest(requestId: string, phoneNumber: string) {

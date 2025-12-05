@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { Phone, PhoneCall, Loader2 } from 'lucide-react'
+import { initiateCall } from '@/lib/real_estate_agent/api'
 
 interface Contact {
   id: string
@@ -15,7 +16,8 @@ interface CallButtonProps {
   variant?: 'primary' | 'secondary' | 'compact'
   size?: 'small' | 'medium' | 'large'
   disabled?: boolean
-  onCallInitiated?: (contactId: string) => void
+  onCallInitiated?: (contactId: string, result?: any) => void
+  onError?: (error: string) => void
 }
 
 export default function CallButton({ 
@@ -23,34 +25,60 @@ export default function CallButton({
   variant = 'secondary', 
   size = 'medium',
   disabled = false,
-  onCallInitiated 
+  onCallInitiated,
+  onError
 }: CallButtonProps) {
   const [isInitiating, setIsInitiating] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const handleCall = async () => {
     if (disabled || isInitiating) return
     
     setIsInitiating(true)
+    setError(null)
+    
+    console.log('📞 Initiating call to:', contact.name, contact.phone_number)
+    console.log('📋 Contact ID:', contact.id)
     
     try {
-      // TODO: Integrate with Twilio API endpoint
-      // For now, simulate call initiation
-      console.log('Initiating call to:', contact.name, contact.phone_number)
+      // Ensure phone number is in E.164 format
+      let phoneNumber = contact.phone_number.trim()
+      if (!phoneNumber.startsWith('+')) {
+        // If no country code, assume Pakistan (+92)
+        if (phoneNumber.startsWith('0')) {
+          phoneNumber = '+92' + phoneNumber.substring(1)
+        } else {
+          phoneNumber = '+92' + phoneNumber
+        }
+      }
+      
+      console.log('📞 Calling API with:', {
+        contact_id: contact.id,
+        phone_number: phoneNumber
+      })
+      
+      // Call the backend API
+      const result = await initiateCall({
+        contact_id: contact.id,
+        phone_number: phoneNumber
+      })
+      
+      console.log('✅ Call initiated successfully:', result)
       
       // Call the callback if provided
-      onCallInitiated?.(contact.id)
+      onCallInitiated?.(contact.id, result)
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Show success message (optional)
+      // You can add a toast notification here
       
-      // In real implementation:
-      // const response = await fetch('/api/calls/initiate', {
-      //   method: 'POST',
-      //   body: JSON.stringify({ contact_id: contact.id }),
-      // })
+    } catch (error: any) {
+      const errorMessage = error?.message || 'Failed to initiate call'
+      console.error('❌ Failed to initiate call:', error)
+      setError(errorMessage)
+      onError?.(errorMessage)
       
-    } catch (error) {
-      console.error('Failed to initiate call:', error)
+      // Show error to user (optional)
+      alert(`Failed to initiate call: ${errorMessage}`)
     } finally {
       setIsInitiating(false)
     }
