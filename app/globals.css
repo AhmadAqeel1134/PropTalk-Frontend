@@ -179,3 +179,39 @@ a {
     opacity: 0.5;
   }
 }
+
+/* Smooth fade in up animation */
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Wheel-like rotation fade in */
+@keyframes wheelFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) rotateX(15deg) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0deg) scale(1);
+  }
+}
+
+/* Smooth scale fade in */
+@keyframes scaleFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
