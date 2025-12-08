@@ -12,6 +12,7 @@ import {
   LogOut,
   Menu,
   X,
+  Phone,
 } from 'lucide-react'
 
 const AgentSidebar: React.FC = () => {
@@ -39,6 +40,11 @@ const AgentSidebar: React.FC = () => {
       name: 'Documents',
       href: '/agent/documents',
       icon: FileText,
+    },
+    {
+      name: 'Call History',
+      href: '/agent/calls',
+      icon: Phone,
     },
     {
       name: 'Profile',
