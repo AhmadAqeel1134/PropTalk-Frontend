@@ -300,7 +300,7 @@ export default function EditPropertyForm({ property, onClose, mode = 'modal' }: 
   if (mode === 'modal') {
     return (
       <div 
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[60] overflow-y-auto p-4"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] overflow-y-auto p-4"
         onClick={(e) => {
           if (e.target === e.currentTarget) onClose()
         }}

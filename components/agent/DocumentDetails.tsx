@@ -1,15 +1,22 @@
 'use client'
 
+import { useState } from 'react'
 import { useDocument, useDocumentProperties, useDocumentContacts, useDeleteDocument } from '@/hooks/useAgent'
-import { ArrowLeft, Download, Trash2, FileText, Building, Users, Phone, MapPin, FileSpreadsheet, FileType, Calendar } from 'lucide-react'
+import { Download, Trash2, FileText, Building, Users, Phone, MapPin, FileSpreadsheet, FileType, Calendar } from 'lucide-react'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ErrorMessage from '@/components/common/ErrorMessage'
 import PageTransition from '@/components/common/PageTransition'
 import { useRouter } from 'next/navigation'
 import BatchCallButton from './BatchCallButton'
+import PropertyDetailsSheet from './PropertyDetailsSheet'
+import ContactDetailsSheet from './ContactDetailsSheet'
 
 export default function DocumentDetails({ documentId }: { documentId: string }) {
   const router = useRouter()
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null)
+  const [isPropertySheetOpen, setIsPropertySheetOpen] = useState(false)
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(null)
+  const [isContactSheetOpen, setIsContactSheetOpen] = useState(false)
   const { data: document, isLoading, error } = useDocument(documentId)
   const { data: properties = [], isLoading: loadingProps } = useDocumentProperties(documentId)
   const { data: contacts = [], isLoading: loadingContacts } = useDocumentContacts(documentId)
@@ -52,13 +59,14 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
         {/* Use full-width layout starting right from the sidebar, same as other agent pages */}
         <div className="max-w-full">
           {/* Back Button */}
-          <button 
-            onClick={() => router.push('/agent/documents')} 
-            className="flex items-center gap-2 text-gray-400 hover:text-white mb-8 group transition-colors"
-          >
-            <ArrowLeft className="size-5 group-hover:-translate-x-1 transition-transform" /> 
-            Back to Documents
-          </button>
+          <div className="flex justify-end mb-8">
+            <button 
+              onClick={() => router.push('/agent/documents')} 
+              className="px-5 py-2.5 bg-gray-800/60 border-2 border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white rounded-xl font-semibold transition-all duration-200"
+            >
+              Back
+            </button>
+          </div>
 
           {/* Document Header Card */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 mb-8">
@@ -164,7 +172,10 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
                   {contacts.map((contact: any, i: number) => (
                     <div
                       key={contact.id}
-                      onClick={() => router.push(`/agent/contacts/${contact.id}`)}
+                      onClick={() => {
+                        setSelectedContactId(contact.id)
+                        setIsContactSheetOpen(true)
+                      }}
                       className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-lg hover:border-gray-600 cursor-pointer transition-all group"
                       style={{ animationDelay: `${i * 50}ms` }}
                     >
@@ -217,7 +228,10 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
                   {properties.map((prop: any, i: number) => (
                     <div
                       key={prop.id}
-                      onClick={() => router.push(`/agent/properties/${prop.id}`)}
+                      onClick={() => {
+                        setSelectedPropertyId(prop.id)
+                        setIsPropertySheetOpen(true)
+                      }}
                       className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-lg hover:border-gray-600 cursor-pointer transition-all group"
                       style={{ animationDelay: `${i * 50}ms` }}
                     >
@@ -257,6 +271,26 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
           </div>
         </div>
       </div>
+
+      {/* Property Details Side Sheet */}
+      <PropertyDetailsSheet
+        isOpen={isPropertySheetOpen}
+        propertyId={selectedPropertyId}
+        onClose={() => {
+          setIsPropertySheetOpen(false)
+          setTimeout(() => setSelectedPropertyId(null), 200)
+        }}
+      />
+
+      {/* Contact Details Side Sheet */}
+      <ContactDetailsSheet
+        isOpen={isContactSheetOpen}
+        contactId={selectedContactId}
+        onClose={() => {
+          setIsContactSheetOpen(false)
+          setTimeout(() => setSelectedContactId(null), 200)
+        }}
+      />
     </PageTransition>
   )
 }

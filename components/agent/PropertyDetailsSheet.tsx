@@ -267,7 +267,7 @@ export default function PropertyDetailsSheet({ isOpen, propertyId, onClose }: Pr
 
           {/* Edit form inline inside the sheet */}
           {isEditing && property && (
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm z-[55] flex items-start justify-center overflow-y-auto p-4">
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-[55] flex items-start justify-center overflow-y-auto p-4">
               <EditPropertyForm
                 property={property}
                 onClose={() => setIsEditing(false)}

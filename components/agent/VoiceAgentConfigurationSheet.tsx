@@ -115,7 +115,7 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
   return (
     <>
       <div 
-        className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 animate-in fade-in duration-300"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-in fade-in duration-300"
         onClick={onClose}
       />
       <div className="fixed top-0 right-0 h-full w-full md:w-[700px] z-50 animate-in slide-in-from-right duration-300">

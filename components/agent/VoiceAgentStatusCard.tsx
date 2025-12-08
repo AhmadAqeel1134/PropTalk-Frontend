@@ -178,7 +178,7 @@ export default function VoiceAgentStatusCard() {
               {isActive ? 'Deactivate' : 'Activate'}
             </button>
             
-            <button className="flex-1 px-6 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-medium transition-all duration-300 hover:-translate-y-0.5 shadow-lg shadow-blue-500/20">
+            <button className="flex-1 px-6 py-3 rounded-xl bg-gray-800/60 border border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800 font-medium transition-all duration-300 hover:-translate-y-0.5 shadow-lg">
               <span className="flex items-center justify-center gap-2">
                 <Settings size={18} />
                 Configure

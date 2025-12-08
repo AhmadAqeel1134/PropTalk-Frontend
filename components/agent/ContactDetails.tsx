@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, Phone, Mail, Edit, Trash2, Building, PhoneCall, MapPin, Calendar } from 'lucide-react'
+import { Phone, Mail, Edit, Trash2, Building, PhoneCall, MapPin, Calendar } from 'lucide-react'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ErrorMessage from '@/components/common/ErrorMessage'
 import PageTransition from '@/components/common/PageTransition'
@@ -39,13 +39,14 @@ export default function ContactDetails({ contactId }: ContactDetailsProps) {
       <div className="min-h-screen p-6 md:p-8" style={{ background: 'rgba(10, 15, 25, 0.95)' }}>
         <div className="max-w-5xl mx-auto">
           {/* Back Button */}
-          <button
-            onClick={() => router.push('/agent/contacts')}
-            className="flex items-center gap-2 text-gray-400 hover:text-white mb-8 transition-colors group"
-          >
-            <ArrowLeft className="size-5 group-hover:-translate-x-1 transition-transform" />
-            Back to Contacts
-          </button>
+          <div className="flex justify-end mb-8">
+            <button
+              onClick={() => router.push('/agent/contacts')}
+              className="px-5 py-2.5 bg-gray-800/60 border-2 border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white rounded-xl font-semibold transition-all duration-200"
+            >
+              Back
+            </button>
+          </div>
 
           {/* Contact Card */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 mb-8">

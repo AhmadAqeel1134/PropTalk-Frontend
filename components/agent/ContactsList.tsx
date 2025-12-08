@@ -1,8 +1,8 @@
 // components/agent/ContactsList.tsx
 'use client'
 
-import { useState } from 'react'
-import { Search, Plus, Users, Phone, Building, Filter, X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, Plus, Users, Phone, Building, Filter, X, TrendingUp } from 'lucide-react'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ErrorMessage from '@/components/common/ErrorMessage'
 import PageTransition from '@/components/common/PageTransition'
@@ -20,8 +20,13 @@ export default function ContactsList() {
   const [filterHasProperties, setFilterHasProperties] = useState<string>('')
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null)
   const [isDetailsSheetOpen, setIsDetailsSheetOpen] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
   const debouncedSearch = useDebounce(search, 500)
   const deleteMutation = useDeleteContact()
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Convert filter string to boolean or undefined
   const hasProperties = filterHasProperties === '' 
@@ -50,152 +55,157 @@ export default function ContactsList() {
     <PageTransition>
       <div className="min-h-screen p-6 md:p-8" style={{ background: 'rgba(10, 15, 25, 0.95)' }}>
         <div className="max-w-full">
-          {/* Header */}
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white">Contacts</h1>
-              <p className="text-gray-400 mt-1">
-                {contacts.length} contact{contacts.length !== 1 ? 's' : ''} • Your target audience for calling campaigns
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              {callableContacts.length > 0 && (
-                <BatchCallButton 
-                  contacts={callableContacts.map(c => ({
-                    id: c.id,
-                    name: c.name,
-                    phone_number: c.phone_number
-                  }))}
-                />
-              )}
-              <button
-                onClick={() => router.push('/agent/contacts/new')}
-                className="flex items-center gap-2 bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white px-5 py-3 rounded-lg transition-all"
-              >
-                <Plus className="size-5" />
-                Add Contact
-              </button>
-            </div>
-          </div>
-
-          {/* Search & Filters */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 mb-8">
-            <div className="flex flex-col md:flex-row gap-4">
-              {/* Search */}
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-500" />
-                <input
-                  type="text"
-                  placeholder="Search by name, phone, or email..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-600 transition-colors"
-                />
-              </div>
-
-              {/* Filter Toggle */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-5 py-3 border rounded-lg transition-all ${
-                  showFilters || hasActiveFilters
-                    ? 'border-blue-600 bg-blue-900/20 text-blue-400'
-                    : 'border-gray-700 hover:border-gray-600 text-gray-300'
-                }`}
-              >
-                <Filter className="size-5" />
-                Filters
-                {hasActiveFilters && (
-                  <span className="w-2 h-2 bg-blue-500 rounded-full" />
-                )}
-              </button>
-            </div>
-
-            {/* Filter Panel */}
-            {showFilters && (
-              <div className="mt-4 pt-4 border-t border-gray-800">
-                <div className="flex flex-wrap gap-4 items-end">
-                  <div className="flex-1 min-w-[200px]">
-                    <label className="block text-sm text-gray-400 mb-2">Property Status</label>
-                    <select
-                      value={filterHasProperties}
-                      onChange={(e) => setFilterHasProperties(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-gray-600"
-                    >
-                      <option value="">All Contacts</option>
-                      <option value="true">With Properties</option>
-                      <option value="false">Without Properties</option>
-                    </select>
+          {/* Enhanced Header */}
+          <div
+            className={`mb-8 transition-all duration-500 ease-out ${
+              isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+            }`}
+          >
+            <div className="bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/50 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="p-2 rounded-xl bg-gray-800/60 border border-gray-700/50">
+                      <Users size={24} className="text-gray-300" />
+                    </div>
+                    <div>
+                      <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">
+                        Contacts
+                      </h1>
+                      <p className="text-gray-400 text-sm md:text-base">
+                        {contacts.length} contact{contacts.length !== 1 ? 's' : ''} • Your target audience for calling campaigns
+                      </p>
+                    </div>
                   </div>
-                  
-                  {hasActiveFilters && (
-                    <button
-                      onClick={clearFilters}
-                      className="flex items-center gap-2 px-4 py-2.5 text-gray-400 hover:text-white transition-colors"
-                    >
-                      <X className="size-4" />
-                      Clear Filters
-                    </button>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {callableContacts.length > 0 && (
+                    <BatchCallButton 
+                      contacts={callableContacts.map(c => ({
+                        id: c.id,
+                        name: c.name,
+                        phone_number: c.phone_number
+                      }))}
+                    />
                   )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Stats Bar */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-800 rounded-lg">
-                  <Users className="size-5 text-blue-400" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-white">{contacts.length}</p>
-                  <p className="text-xs text-gray-500">Total Contacts</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-800 rounded-lg">
-                  <Phone className="size-5 text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-white">{callableContacts.length}</p>
-                  <p className="text-xs text-gray-500">Ready to Call</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-800 rounded-lg">
-                  <Building className="size-5 text-purple-400" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-white">
-                    {contacts.filter(c => c.properties_count > 0).length}
-                  </p>
-                  <p className="text-xs text-gray-500">With Properties</p>
-                </div>
-              </div>
-            </div>
-            <div className="bg-gray-900 border border-gray-800 rounded-lg p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-gray-800 rounded-lg">
-                  <Building className="size-5 text-orange-400" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold text-white">
-                    {contacts.reduce((sum, c) => sum + (c.properties_count || 0), 0)}
-                  </p>
-                  <p className="text-xs text-gray-500">Total Properties</p>
+                  <button
+                    onClick={() => router.push('/agent/contacts/new')}
+                    className="flex items-center gap-2 bg-gray-800/60 border border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800 px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    <Plus size={18} />
+                    Add Contact
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Contacts Grid */}
+          {/* Enhanced Search & Filters */}
+          <div
+            className={`mb-8 transition-all duration-500 ease-out ${
+              isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+            }`}
+            style={{ transitionDelay: '100ms' }}
+          >
+            <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
+              <div className="flex flex-col md:flex-row gap-4">
+                {/* Search */}
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-500" />
+                  <input
+                    type="text"
+                    placeholder="Search by name, phone, or email..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full pl-12 pr-4 py-3 bg-gray-800/60 border-2 border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gray-600 transition-all duration-200"
+                  />
+                </div>
+
+                {/* Filter Toggle */}
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center gap-2 px-5 py-3 border-2 rounded-xl transition-all duration-200 ${
+                    showFilters || hasActiveFilters
+                      ? 'border-blue-600 bg-blue-900/20 text-blue-400'
+                      : 'border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white'
+                  }`}
+                >
+                  <Filter className="size-5" />
+                  Filters
+                  {hasActiveFilters && (
+                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  )}
+                </button>
+              </div>
+
+              {/* Filter Panel */}
+              {showFilters && (
+                <div className="mt-4 pt-4 border-t border-gray-800/50">
+                  <div className="flex flex-wrap gap-4 items-end">
+                    <div className="flex-1 min-w-[200px]">
+                      <label className="block text-sm text-gray-400 mb-2 font-medium">Property Status</label>
+                      <select
+                        value={filterHasProperties}
+                        onChange={(e) => setFilterHasProperties(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-gray-800/60 border-2 border-gray-700/50 rounded-xl text-white focus:outline-none focus:border-gray-600 transition-all"
+                      >
+                        <option value="">All Contacts</option>
+                        <option value="true">With Properties</option>
+                        <option value="false">Without Properties</option>
+                      </select>
+                    </div>
+                    
+                    {hasActiveFilters && (
+                      <button
+                        onClick={clearFilters}
+                        className="flex items-center gap-2 px-4 py-2.5 text-gray-400 hover:text-white transition-colors"
+                      >
+                        <X className="size-4" />
+                        Clear Filters
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Enhanced Stats Bar */}
+          <div
+            className={`grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 transition-all duration-500 ease-out ${
+              isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}
+            style={{ transitionDelay: '150ms' }}
+          >
+            {[
+              { icon: Users, label: 'Total Contacts', value: contacts.length, color: 'blue-400', delay: '0ms' },
+              { icon: Phone, label: 'Ready to Call', value: callableContacts.length, color: 'emerald-400', delay: '50ms' },
+              { icon: Building, label: 'With Properties', value: contacts.filter(c => c.properties_count > 0).length, color: 'purple-400', delay: '100ms' },
+              { icon: TrendingUp, label: 'Total Properties', value: contacts.reduce((sum, c) => sum + (c.properties_count || 0), 0), color: 'orange-400', delay: '150ms' },
+            ].map((stat, i) => (
+              <div
+                key={i}
+                className={`bg-gradient-to-br from-gray-900/60 to-gray-950/60 border-2 border-gray-800/50 rounded-xl p-5 backdrop-blur-sm shadow-xl hover:border-gray-700 transition-all duration-300 hover:-translate-y-1 ${
+                  isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}
+                style={{ transitionDelay: stat.delay }}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`p-2.5 bg-gray-800/60 border border-gray-700/50 rounded-lg`}>
+                    <stat.icon className={`size-5 text-${stat.color}`} />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{stat.value}</p>
+                    <p className="text-xs text-gray-500 font-medium">{stat.label}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Contacts Grid with Staggered Animation */}
           {contacts.length === 0 ? (
-            <div className="text-center py-20 bg-gray-900 border border-gray-800 rounded-xl">
+            <div className="text-center py-20 bg-gradient-to-br from-gray-900/60 to-gray-950/60 border-2 border-gray-800/50 rounded-2xl backdrop-blur-sm">
               <Users className="size-20 text-gray-700 mx-auto mb-6" />
               <h3 className="text-xl text-gray-400 font-medium mb-2">No contacts found</h3>
               <p className="text-gray-500 mb-8 max-w-md mx-auto">
@@ -206,13 +216,13 @@ export default function ContactsList() {
               <div className="flex justify-center gap-4">
                 <button
                   onClick={() => router.push('/agent/documents/upload')}
-                  className="flex items-center gap-2 bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white px-6 py-3 rounded-lg transition-all"
+                  className="flex items-center gap-2 bg-gray-800/60 border-2 border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white px-6 py-3 rounded-xl transition-all font-semibold"
                 >
                   Upload CSV
                 </button>
                 <button
                   onClick={() => router.push('/agent/contacts/new')}
-                  className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all"
+                  className="flex items-center gap-2 bg-gray-800/60 border border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800 px-6 py-3 rounded-xl transition-all font-semibold shadow-lg"
                 >
                   <Plus className="size-5" />
                   Add Contact
@@ -224,8 +234,13 @@ export default function ContactsList() {
               {contacts.map((contact, i) => (
                 <div
                   key={contact.id}
-                  className="opacity-0 animate-fadeIn"
-                  style={{ animationDelay: `${Math.min(i * 50, 500)}ms` }}
+                  className={`transition-all duration-700 ease-out ${
+                    isMounted ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
+                  }`}
+                  style={{ 
+                    transitionDelay: `${Math.min(i * 100, 1000)}ms`,
+                    animation: isMounted ? `fadeInUp 0.7s ease-out ${Math.min(i * 100, 1000)}ms both` : 'none'
+                  }}
                 >
                   <ContactCard
                     contact={contact}
@@ -252,7 +267,6 @@ export default function ContactsList() {
             contactId={selectedContactId}
             onClose={() => {
               setIsDetailsSheetOpen(false)
-              // Slight delay before clearing ID to avoid unmount glitches
               setTimeout(() => setSelectedContactId(null), 200)
             }}
           />
