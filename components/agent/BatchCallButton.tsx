@@ -76,7 +76,7 @@ export default function BatchCallButton({
       
       // Close modal after 2 seconds if successful
       setTimeout(() => {
-        setIsModalOpen(false)
+      setIsModalOpen(false)
         setSuccess(null)
       }, 2000)
     } catch (error: any) {
