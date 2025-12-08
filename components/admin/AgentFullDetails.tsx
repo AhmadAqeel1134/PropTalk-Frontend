@@ -6,7 +6,6 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ErrorMessage from '@/components/common/ErrorMessage';
 import PageTransition from '@/components/common/PageTransition';
 import {
-  ArrowLeft,
   User,
   Building,
   FileText,
@@ -150,13 +149,14 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
         <div className="w-full px-8 py-8">
           {/* Header */}
           <div className="mb-8">
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
-            >
-              <ArrowLeft size={18} />
-              <span className="text-sm font-medium">Back to Agents</span>
-            </button>
+            <div className="flex justify-end mb-6">
+              <button
+                onClick={handleBack}
+                className="px-5 py-2.5 bg-gray-800/60 border-2 border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white rounded-xl font-semibold transition-all duration-200"
+              >
+                Back
+              </button>
+            </div>
 
             {/* Profile Section */}
             <div className="flex items-start gap-6 mb-8 pb-8 border-b border-gray-800 opacity-0" style={{ animation: 'fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) 100ms forwards' }}>

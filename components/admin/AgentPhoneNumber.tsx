@@ -6,7 +6,6 @@ import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ErrorMessage from '@/components/common/ErrorMessage';
 import {
   Phone,
-  ArrowLeft,
   RefreshCw,
   Copy,
   CheckCircle,
@@ -59,13 +58,14 @@ const AgentPhoneNumber: React.FC<AgentPhoneNumberProps> = ({ agentId, agentName,
         {/* Header */}
         <div className="mb-8">
           {onBack && (
-            <button
-              onClick={onBack}
-              className="flex items-center space-x-2 mb-4 text-blue-400 hover:text-blue-300 transition-colors duration-300"
-            >
-              <ArrowLeft size={20} />
-              <span className="font-semibold">Back</span>
-            </button>
+            <div className="flex justify-end mb-4">
+              <button
+                onClick={onBack}
+                className="px-5 py-2.5 bg-gray-800/60 border-2 border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white rounded-xl font-semibold transition-all duration-200"
+              >
+                Back
+              </button>
+            </div>
           )}
           
           <div className="flex items-center justify-between">
