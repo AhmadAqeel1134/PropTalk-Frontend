@@ -23,6 +23,10 @@ import {
   getAgentProfile,
   updateAgentProfile,
   changePassword,
+  getCallStatistics,
+  getVoiceAgent,
+  updateVoiceAgent,
+  toggleVoiceAgentStatus,
 } from '@/lib/real_estate_agent/api'
 import type { AgentDashboardData, Contact, Property, Document, PaginatedProperties } from '@/types/agent.types'
 import { getSmartRefetchInterval } from './useVisibilityRefetch'
@@ -266,6 +270,44 @@ export function useUpdateAgentProfile() {
 export function useChangePassword() {
   return useMutation({
     mutationFn: changePassword,
+  })
+}
+
+// Call stats
+export function useCallStatistics(period: 'day' | 'week' | 'month' = 'week') {
+  return useQuery({
+    queryKey: ['agent', 'call-stats', period],
+    queryFn: () => getCallStatistics(period),
+    staleTime: 60000,
+  })
+}
+
+// Voice agent
+export function useVoiceAgent() {
+  return useQuery({
+    queryKey: ['agent', 'voice-agent'],
+    queryFn: getVoiceAgent,
+  })
+}
+
+export function useUpdateVoiceAgent() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: updateVoiceAgent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agent', 'voice-agent'] })
+    },
+  })
+}
+
+export function useToggleVoiceAgentStatus() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: toggleVoiceAgentStatus,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agent', 'voice-agent'] })
+      queryClient.invalidateQueries({ queryKey: ['agent', 'call-stats'] })
+    },
   })
 }
 
