@@ -96,9 +96,8 @@ export default function CallHistoryList() {
               className="pl-10 pr-8 py-3 bg-gray-900 border border-gray-800 rounded-xl text-white focus:outline-none focus:border-purple-500/50 focus:ring-2 focus:ring-purple-500/20 transition-all appearance-none cursor-pointer hover:border-gray-700"
             >
               <option value="all">All Status</option>
+              <option value="initiated">Initiated</option>
               <option value="completed">Completed</option>
-              <option value="failed">Failed</option>
-              <option value="busy">Busy</option>
               <option value="no-answer">No Answer</option>
             </select>
           </div>

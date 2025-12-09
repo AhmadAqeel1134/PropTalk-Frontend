@@ -19,7 +19,6 @@ type FormData = z.infer<typeof schema>
 
 interface EditProfileFormProps {
   profile: {
-    id: string
     email: string
     full_name: string
     company_name: string | null
@@ -76,7 +75,16 @@ export default function EditProfileForm({ profile, onClose }: EditProfileFormPro
         </div>
 
         <form onSubmit={handleSubmit(data => {
-          mutation.mutate(data, {
+          // Remove empty optional fields so backend optional validators don't reject ""
+          const payload = {
+            full_name: data.full_name?.trim(),
+            email: data.email?.trim(),
+            company_name: data.company_name?.trim() || undefined,
+            phone: data.phone?.trim() || undefined,
+            address: data.address?.trim() || undefined,
+          }
+
+          mutation.mutate(payload, {
             onSuccess: () => onClose()
           })
         })} className="space-y-6">

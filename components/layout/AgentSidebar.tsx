@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   Phone,
+  Radio,
 } from 'lucide-react'
 
 const AgentSidebar: React.FC = () => {
@@ -45,6 +46,11 @@ const AgentSidebar: React.FC = () => {
       name: 'Call History',
       href: '/agent/calls',
       icon: Phone,
+    },
+    {
+      name: 'Voice Agent',
+      href: '/agent/voice-agent',
+      icon: Radio,
     },
     {
       name: 'Profile',

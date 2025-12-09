@@ -140,10 +140,10 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-300 ${
+                    className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
                       activeTab === tab.id
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/30'
-                        : 'bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-400 hover:text-white'
+                        ? 'bg-gray-800 border border-gray-600 text-white'
+                        : 'bg-gray-900 border border-gray-800 hover:border-gray-700 text-gray-400 hover:text-white'
                     }`}
                   >
                     <span className="flex items-center justify-center gap-2">
