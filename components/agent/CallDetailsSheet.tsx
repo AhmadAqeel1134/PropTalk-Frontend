@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getCallById, getCallRecording } from '@/lib/real_estate_agent/api'
 import CallRecordingModal from './CallRecordingModal'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 import { X, Phone, PhoneIncoming, PhoneOutgoing, Clock, Calendar, User, Play, FileText } from 'lucide-react'
@@ -18,6 +19,7 @@ interface CallDetailsSheetProps {
 }
 
 export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetailsSheetProps) {
+  const { theme } = useTheme()
   const [isRecordingModalOpen, setIsRecordingModalOpen] = useState(false)
 
   const { data: call, isLoading, error } = useQuery({
@@ -87,23 +89,43 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-in fade-in duration-300"
+        className={`fixed inset-0 backdrop-blur-sm z-40 animate-in fade-in duration-300 ${
+          theme === 'dark' ? 'bg-black/50' : 'bg-black/30'
+        }`}
         onClick={onClose}
       />
 
       {/* Side Sheet */}
       <div
-        className="fixed right-0 top-0 h-full w-full max-w-2xl bg-gray-900 border-l border-gray-800 z-50 shadow-2xl overflow-y-auto"
+        className={`fixed right-0 top-0 h-full w-full max-w-2xl border-l z-50 shadow-2xl overflow-y-auto ${
+          theme === 'dark'
+            ? 'bg-gray-900 border-gray-800'
+            : 'bg-white border-gray-200'
+        }`}
         style={{
           animation: isOpen ? 'slide-in-from-right 0.3s ease-out' : 'none',
         }}
       >
-        <div className="sticky top-0 z-10 p-6 border-b border-gray-800 bg-gray-900/95 backdrop-blur-sm">
+        <div
+          className={`sticky top-0 z-10 p-6 border-b backdrop-blur-sm ${
+            theme === 'dark'
+              ? 'border-gray-800 bg-gray-900/95'
+              : 'border-gray-200 bg-white'
+          }`}
+        >
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-2xl font-bold text-white">Call Details</h2>
+            <h2 className={`text-2xl font-bold ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}>
+              Call Details
+            </h2>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors"
+              className={`p-2 rounded-lg transition-colors ${
+                theme === 'dark'
+                  ? 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                  : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+              }`}
             >
               <X size={20} />
             </button>
@@ -117,37 +139,71 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
             <ErrorMessage message={(error as Error).message} />
           ) : !call ? (
             <div className="text-center py-12">
-              <p className="text-gray-400">Call not found</p>
+              <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                Call not found
+              </p>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Call Header */}
-              <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 rounded-2xl p-6">
+              <div
+                className={`border rounded-2xl p-6 ${
+                  theme === 'dark'
+                    ? 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-gray-700/50'
+                    : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-sm'
+                }`}
+              >
                 <div className="flex items-center gap-4 mb-6">
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center border-2 ${
-                    call.status === 'completed' 
-                      ? 'bg-green-500/10 border-green-500/30' 
-                      : call.status === 'failed' || call.status === 'busy' || call.status === 'no-answer'
-                      ? 'bg-red-500/10 border-red-500/30'
-                      : 'bg-blue-500/10 border-blue-500/30'
-                  }`}>
+                  <div
+                    className={`w-16 h-16 rounded-full flex items-center justify-center border-2 ${
+                      call.status === 'completed'
+                        ? theme === 'dark'
+                          ? 'bg-green-500/10 border-green-500/30'
+                          : 'bg-green-100 border-green-300'
+                        : call.status === 'failed' || call.status === 'busy' || call.status === 'no-answer'
+                        ? theme === 'dark'
+                          ? 'bg-red-500/10 border-red-500/30'
+                          : 'bg-red-100 border-red-300'
+                        : theme === 'dark'
+                        ? 'bg-blue-500/10 border-blue-500/30'
+                        : 'bg-blue-100 border-blue-300'
+                    }`}
+                  >
                     {isOutbound ? (
-                      <PhoneOutgoing className="size-8 text-green-400" />
+                      <PhoneOutgoing
+                        className={`size-8 ${
+                          theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                        }`}
+                      />
                     ) : (
-                      <PhoneIncoming className="size-8 text-blue-400" />
+                      <PhoneIncoming
+                        className={`size-8 ${
+                          theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+                        }`}
+                      />
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-white mb-1">
+                    <h3 className={`text-xl font-bold mb-1 ${
+                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    }`}>
                       {isOutbound ? 'Outbound Call' : 'Inbound Call'}
                     </h3>
-                    <p className={`text-sm font-semibold px-3 py-1 rounded-full inline-block border ${
-                      call.status === 'completed' 
-                        ? 'text-green-400 bg-green-500/10 border-green-500/20' 
-                        : call.status === 'failed' || call.status === 'busy' || call.status === 'no-answer'
-                        ? 'text-red-400 bg-red-500/10 border-red-500/20'
-                        : 'text-blue-400 bg-blue-500/10 border-blue-500/20'
-                    }`}>
+                    <p
+                      className={`text-sm font-semibold px-3 py-1 rounded-full inline-block border ${
+                        call.status === 'completed'
+                          ? theme === 'dark'
+                            ? 'text-green-400 bg-green-500/10 border-green-500/20'
+                            : 'text-green-700 bg-green-100 border-green-300'
+                          : call.status === 'failed' || call.status === 'busy' || call.status === 'no-answer'
+                          ? theme === 'dark'
+                            ? 'text-red-400 bg-red-500/10 border-red-500/20'
+                            : 'text-red-700 bg-red-100 border-red-300'
+                          : theme === 'dark'
+                          ? 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+                          : 'text-blue-700 bg-blue-100 border-blue-300'
+                      }`}
+                    >
                       {call.status.replace('-', ' ').toUpperCase()}
                     </p>
                   </div>
@@ -155,33 +211,83 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
 
                 {/* Call Flow */}
                 <div className="space-y-4">
-                  <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
+                  <div
+                    className={`flex items-center gap-4 p-4 rounded-xl border ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/50 border-gray-700/50'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
                     <div className="flex-shrink-0">
-                      <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
-                        <User className="size-5 text-gray-400" />
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                        }`}
+                      >
+                        <User className={`size-5 ${
+                          theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                        }`} />
                       </div>
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm text-gray-400 mb-1">From</p>
-                      <p className="text-white font-semibold">{callerName}</p>
-                      <p className="text-sm text-gray-400">{callerPhone}</p>
+                      <p className={`text-sm mb-1 ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        From
+                      </p>
+                      <p className={`font-semibold ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {callerName}
+                      </p>
+                      <p className={`text-sm ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        {callerPhone}
+                      </p>
                     </div>
                   </div>
 
                   <div className="flex justify-center">
-                    <div className="w-0.5 h-8 bg-gray-700" />
+                    <div className={`w-0.5 h-8 ${
+                      theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
+                    }`} />
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-xl border border-gray-700/50">
+                  <div
+                    className={`flex items-center gap-4 p-4 rounded-xl border ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/50 border-gray-700/50'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
                     <div className="flex-shrink-0">
-                      <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center">
-                        <Phone className="size-5 text-gray-400" />
+                      <div
+                        className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                          theme === 'dark' ? 'bg-gray-700' : 'bg-gray-200'
+                        }`}
+                      >
+                        <Phone className={`size-5 ${
+                          theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                        }`} />
                       </div>
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm text-gray-400 mb-1">To</p>
-                      <p className="text-white font-semibold">{receiverName}</p>
-                      <p className="text-sm text-gray-400">{receiverPhone}</p>
+                      <p className={`text-sm mb-1 ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        To
+                      </p>
+                      <p className={`font-semibold ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {receiverName}
+                      </p>
+                      <p className={`text-sm ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        {receiverPhone}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -189,16 +295,32 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
 
               {/* Recording Player */}
               {recordingUrl && (
-                <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 rounded-2xl p-6">
+                <div
+                  className={`border rounded-2xl p-6 ${
+                    theme === 'dark'
+                      ? 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-gray-700/50'
+                      : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-sm'
+                  }`}
+                >
                   <div className="flex items-center gap-3 mb-4">
-                    <FileText className="size-5 text-gray-400" />
-                    <h3 className="text-lg font-semibold text-white">Recording</h3>
+                    <FileText className={`size-5 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`} />
+                    <h3 className={`text-lg font-semibold ${
+                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      Recording
+                    </h3>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <button
                       onClick={() => setIsRecordingModalOpen(true)}
-                      className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-gray-800 border-2 border-gray-700 hover:border-gray-600 text-white rounded-xl transition-all hover:scale-[1.02] font-semibold"
+                      className={`w-full flex items-center justify-center gap-3 px-6 py-4 border-2 rounded-xl transition-all hover:scale-[1.02] font-semibold ${
+                        theme === 'dark'
+                          ? 'bg-gray-800 border-gray-700 hover:border-gray-600 text-white'
+                          : 'bg-white border-gray-200 hover:border-blue-400 text-gray-700 hover:text-blue-700 shadow-sm'
+                      }`}
                     >
                       <Play className="size-5" />
                       <span>Play Recording with Transcription</span>
@@ -208,39 +330,79 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
               )}
 
               {/* Call Information */}
-              <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Call Information</h3>
+              <div
+                className={`border rounded-2xl p-6 ${
+                  theme === 'dark'
+                    ? 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-gray-700/50'
+                    : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-sm'
+                }`}
+              >
+                <h3 className={`text-lg font-semibold mb-4 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Call Information
+                </h3>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between py-2 border-b border-gray-700/50">
-                    <span className="text-gray-400 flex items-center gap-2">
+                  <div className={`flex items-center justify-between py-2 border-b ${
+                    theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'
+                  }`}>
+                    <span className={`flex items-center gap-2 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
                       <Clock className="size-4" />
                       Duration
                     </span>
-                    <span className="text-white font-medium">{formatDuration(call.duration_seconds)}</span>
+                    <span className={`font-medium ${
+                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {formatDuration(call.duration_seconds)}
+                    </span>
                   </div>
-                  <div className="flex items-center justify-between py-2 border-b border-gray-700/50">
-                    <span className="text-gray-400 flex items-center gap-2">
+                  <div className={`flex items-center justify-between py-2 border-b ${
+                    theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'
+                  }`}>
+                    <span className={`flex items-center gap-2 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
                       <Calendar className="size-4" />
                       Started
                     </span>
-                    <span className="text-white font-medium">{formatDateTime(call.started_at)}</span>
+                    <span className={`font-medium ${
+                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {formatDateTime(call.started_at)}
+                    </span>
                   </div>
                   {call.answered_at && (
-                    <div className="flex items-center justify-between py-2 border-b border-gray-700/50">
-                      <span className="text-gray-400 flex items-center gap-2">
+                    <div className={`flex items-center justify-between py-2 border-b ${
+                      theme === 'dark' ? 'border-gray-700/50' : 'border-gray-200'
+                    }`}>
+                      <span className={`flex items-center gap-2 ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
                         <Phone className="size-4" />
                         Answered
                       </span>
-                      <span className="text-white font-medium">{formatDateTime(call.answered_at)}</span>
+                      <span className={`font-medium ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {formatDateTime(call.answered_at)}
+                      </span>
                     </div>
                   )}
                   {call.ended_at && (
                     <div className="flex items-center justify-between py-2">
-                      <span className="text-gray-400 flex items-center gap-2">
+                      <span className={`flex items-center gap-2 ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
                         <X className="size-4" />
                         Ended
                       </span>
-                      <span className="text-white font-medium">{formatDateTime(call.ended_at)}</span>
+                      <span className={`font-medium ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {formatDateTime(call.ended_at)}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -248,10 +410,30 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
 
               {/* Transcript */}
               {call.transcript && (
-                <div className="bg-gradient-to-br from-gray-800/60 to-gray-900/60 border border-gray-700/50 rounded-2xl p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4">Transcript</h3>
-                  <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
-                    <p className="text-gray-300 whitespace-pre-wrap leading-relaxed">{call.transcript}</p>
+                <div
+                  className={`border rounded-2xl p-6 ${
+                    theme === 'dark'
+                      ? 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-gray-700/50'
+                      : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-sm'
+                  }`}
+                >
+                  <h3 className={`text-lg font-semibold mb-4 ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Transcript
+                  </h3>
+                  <div
+                    className={`rounded-xl p-4 border ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/50 border-gray-700/50'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
+                    <p className={`whitespace-pre-wrap leading-relaxed ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      {call.transcript}
+                    </p>
                   </div>
                 </div>
               )}

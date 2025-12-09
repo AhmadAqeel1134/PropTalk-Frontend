@@ -9,6 +9,7 @@ import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ErrorMessage from '@/components/common/ErrorMessage'
 import PageTransition from '@/components/common/PageTransition'
 import CallDetailsSheet from './CallDetailsSheet'
+import { useTheme } from '@/contexts/ThemeContext'
 
 interface Call {
   id: string
@@ -29,6 +30,7 @@ interface Call {
 }
 
 export default function CallsList() {
+  const { theme } = useTheme()
   const [page, setPage] = useState(1)
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [directionFilter, setDirectionFilter] = useState<string>('all')
@@ -80,19 +82,36 @@ export default function CallsList() {
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'completed':
-        return 'text-green-400 bg-green-500/10 border-green-500/20'
-      case 'failed':
-      case 'busy':
-      case 'no-answer':
-        return 'text-red-400 bg-red-500/10 border-red-500/20'
-      case 'initiated':
-      case 'ringing':
-      case 'in-progress':
-        return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
-      default:
-        return 'text-gray-400 bg-gray-500/10 border-gray-500/20'
+    if (theme === 'light') {
+      switch (status) {
+        case 'completed':
+          return 'text-green-700 bg-green-100 border-green-300'
+        case 'failed':
+        case 'busy':
+        case 'no-answer':
+          return 'text-red-700 bg-red-100 border-red-300'
+        case 'initiated':
+        case 'ringing':
+        case 'in-progress':
+          return 'text-blue-700 bg-blue-100 border-blue-300'
+        default:
+          return 'text-gray-700 bg-gray-100 border-gray-300'
+      }
+    } else {
+      switch (status) {
+        case 'completed':
+          return 'text-green-400 bg-green-500/10 border-green-500/20'
+        case 'failed':
+        case 'busy':
+        case 'no-answer':
+          return 'text-red-400 bg-red-500/10 border-red-500/20'
+        case 'initiated':
+        case 'ringing':
+        case 'in-progress':
+          return 'text-blue-400 bg-blue-500/10 border-blue-500/20'
+        default:
+          return 'text-gray-400 bg-gray-500/10 border-gray-500/20'
+      }
     }
   }
 
@@ -122,7 +141,14 @@ export default function CallsList() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen p-6 md:p-8" style={{ background: 'rgba(10, 15, 25, 0.95)' }}>
+      <div
+        className="min-h-screen p-6 md:p-8"
+        style={
+          theme === 'dark'
+            ? { background: 'rgba(10, 15, 25, 0.95)' }
+            : { background: 'rgba(248, 250, 252, 0.98)' }
+        }
+      >
         <div className="max-w-full">
           {/* Enhanced Header */}
           <div
@@ -130,18 +156,34 @@ export default function CallsList() {
               isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
             }`}
           >
-            <div className="bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/50 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl">
+            <div
+              className={`rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/50'
+                  : 'bg-gradient-to-br from-white to-gray-50 border border-gray-200 shadow-sm'
+              }`}
+            >
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 rounded-xl bg-gray-800/60 border border-gray-700/50">
-                      <Phone size={24} className="text-gray-300" />
+                    <div
+                      className={`p-2 rounded-xl border ${
+                        theme === 'dark'
+                          ? 'bg-gray-800/60 border-gray-700/50'
+                          : 'bg-blue-50 border-blue-200'
+                      }`}
+                    >
+                      <Phone size={24} className={theme === 'dark' ? 'text-gray-300' : 'text-blue-600'} />
                     </div>
                     <div>
-                      <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">
+                      <h1 className={`text-3xl md:text-4xl font-bold mb-1 ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
                         Call History
                       </h1>
-                      <p className="text-gray-400 text-sm md:text-base">
+                      <p className={`text-sm md:text-base ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
                         {total} call{total !== 1 ? 's' : ''} recorded • Review and listen to recordings
                       </p>
                     </div>
@@ -153,7 +195,11 @@ export default function CallsList() {
 
           {/* Filters */}
           <div
-            className={`mb-8 bg-gray-900/60 border border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm shadow-xl transition-all duration-500 ease-out ${
+            className={`mb-8 rounded-2xl p-6 backdrop-blur-sm shadow-xl transition-all duration-500 ease-out ${
+              theme === 'dark'
+                ? 'bg-gray-900/60 border border-gray-800/50'
+                : 'bg-white border border-gray-200 shadow-sm'
+            } ${
               isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
             }`}
             style={{ transitionDelay: '100ms' }}
@@ -162,7 +208,11 @@ export default function CallsList() {
               {/* Search and Clear Filters */}
               <div className="flex gap-3">
                 <div className="flex-1 relative">
-                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <Search
+                    className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                    }`}
+                  />
                   <input
                     type="text"
                     placeholder="Search by contact name or phone number..."
@@ -171,13 +221,21 @@ export default function CallsList() {
                       setSearchQuery(e.target.value)
                       setPage(1)
                     }}
-                    className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-transparent transition-all"
+                    className={`w-full pl-12 pr-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/50 border-gray-700/50 text-white focus:ring-gray-600 focus:border-transparent'
+                        : 'bg-white border-gray-300 text-gray-900 focus:ring-blue-400 focus:border-blue-400 shadow-sm'
+                    }`}
                   />
                 </div>
                 {hasActiveFilters && (
                   <button
                     onClick={handleClearFilters}
-                    className="px-4 py-3 bg-gray-800/50 border border-gray-700/50 text-gray-400 hover:text-white hover:border-gray-600 rounded-xl font-medium transition-all flex items-center gap-2"
+                    className={`px-4 py-3 border rounded-xl font-medium transition-all flex items-center gap-2 ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/50 border-gray-700/50 text-gray-400 hover:text-white hover:border-gray-600'
+                        : 'bg-white border-gray-200 text-gray-600 hover:text-gray-900 hover:border-blue-400 shadow-sm'
+                    }`}
                   >
                     <X size={16} />
                     Clear Filters
@@ -189,7 +247,11 @@ export default function CallsList() {
               <div className="flex flex-col sm:flex-row gap-4">
                 {/* Status Filter */}
                 <div className="flex-1">
-                  <label className="block text-xs text-gray-400 mb-2 font-medium">Status</label>
+                  <label className={`block text-xs mb-2 font-medium ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    Status
+                  </label>
                   <div className="flex gap-2 flex-wrap">
                     {[
                       { value: 'all', label: 'All' },
@@ -203,10 +265,14 @@ export default function CallsList() {
                           setStatusFilter(value)
                           setPage(1)
                         }}
-                        className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                        className={`px-4 py-2 rounded-xl font-medium transition-all border ${
                           statusFilter === value
-                            ? 'bg-gray-800 border-2 border-gray-600 text-white'
-                            : 'bg-gray-800/50 border border-gray-700/50 text-gray-400 hover:text-white hover:border-gray-600'
+                            ? theme === 'dark'
+                              ? 'bg-gray-800 border-2 border-gray-600 text-white'
+                              : 'bg-blue-50 border-2 border-blue-200 text-blue-700 shadow-sm'
+                            : theme === 'dark'
+                            ? 'bg-gray-800/50 border border-gray-700/50 text-gray-400 hover:text-white hover:border-gray-600'
+                            : 'bg-white border border-gray-300 text-gray-600 hover:text-blue-700 hover:border-blue-400 shadow-sm'
                         }`}
                       >
                         {label}
@@ -217,7 +283,11 @@ export default function CallsList() {
 
                 {/* Direction Filter */}
                 <div className="flex-1">
-                  <label className="block text-xs text-gray-400 mb-2 font-medium">Direction</label>
+                  <label className={`block text-xs mb-2 font-medium ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    Direction
+                  </label>
                   <div className="flex gap-2 flex-wrap">
                     {[
                       { value: 'all', label: 'All' },
@@ -230,10 +300,14 @@ export default function CallsList() {
                           setDirectionFilter(value)
                           setPage(1)
                         }}
-                        className={`px-4 py-2 rounded-xl font-medium transition-all ${
+                        className={`px-4 py-2 rounded-xl font-medium transition-all border ${
                           directionFilter === value
-                            ? 'bg-gray-800 border-2 border-gray-600 text-white'
-                            : 'bg-gray-800/50 border border-gray-700/50 text-gray-400 hover:text-white hover:border-gray-600'
+                            ? theme === 'dark'
+                              ? 'bg-gray-800 border-2 border-gray-600 text-white'
+                              : 'bg-blue-50 border-2 border-blue-200 text-blue-700 shadow-sm'
+                            : theme === 'dark'
+                            ? 'bg-gray-800/50 border border-gray-700/50 text-gray-400 hover:text-white hover:border-gray-600'
+                            : 'bg-white border border-gray-300 text-gray-600 hover:text-blue-700 hover:border-blue-400 shadow-sm'
                         }`}
                       >
                         {label}
@@ -249,10 +323,24 @@ export default function CallsList() {
           {isLoading ? (
             <LoadingSpinner />
           ) : calls.length === 0 ? (
-            <div className="text-center py-20 bg-gradient-to-br from-gray-900/60 to-gray-950/60 border-2 border-gray-800/50 rounded-2xl backdrop-blur-sm">
-              <Phone className="size-20 text-gray-700 mx-auto mb-6" />
-              <h3 className="text-xl text-gray-400 font-medium mb-2">No calls found</h3>
-              <p className="text-gray-500 mb-8 max-w-md mx-auto">
+            <div
+              className={`text-center py-20 border-2 rounded-2xl backdrop-blur-sm ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-br from-gray-900/60 to-gray-950/60 border-gray-800/50'
+                  : 'bg-white border-gray-200 shadow-sm'
+              }`}
+            >
+              <Phone className={`size-20 mx-auto mb-6 ${
+                theme === 'dark' ? 'text-gray-700' : 'text-gray-400'
+              }`} />
+              <h3 className={`text-xl font-medium mb-2 ${
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                No calls found
+              </h3>
+              <p className={`mb-8 max-w-md mx-auto ${
+                theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+              }`}>
                 {hasActiveFilters
                   ? 'Try adjusting your filters'
                   : 'Your call history will appear here once you start making calls'}
@@ -280,31 +368,57 @@ export default function CallsList() {
                   <div
                     key={call.id}
                     onClick={() => handleCallClick(call.id)}
-                    className={`group relative bg-gradient-to-br from-gray-900/60 to-gray-950/60 border-2 border-gray-800/50 rounded-2xl p-6 backdrop-blur-sm shadow-xl cursor-pointer transition-all duration-300 hover:border-gray-700 hover:shadow-2xl hover:-translate-y-1 ${
+                    className={`group relative border-2 rounded-2xl p-6 backdrop-blur-sm shadow-xl cursor-pointer transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 ${
+                      theme === 'dark'
+                        ? 'bg-gradient-to-br from-gray-900/60 to-gray-950/60 border-gray-800/50 hover:border-gray-700'
+                        : 'bg-white border-gray-200 hover:border-blue-300 shadow-sm'
+                    } ${
                       isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                     }`}
                     style={{ transitionDelay: `${Math.min(index * 50, 500)}ms` }}
                   >
                     {/* Timeline Line */}
-                    <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-gray-800 group-hover:bg-gray-700 transition-colors" />
+                    <div
+                      className={`absolute left-8 top-0 bottom-0 w-0.5 transition-colors ${
+                        theme === 'dark'
+                          ? 'bg-gray-800 group-hover:bg-gray-700'
+                          : 'bg-gray-200 group-hover:bg-gray-300'
+                      }`}
+                    />
                     
                     {/* Content */}
                     <div className="relative flex items-start gap-6">
                       {/* Icon */}
-                      <div className={`relative z-10 flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center border-2 ${
-                        call.status === 'completed' 
-                          ? 'bg-green-500/10 border-green-500/30' 
-                          : call.status === 'failed' || call.status === 'busy' || call.status === 'no-answer'
-                          ? 'bg-red-500/10 border-red-500/30'
-                          : 'bg-blue-500/10 border-blue-500/30'
-                      }`}>
-                        <StatusIcon className={`size-7 ${
-                          call.status === 'completed' 
-                            ? 'text-green-400' 
+                      <div
+                        className={`relative z-10 flex-shrink-0 w-16 h-16 rounded-full flex items-center justify-center border-2 ${
+                          call.status === 'completed'
+                            ? theme === 'dark'
+                              ? 'bg-green-500/10 border-green-500/30'
+                              : 'bg-green-100 border-green-300'
                             : call.status === 'failed' || call.status === 'busy' || call.status === 'no-answer'
-                            ? 'text-red-400'
-                            : 'text-blue-400'
-                        }`} />
+                            ? theme === 'dark'
+                              ? 'bg-red-500/10 border-red-500/30'
+                              : 'bg-red-100 border-red-300'
+                            : theme === 'dark'
+                            ? 'bg-blue-500/10 border-blue-500/30'
+                            : 'bg-blue-100 border-blue-300'
+                        }`}
+                      >
+                        <StatusIcon
+                          className={`size-7 ${
+                            call.status === 'completed'
+                              ? theme === 'dark'
+                                ? 'text-green-400'
+                                : 'text-green-600'
+                              : call.status === 'failed' || call.status === 'busy' || call.status === 'no-answer'
+                              ? theme === 'dark'
+                                ? 'text-red-400'
+                                : 'text-red-600'
+                              : theme === 'dark'
+                              ? 'text-blue-400'
+                              : 'text-blue-600'
+                          }`}
+                        />
                       </div>
 
                       {/* Details */}
@@ -312,10 +426,14 @@ export default function CallsList() {
                         <div className="flex items-start justify-between gap-4 mb-3">
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-3 mb-2">
-                              <h3 className="text-lg font-bold text-white truncate">
+                              <h3 className={`text-lg font-bold truncate ${
+                                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                              }`}>
                                 {isOutbound ? (
                                   <>
-                                    <span className="text-gray-400">{callerName}</span>
+                                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                                      {callerName}
+                                    </span>
                                     <span className="mx-2">→</span>
                                     <span>{receiverName}</span>
                                   </>
@@ -323,7 +441,9 @@ export default function CallsList() {
                                   <>
                                     <span>{callerName}</span>
                                     <span className="mx-2">→</span>
-                                    <span className="text-gray-400">{receiverName}</span>
+                                    <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                                      {receiverName}
+                                    </span>
                                   </>
                                 )}
                               </h3>
@@ -331,7 +451,9 @@ export default function CallsList() {
                                 {call.status.replace('-', ' ')}
                               </span>
                             </div>
-                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                            <div className={`flex items-center gap-4 text-sm ${
+                              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                            }`}>
                               <div className="flex items-center gap-1.5">
                                 <User size={14} />
                                 <span>{callerPhone}</span>
@@ -350,8 +472,20 @@ export default function CallsList() {
                           </div>
                           {call.recording_url && (
                             <div className="flex-shrink-0">
-                              <div className="p-2 rounded-lg bg-gray-800/50 border border-gray-700/50 group-hover:border-gray-600 transition-colors">
-                                <Play className="size-5 text-gray-400 group-hover:text-white transition-colors" />
+                              <div
+                                className={`p-2 rounded-lg border transition-colors ${
+                                  theme === 'dark'
+                                    ? 'bg-gray-800/50 border-gray-700/50 group-hover:border-gray-600'
+                                    : 'bg-gray-50 border-gray-200 group-hover:border-blue-300'
+                                }`}
+                              >
+                                <Play
+                                  className={`size-5 transition-colors ${
+                                    theme === 'dark'
+                                      ? 'text-gray-400 group-hover:text-white'
+                                      : 'text-gray-500 group-hover:text-blue-600'
+                                  }`}
+                                />
                               </div>
                             </div>
                           )}
@@ -367,21 +501,31 @@ export default function CallsList() {
           {/* Pagination */}
           {total > 20 && (
             <div className="mt-8 flex items-center justify-between">
-              <div className="text-sm text-gray-400">
+              <div className={`text-sm ${
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              }`}>
                 Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, total)} of {total} calls
               </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 bg-gray-800/60 border border-gray-700/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                    theme === 'dark'
+                      ? 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:text-white hover:border-gray-600'
+                      : 'bg-white border-gray-200 text-gray-700 hover:text-blue-700 hover:border-blue-400 shadow-sm'
+                  }`}
                 >
                   Previous
                 </button>
                 <button
                   onClick={() => setPage(p => p + 1)}
                   disabled={page * 20 >= total}
-                  className="px-4 py-2 bg-gray-800/60 border border-gray-700/50 rounded-xl text-gray-300 hover:text-white hover:border-gray-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className={`px-4 py-2 border rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+                    theme === 'dark'
+                      ? 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:text-white hover:border-gray-600'
+                      : 'bg-white border-gray-200 text-gray-700 hover:text-blue-700 hover:border-blue-400 shadow-sm'
+                  }`}
                 >
                   Next
                 </button>

@@ -9,6 +9,7 @@ import {
   User, MessageSquare, List, Eye, AlertCircle 
 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface VoiceAgentConfigProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ interface VoiceAgentConfigProps {
 }
 
 export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceAgentConfigProps) {
+  const { theme } = useTheme();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<'basic' | 'voice' | 'advanced'>('basic');
   
@@ -119,16 +121,40 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
         onClick={onClose}
       />
       <div className="fixed top-0 right-0 h-full w-full md:w-[700px] z-50 animate-in slide-in-from-right duration-300">
-        <div className="bg-gray-900 border-l border-gray-800 h-full flex flex-col">
-          <div className="p-6 border-b border-gray-800 bg-gray-900/95 backdrop-blur-sm">
+        <div
+          className={`border-l h-full flex flex-col ${
+            theme === 'dark'
+              ? 'bg-gray-900 border-gray-800'
+              : 'bg-white border-gray-200'
+          }`}
+        >
+          <div
+            className={`p-6 border-b backdrop-blur-sm ${
+              theme === 'dark'
+                ? 'border-gray-800 bg-gray-900/95'
+                : 'border-gray-200 bg-white'
+            }`}
+          >
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-1">Voice Agent Configuration</h2>
-                <p className="text-gray-400 text-sm">Customize your AI assistant's behavior</p>
+                <h2 className={`text-2xl font-bold mb-1 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Voice Agent Configuration
+                </h2>
+                <p className={`text-sm ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Customize your AI assistant's behavior
+                </p>
               </div>
-              <button 
+              <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-all hover:rotate-90 duration-300"
+                className={`p-2 rounded-lg transition-all hover:rotate-90 duration-300 ${
+                  theme === 'dark'
+                    ? 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                    : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                }`}
               >
                 <X size={24} />
               </button>
@@ -140,10 +166,14 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id as any)}
-                    className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+                    className={`flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-200 border ${
                       activeTab === tab.id
-                        ? 'bg-gray-800 border border-gray-600 text-white'
-                        : 'bg-gray-900 border border-gray-800 hover:border-gray-700 text-gray-400 hover:text-white'
+                        ? theme === 'dark'
+                          ? 'bg-gray-800 border-gray-600 text-white'
+                          : 'bg-blue-50 border-blue-200 text-blue-700 shadow-sm'
+                        : theme === 'dark'
+                        ? 'bg-gray-900 border-gray-800 hover:border-gray-700 text-gray-400 hover:text-white'
+                        : 'bg-white border-gray-200 hover:border-blue-300 text-gray-600 hover:text-blue-700 shadow-sm'
                     }`}
                   >
                     <span className="flex items-center justify-center gap-2">
@@ -161,37 +191,72 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
               <>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
                       Agent Name *
                     </label>
                     <input
                       type="text"
                       value={config.name}
                       onChange={(e) => setConfig({ ...config, name: e.target.value })}
-                      className={`w-full px-4 py-3 bg-gray-800 border ${errors.name ? 'border-red-500' : 'border-gray-700'} rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`}
+                      className={`w-full px-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
+                        errors.name
+                          ? 'border-red-500'
+                          : theme === 'dark'
+                          ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500/20'
+                          : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm'
+                      }`}
                       placeholder="e.g., Sales Assistant"
                     />
                     {errors.name && (
-                      <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
+                      <p className={`mt-2 text-sm flex items-center gap-1 ${
+                        theme === 'dark' ? 'text-red-400' : 'text-red-600'
+                      }`}>
                         <AlertCircle size={14} />
                         {errors.name}
                       </p>
                     )}
                   </div>
 
-                  <div className="p-4 rounded-xl bg-blue-500/5 border border-blue-500/20">
+                  <div
+                    className={`p-4 rounded-xl border ${
+                      theme === 'dark'
+                        ? 'bg-blue-500/5 border-blue-500/20'
+                        : 'bg-blue-50 border-blue-200'
+                    }`}
+                  >
                     <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-lg bg-blue-500/10">
-                        <Sparkles className="text-blue-400" size={20} />
+                      <div
+                        className={`p-2 rounded-lg ${
+                          theme === 'dark' ? 'bg-blue-500/10' : 'bg-blue-100'
+                        }`}
+                      >
+                        <Sparkles
+                          className={theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}
+                          size={20}
+                        />
                       </div>
                       <div className="flex-1">
-                        <h4 className="text-white font-medium mb-1">System Prompt</h4>
-                        <p className="text-gray-400 text-sm mb-3">
+                        <h4 className={`font-medium mb-1 ${
+                          theme === 'dark' ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          System Prompt
+                        </h4>
+                        <p className={`text-sm mb-3 ${
+                          theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}>
                           Choose between our optimized default prompt or create your own custom prompt.
                         </p>
-                        
+
                         <div className="space-y-3">
-                          <label className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 border border-gray-700 cursor-pointer hover:bg-gray-800 transition-all">
+                          <label
+                            className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                              theme === 'dark'
+                                ? 'bg-gray-800/50 border-gray-700 hover:bg-gray-800'
+                                : 'bg-white border-gray-200 hover:bg-gray-50 shadow-sm'
+                            }`}
+                          >
                             <input
                               type="radio"
                               checked={config.use_default_prompt}
@@ -199,11 +264,25 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                               className="w-4 h-4 text-blue-600"
                             />
                             <div>
-                              <p className="text-white font-medium">Use Default Prompt</p>
-                              <p className="text-gray-400 text-sm">Optimized for real estate sales</p>
+                              <p className={`font-medium ${
+                                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                              }`}>
+                                Use Default Prompt
+                              </p>
+                              <p className={`text-sm ${
+                                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                              }`}>
+                                Optimized for real estate sales
+                              </p>
                             </div>
                           </label>
-                          <label className="flex items-center gap-3 p-3 rounded-lg bg-gray-800/50 border border-gray-700 cursor-pointer hover:bg-gray-800 transition-all">
+                          <label
+                            className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                              theme === 'dark'
+                                ? 'bg-gray-800/50 border-gray-700 hover:bg-gray-800'
+                                : 'bg-white border-gray-200 hover:bg-gray-50 shadow-sm'
+                            }`}
+                          >
                             <input
                               type="radio"
                               checked={!config.use_default_prompt}
@@ -211,8 +290,16 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                               className="w-4 h-4 text-blue-600"
                             />
                             <div>
-                              <p className="text-white font-medium">Custom Prompt</p>
-                              <p className="text-gray-400 text-sm">Create your own instructions</p>
+                              <p className={`font-medium ${
+                                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                              }`}>
+                                Custom Prompt
+                              </p>
+                              <p className={`text-sm ${
+                                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                              }`}>
+                                Create your own instructions
+                              </p>
                             </div>
                           </label>
                         </div>
@@ -222,18 +309,28 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
 
                   {!config.use_default_prompt && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
+                      <label className={`block text-sm font-medium mb-2 ${
+                        theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
                         Custom System Prompt *
                       </label>
                       <textarea
                         value={config.system_prompt}
                         onChange={(e) => setConfig({ ...config, system_prompt: e.target.value })}
                         rows={8}
-                        className={`w-full px-4 py-3 bg-gray-800 border ${errors.system_prompt ? 'border-red-500' : 'border-gray-700'} rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all resize-none`}
+                        className={`w-full px-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 transition-all resize-none ${
+                          errors.system_prompt
+                            ? 'border-red-500'
+                            : theme === 'dark'
+                            ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500/20'
+                            : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm'
+                        }`}
                         placeholder="Enter your custom system prompt here..."
                       />
                       {errors.system_prompt && (
-                        <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
+                        <p className={`mt-2 text-sm flex items-center gap-1 ${
+                          theme === 'dark' ? 'text-red-400' : 'text-red-600'
+                        }`}>
                           <AlertCircle size={14} />
                           {errors.system_prompt}
                         </p>
@@ -242,7 +339,9 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                   )}
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
                       Greeting Message *
                     </label>
                     <input
@@ -252,11 +351,19 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                         ...config,
                         settings: { ...config.settings, greeting_message: e.target.value }
                       })}
-                      className={`w-full px-4 py-3 bg-gray-800 border ${errors.greeting_message ? 'border-red-500' : 'border-gray-700'} rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all`}
+                      className={`w-full px-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
+                        errors.greeting_message
+                          ? 'border-red-500'
+                          : theme === 'dark'
+                          ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500/20'
+                          : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm'
+                      }`}
                       placeholder="e.g., Hello! How can I help you today?"
                     />
                     {errors.greeting_message && (
-                      <p className="mt-2 text-sm text-red-400 flex items-center gap-1">
+                      <p className={`mt-2 text-sm flex items-center gap-1 ${
+                        theme === 'dark' ? 'text-red-400' : 'text-red-600'
+                      }`}>
                         <AlertCircle size={14} />
                         {errors.greeting_message}
                       </p>
@@ -270,7 +377,9 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
               <>
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-3">
+                    <label className={`block text-sm font-medium mb-3 ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
                       Voice Gender
                     </label>
                     <div className="grid grid-cols-2 gap-3">
@@ -283,26 +392,47 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                           })}
                           className={`p-4 rounded-xl border-2 transition-all duration-300 ${
                             config.settings.voice_gender === gender
-                              ? 'border-purple-500 bg-purple-500/10'
-                              : 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                              ? theme === 'dark'
+                                ? 'border-purple-500 bg-purple-500/10'
+                                : 'border-purple-500 bg-purple-50'
+                              : theme === 'dark'
+                              ? 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                              : 'border-gray-200 bg-white hover:border-gray-300 shadow-sm'
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg ${
-                              config.settings.voice_gender === gender
-                                ? 'bg-purple-500/20'
-                                : 'bg-gray-700'
-                            }`}>
-                              <User className={
+                            <div
+                              className={`p-2 rounded-lg ${
                                 config.settings.voice_gender === gender
-                                  ? 'text-purple-400'
-                                  : 'text-gray-400'
-                              } size={20} />
+                                  ? theme === 'dark'
+                                    ? 'bg-purple-500/20'
+                                    : 'bg-purple-100'
+                                  : theme === 'dark'
+                                  ? 'bg-gray-700'
+                                  : 'bg-gray-100'
+                              }`}
+                            >
+                              <User
+                                className={
+                                  config.settings.voice_gender === gender
+                                    ? theme === 'dark'
+                                      ? 'text-purple-400'
+                                      : 'text-purple-600'
+                                    : theme === 'dark'
+                                    ? 'text-gray-400'
+                                    : 'text-gray-500'
+                                }
+                                size={20}
+                              />
                             </div>
                             <span className={`font-medium capitalize ${
                               config.settings.voice_gender === gender
-                                ? 'text-purple-400'
-                                : 'text-gray-300'
+                                ? theme === 'dark'
+                                  ? 'text-purple-400'
+                                  : 'text-purple-700'
+                                : theme === 'dark'
+                                ? 'text-gray-300'
+                                : 'text-gray-700'
                             }`}>
                               {gender}
                             </span>
@@ -313,7 +443,9 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-3">
+                    <label className={`block text-sm font-medium mb-3 ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
                       Voice Speed
                     </label>
                     <div className="grid grid-cols-3 gap-3">
@@ -326,14 +458,22 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                           })}
                           className={`p-4 rounded-xl border-2 transition-all duration-300 ${
                             config.settings.voice_speed === speed
-                              ? 'border-blue-500 bg-blue-500/10'
-                              : 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                              ? theme === 'dark'
+                                ? 'border-blue-500 bg-blue-500/10'
+                                : 'border-blue-500 bg-blue-50'
+                              : theme === 'dark'
+                              ? 'border-gray-700 bg-gray-800 hover:border-gray-600'
+                              : 'border-gray-200 bg-white hover:border-gray-300 shadow-sm'
                           }`}
                         >
                           <span className={`font-medium capitalize ${
                             config.settings.voice_speed === speed
-                              ? 'text-blue-400'
-                              : 'text-gray-300'
+                              ? theme === 'dark'
+                                ? 'text-blue-400'
+                                : 'text-blue-700'
+                              : theme === 'dark'
+                              ? 'text-gray-300'
+                              : 'text-gray-700'
                           }`}>
                             {speed}
                           </span>
@@ -343,7 +483,9 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <label className={`block text-sm font-medium mb-2 ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
                       Language
                     </label>
                     <select
@@ -352,7 +494,11 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                         ...config,
                         settings: { ...config.settings, language: e.target.value }
                       })}
-                      className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${
+                        theme === 'dark'
+                          ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500/20'
+                          : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm'
+                      }`}
                     >
                       <option value="en-US">English (US)</option>
                       <option value="en-GB">English (UK)</option>
@@ -369,7 +515,11 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                 <div className="space-y-6">
                   <div>
                     <label className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-medium text-gray-300">Call Recording</span>
+                      <span className={`text-sm font-medium ${
+                        theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
+                        Call Recording
+                      </span>
                       <button
                         onClick={() => setConfig({
                           ...config,
@@ -381,7 +531,9 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                         className={`relative w-14 h-7 rounded-full transition-all duration-300 ${
                           config.settings.recording_enabled
                             ? 'bg-gradient-to-r from-green-500 to-emerald-500'
-                            : 'bg-gray-700'
+                            : theme === 'dark'
+                            ? 'bg-gray-700'
+                            : 'bg-gray-300'
                         }`}
                       >
                         <div className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform duration-300 ${
@@ -389,13 +541,17 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                         }`}></div>
                       </button>
                     </label>
-                    <p className="text-sm text-gray-400">
+                    <p className={`text-sm ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
                       Enable automatic recording of all calls for quality and training purposes
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-3">
+                    <label className={`block text-sm font-medium mb-3 ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
                       Custom Commands
                     </label>
                     <div className="space-y-3">
@@ -406,7 +562,11 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                           onChange={(e) => setCustomCommand(e.target.value)}
                           onKeyPress={(e) => e.key === 'Enter' && addCustomCommand()}
                           placeholder="Enter a custom command..."
-                          className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                          className={`flex-1 px-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 ${
+                            theme === 'dark'
+                              ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500/20'
+                              : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm'
+                          }`}
                         />
                         <button
                           onClick={addCustomCommand}
@@ -418,12 +578,30 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                       {config.settings.custom_commands.length > 0 && (
                         <div className="space-y-2">
                           {config.settings.custom_commands.map((cmd, i) => (
-                            <div key={i} className="flex items-center gap-2 p-3 rounded-lg bg-gray-800 border border-gray-700">
-                              <List className="text-gray-400" size={16} />
-                              <span className="flex-1 text-gray-300">{cmd}</span>
+                            <div
+                              key={i}
+                              className={`flex items-center gap-2 p-3 rounded-lg border ${
+                                theme === 'dark'
+                                  ? 'bg-gray-800 border-gray-700'
+                                  : 'bg-gray-50 border-gray-200'
+                              }`}
+                            >
+                              <List
+                                className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}
+                                size={16}
+                              />
+                              <span className={`flex-1 ${
+                                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                              }`}>
+                                {cmd}
+                              </span>
                               <button
                                 onClick={() => removeCustomCommand(i)}
-                                className="p-1 rounded hover:bg-gray-700 text-gray-400 hover:text-red-400 transition-colors"
+                                className={`p-1 rounded transition-colors ${
+                                  theme === 'dark'
+                                    ? 'hover:bg-gray-700 text-gray-400 hover:text-red-400'
+                                    : 'hover:bg-gray-200 text-gray-500 hover:text-red-600'
+                                }`}
                               >
                                 <X size={16} />
                               </button>
@@ -438,11 +616,21 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
             )}
           </div>
 
-          <div className="p-6 border-t border-gray-800 bg-gray-900/95 backdrop-blur-sm">
+          <div
+            className={`p-6 border-t backdrop-blur-sm ${
+              theme === 'dark'
+                ? 'border-gray-800 bg-gray-900/95'
+                : 'border-gray-200 bg-white'
+            }`}
+          >
             <div className="flex gap-3">
               <button
                 onClick={onClose}
-                className="flex-1 px-6 py-3 rounded-xl bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white font-medium transition-all"
+                className={`flex-1 px-6 py-3 rounded-xl border font-medium transition-all ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white'
+                    : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900 shadow-sm'
+                }`}
               >
                 Cancel
               </button>

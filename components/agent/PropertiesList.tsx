@@ -11,8 +11,10 @@ import PropertyDetailsSheet from './PropertyDetailsSheet'
 import { useMyProperties } from '@/hooks/useAgent'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useRouter } from 'next/navigation'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function PropertiesList() {
+  const { theme } = useTheme()
   const router = useRouter()
   const [search, setSearch] = useState('')
   const [showFilters, setShowFilters] = useState(false)
@@ -80,7 +82,14 @@ export default function PropertiesList() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen p-6 md:p-8" style={{ background: 'rgba(10, 15, 25, 0.95)' }}>
+      <div
+        className="min-h-screen p-6 md:p-8"
+        style={
+          theme === 'dark'
+            ? { background: 'rgba(10, 15, 25, 0.95)' }
+            : { background: 'rgba(248, 250, 252, 0.98)' }
+        }
+      >
         <div className="max-w-full">
           {/* Enhanced Header */}
           <div
@@ -88,18 +97,34 @@ export default function PropertiesList() {
               isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
             }`}
           >
-            <div className="bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/50 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl">
+            <div
+              className={`rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/50'
+                  : 'bg-gradient-to-br from-white to-gray-50 border border-gray-200 shadow-sm'
+              }`}
+            >
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 rounded-xl bg-gray-800/60 border border-gray-700/50">
-                      <Building size={24} className="text-gray-300" />
+                    <div
+                      className={`p-2 rounded-xl border ${
+                        theme === 'dark'
+                          ? 'bg-gray-800/60 border-gray-700/50'
+                          : 'bg-blue-50 border-blue-200'
+                      }`}
+                    >
+                      <Building size={24} className={theme === 'dark' ? 'text-gray-300' : 'text-blue-600'} />
                     </div>
                     <div>
-                      <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">
+                      <h1 className={`text-3xl md:text-4xl font-bold mb-1 ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
                         Properties
                       </h1>
-                      <p className="text-gray-400 text-sm md:text-base">
+                      <p className={`text-sm md:text-base ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
                         {total} propert{total !== 1 ? 'ies' : 'y'} in your inventory
                       </p>
                     </div>
@@ -107,7 +132,11 @@ export default function PropertiesList() {
                 </div>
                 <button
                   onClick={() => router.push('/agent/properties/new')}
-                  className="flex items-center gap-2 bg-gray-800/60 border border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800 px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className={`flex items-center gap-2 border px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl ${
+                    theme === 'dark'
+                      ? 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800'
+                      : 'bg-white border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
+                  }`}
                 >
                   <Plus size={18} />
                   Add Property
@@ -123,17 +152,29 @@ export default function PropertiesList() {
             }`}
             style={{ transitionDelay: '100ms' }}
           >
-            <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
+            <div
+              className={`rounded-2xl p-5 backdrop-blur-sm shadow-xl ${
+                theme === 'dark'
+                  ? 'bg-gray-900/60 border border-gray-800/50'
+                  : 'bg-white border border-gray-200 shadow-sm'
+              }`}
+            >
               <div className="flex flex-col md:flex-row gap-4">
                 {/* Search */}
                 <div className="relative flex-1">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-gray-500" />
+                  <Search className={`absolute left-4 top-1/2 -translate-y-1/2 size-5 ${
+                    theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                  }`} />
                   <input
                     type="text"
                     placeholder="Search by address, city, or state..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-gray-800/60 border-2 border-gray-700/50 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-gray-600 transition-all duration-200"
+                    className={`w-full pl-12 pr-4 py-3 border-2 rounded-xl placeholder-gray-500 focus:outline-none transition-all duration-200 ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/60 border-gray-700/50 text-white focus:border-gray-600'
+                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-400 shadow-sm'
+                    }`}
                   />
                 </div>
 
@@ -142,29 +183,45 @@ export default function PropertiesList() {
                   onClick={() => setShowFilters(!showFilters)}
                   className={`flex items-center gap-2 px-5 py-3 border-2 rounded-xl transition-all duration-200 ${
                     showFilters || hasActiveFilters
-                      ? 'border-blue-600 bg-blue-900/20 text-blue-400'
-                      : 'border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white'
+                      ? theme === 'dark'
+                        ? 'border-blue-600 bg-blue-900/20 text-blue-400'
+                        : 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+                      : theme === 'dark'
+                      ? 'border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white'
+                      : 'border-gray-200 hover:border-blue-400 text-gray-600 hover:text-blue-700 shadow-sm'
                   }`}
                 >
                   <Filter className="size-5" />
                   Filters
                   {hasActiveFilters && (
-                    <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                    <span className={`w-2 h-2 rounded-full animate-pulse ${
+                      theme === 'dark' ? 'bg-blue-500' : 'bg-blue-600'
+                    }`} />
                   )}
                 </button>
               </div>
 
               {/* Filter Panel */}
               {showFilters && (
-                <div className="mt-4 pt-4 border-t border-gray-800/50">
+                <div className={`mt-4 pt-4 border-t ${
+                  theme === 'dark' ? 'border-gray-800/50' : 'border-gray-200'
+                }`}>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     {/* Property Type */}
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2 font-medium">Property Type</label>
+                      <label className={`block text-sm mb-2 font-medium ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        Property Type
+                      </label>
                       <select
                         value={filters.property_type}
                         onChange={(e) => setFilters(f => ({ ...f, property_type: e.target.value }))}
-                        className="w-full px-4 py-2.5 bg-gray-800/60 border-2 border-gray-700/50 rounded-xl text-white focus:outline-none focus:border-gray-600 transition-all"
+                        className={`w-full px-4 py-2.5 border-2 rounded-xl focus:outline-none transition-all ${
+                          theme === 'dark'
+                            ? 'bg-gray-800/60 border-gray-700/50 text-white focus:border-gray-600'
+                            : 'bg-white border-gray-300 text-gray-900 focus:border-blue-400 shadow-sm'
+                        }`}
                       >
                         <option value="">All Types</option>
                         {filterOptions.types.map(type => (
@@ -175,11 +232,19 @@ export default function PropertiesList() {
 
                     {/* City */}
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2 font-medium">City</label>
+                      <label className={`block text-sm mb-2 font-medium ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        City
+                      </label>
                       <select
                         value={filters.city}
                         onChange={(e) => setFilters(f => ({ ...f, city: e.target.value }))}
-                        className="w-full px-4 py-2.5 bg-gray-800/60 border-2 border-gray-700/50 rounded-xl text-white focus:outline-none focus:border-gray-600 transition-all"
+                        className={`w-full px-4 py-2.5 border-2 rounded-xl focus:outline-none transition-all ${
+                          theme === 'dark'
+                            ? 'bg-gray-800/60 border-gray-700/50 text-white focus:border-gray-600'
+                            : 'bg-white border-gray-300 text-gray-900 focus:border-blue-400 shadow-sm'
+                        }`}
                       >
                         <option value="">All Cities</option>
                         {filterOptions.cities.map(city => (
@@ -190,11 +255,19 @@ export default function PropertiesList() {
 
                     {/* Availability */}
                     <div>
-                      <label className="block text-sm text-gray-400 mb-2 font-medium">Status</label>
+                      <label className={`block text-sm mb-2 font-medium ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        Status
+                      </label>
                       <select
                         value={filters.is_available}
                         onChange={(e) => setFilters(f => ({ ...f, is_available: e.target.value }))}
-                        className="w-full px-4 py-2.5 bg-gray-800/60 border-2 border-gray-700/50 rounded-xl text-white focus:outline-none focus:border-gray-600 transition-all"
+                        className={`w-full px-4 py-2.5 border-2 rounded-xl focus:outline-none transition-all ${
+                          theme === 'dark'
+                            ? 'bg-gray-800/60 border-gray-700/50 text-white focus:border-gray-600'
+                            : 'bg-white border-gray-300 text-gray-900 focus:border-blue-400 shadow-sm'
+                        }`}
                       >
                         <option value="">All Status</option>
                         <option value="true">Available</option>
@@ -207,7 +280,11 @@ export default function PropertiesList() {
                       {hasActiveFilters && (
                         <button
                           onClick={clearFilters}
-                          className="flex items-center gap-2 px-4 py-2.5 text-gray-400 hover:text-white transition-colors"
+                          className={`flex items-center gap-2 px-4 py-2.5 transition-colors ${
+                            theme === 'dark'
+                              ? 'text-gray-400 hover:text-white'
+                              : 'text-gray-600 hover:text-gray-900'
+                          }`}
                         >
                           <X className="size-4" />
                           Clear All
@@ -235,18 +312,36 @@ export default function PropertiesList() {
             ].map((stat, i) => (
               <div
                 key={i}
-                className={`bg-gradient-to-br from-gray-900/60 to-gray-950/60 border-2 border-gray-800/50 rounded-xl p-5 backdrop-blur-sm shadow-xl hover:border-gray-700 transition-all duration-300 hover:-translate-y-1 ${
+                className={`border-2 rounded-xl p-5 backdrop-blur-sm shadow-xl transition-all duration-300 hover:-translate-y-1 ${
+                  theme === 'dark'
+                    ? 'bg-gradient-to-br from-gray-900/60 to-gray-950/60 border-gray-800/50 hover:border-gray-700'
+                    : 'bg-white border-gray-200 hover:border-blue-300 shadow-sm'
+                } ${
                   isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
                 }`}
                 style={{ transitionDelay: stat.delay }}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`p-2.5 bg-gray-800/60 border border-gray-700/50 rounded-lg`}>
+                  <div
+                    className={`p-2.5 border rounded-lg ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/60 border-gray-700/50'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
                     <stat.icon className={`size-5 text-${stat.color}`} />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold text-white">{stat.value}</p>
-                    <p className="text-xs text-gray-500 font-medium">{stat.label}</p>
+                    <p className={`text-2xl font-bold ${
+                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {stat.value}
+                    </p>
+                    <p className={`text-xs font-medium ${
+                      theme === 'dark' ? 'text-gray-500' : 'text-gray-600'
+                    }`}>
+                      {stat.label}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -257,10 +352,24 @@ export default function PropertiesList() {
           {isLoading ? (
             <LoadingSpinner />
           ) : properties.length === 0 ? (
-            <div className="text-center py-20 bg-gradient-to-br from-gray-900/60 to-gray-950/60 border-2 border-gray-800/50 rounded-2xl backdrop-blur-sm">
-              <Building className="size-20 text-gray-700 mx-auto mb-6" />
-              <h3 className="text-xl text-gray-400 font-medium mb-2">No properties found</h3>
-              <p className="text-gray-500 mb-8 max-w-md mx-auto">
+            <div
+              className={`text-center py-20 border-2 rounded-2xl backdrop-blur-sm ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-br from-gray-900/60 to-gray-950/60 border-gray-800/50'
+                  : 'bg-white border-gray-200 shadow-sm'
+              }`}
+            >
+              <Building className={`size-20 mx-auto mb-6 ${
+                theme === 'dark' ? 'text-gray-700' : 'text-gray-400'
+              }`} />
+              <h3 className={`text-xl font-medium mb-2 ${
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                No properties found
+              </h3>
+              <p className={`mb-8 max-w-md mx-auto ${
+                theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+              }`}>
                 {hasActiveFilters 
                   ? 'Try adjusting your filters or search query'
                   : 'Upload a CSV document or add properties manually'}
@@ -268,13 +377,21 @@ export default function PropertiesList() {
               <div className="flex justify-center gap-4">
                 <button
                   onClick={() => router.push('/agent/documents/upload')}
-                  className="flex items-center gap-2 bg-gray-800/60 border-2 border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white px-6 py-3 rounded-xl transition-all font-semibold"
+                  className={`flex items-center gap-2 border-2 px-6 py-3 rounded-xl transition-all font-semibold ${
+                    theme === 'dark'
+                      ? 'bg-gray-800/60 border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white'
+                      : 'bg-white border-gray-200 hover:border-blue-400 text-gray-700 hover:text-blue-700 shadow-sm'
+                  }`}
                 >
                   Upload CSV
                 </button>
                 <button
                   onClick={() => router.push('/agent/properties/new')}
-                  className="flex items-center gap-2 bg-gray-800/60 border border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800 px-6 py-3 rounded-xl transition-all font-semibold shadow-lg"
+                  className={`flex items-center gap-2 border px-6 py-3 rounded-xl transition-all font-semibold shadow-lg ${
+                    theme === 'dark'
+                      ? 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800'
+                      : 'bg-white border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
+                  }`}
                 >
                   <Plus className="size-5" />
                   Add Property
@@ -308,31 +425,63 @@ export default function PropertiesList() {
 
               {/* Pagination controls */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-2 p-4 bg-gray-900/60 border-2 border-gray-800/50 rounded-xl">
-                  <p className="text-xs text-gray-500">
+                <div
+                  className={`flex items-center justify-between mt-2 p-4 border-2 rounded-xl ${
+                    theme === 'dark'
+                      ? 'bg-gray-900/60 border-gray-800/50'
+                      : 'bg-white border-gray-200 shadow-sm'
+                  }`}
+                >
+                  <p className={`text-xs ${
+                    theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                  }`}>
                     Showing{' '}
-                    <span className="font-semibold text-gray-300">
+                    <span className={`font-semibold ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
                       {(page - 1) * pageSize + 1}–
                       {Math.min(page * pageSize, total)}
                     </span>{' '}
-                    of <span className="font-semibold text-gray-300">{total}</span> properties
+                    of <span className={`font-semibold ${
+                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      {total}
+                    </span> properties
                   </p>
                   <div className="flex items-center gap-2">
                     <button
                       disabled={page === 1}
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
-                      className="px-4 py-2 text-sm rounded-xl border-2 border-gray-700/50 text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed hover:border-gray-600 hover:text-white transition-all font-semibold"
+                      className={`px-4 py-2 text-sm rounded-xl border-2 transition-all font-semibold disabled:opacity-40 disabled:cursor-not-allowed ${
+                        theme === 'dark'
+                          ? 'border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white'
+                          : 'border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-700 shadow-sm'
+                      }`}
                     >
                       Previous
                     </button>
-                    <span className="text-xs text-gray-400 px-3">
-                      Page <span className="font-semibold text-gray-200">{page}</span> of{' '}
-                      <span className="font-semibold text-gray-200">{totalPages}</span>
+                    <span className={`text-xs px-3 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      Page <span className={`font-semibold ${
+                        theme === 'dark' ? 'text-gray-200' : 'text-gray-700'
+                      }`}>
+                        {page}
+                      </span> of{' '}
+                      <span className={`font-semibold ${
+                        theme === 'dark' ? 'text-gray-200' : 'text-gray-700'
+                      }`}>
+                        {totalPages}
+                      </span>
                     </span>
                     <button
                       disabled={page === totalPages}
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                      className="px-4 py-2 text-sm rounded-xl border-2 border-gray-700/50 text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed hover:border-gray-600 hover:text-white transition-all font-semibold"
+                      className={`px-4 py-2 text-sm rounded-xl border-2 transition-all font-semibold disabled:opacity-40 disabled:cursor-not-allowed ${
+                        theme === 'dark'
+                          ? 'border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white'
+                          : 'border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-700 shadow-sm'
+                      }`}
                     >
                       Next
                     </button>

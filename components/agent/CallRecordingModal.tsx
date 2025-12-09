@@ -5,6 +5,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { X, Play, Pause, Download, Volume2, User, Bot, Clock } from 'lucide-react'
 import { getCallById, getCallRecording, getCallTranscript } from '@/lib/real_estate_agent/api'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -21,6 +22,7 @@ interface CallRecordingModalProps {
 }
 
 export default function CallRecordingModal({ callId, isOpen, onClose }: CallRecordingModalProps) {
+  const { theme } = useTheme()
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
@@ -246,28 +248,50 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 animate-in fade-in duration-300"
+        className={`fixed inset-0 backdrop-blur-sm z-50 animate-in fade-in duration-300 ${
+          theme === 'dark' ? 'bg-black/50' : 'bg-black/30'
+        }`}
         onClick={onClose}
       />
 
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-300"
+          className={`border rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-300 ${
+            theme === 'dark'
+              ? 'bg-gray-900 border-gray-800'
+              : 'bg-white border-gray-200'
+          }`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="sticky top-0 z-10 p-6 border-b border-gray-800 bg-gray-900/95 backdrop-blur-sm rounded-t-2xl">
+          <div
+            className={`sticky top-0 z-10 p-6 border-b backdrop-blur-sm rounded-t-2xl ${
+              theme === 'dark'
+                ? 'border-gray-800 bg-gray-900/95'
+                : 'border-gray-200 bg-white'
+            }`}
+          >
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-1">Call Recording</h2>
-                <p className="text-sm text-gray-400">
+                <h2 className={`text-2xl font-bold mb-1 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Call Recording
+                </h2>
+                <p className={`text-sm ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                }`}>
                   {callerName} • {formatTime(duration)} • {call?.status?.toUpperCase()}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-colors"
+                className={`p-2 rounded-lg transition-colors ${
+                  theme === 'dark'
+                    ? 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                    : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                }`}
               >
                 <X size={24} />
               </button>
@@ -285,7 +309,11 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
                 <div className="flex items-center gap-4">
                   <button
                     onClick={handlePlayPause}
-                    className="w-12 h-12 rounded-full bg-gray-800 border-2 border-gray-700 hover:border-gray-600 flex items-center justify-center text-white transition-all hover:scale-105"
+                    className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all hover:scale-105 ${
+                      theme === 'dark'
+                        ? 'bg-gray-800 border-gray-700 hover:border-gray-600 text-white'
+                        : 'bg-white border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-700 shadow-sm'
+                    }`}
                   >
                     {isPlaying ? (
                       <Pause className="size-6" />
@@ -301,9 +329,15 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
                       max={duration || 0}
                       value={currentTime}
                       onChange={handleSeek}
-                      className="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-gray-600 hover:accent-gray-500 transition-colors"
+                      className={`w-full h-2 rounded-lg appearance-none cursor-pointer transition-colors ${
+                        theme === 'dark'
+                          ? 'bg-gray-800 accent-gray-600 hover:accent-gray-500'
+                          : 'bg-gray-200 accent-blue-600 hover:accent-blue-500'
+                      }`}
                     />
-                    <div className="flex justify-between text-xs text-gray-400 mt-1">
+                    <div className={`flex justify-between text-xs mt-1 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
                       <span>{formatTime(currentTime)}</span>
                       <span>{formatTime(duration)}</span>
                     </div>
@@ -311,7 +345,11 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
 
                   <button
                     onClick={handleDownload}
-                    className="px-4 py-2 bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white rounded-xl transition-all flex items-center gap-2"
+                    className={`px-4 py-2 border rounded-xl transition-all flex items-center gap-2 ${
+                      theme === 'dark'
+                        ? 'bg-gray-800 border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white'
+                        : 'bg-white border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-700 shadow-sm'
+                    }`}
                   >
                     <Download className="size-4" />
                     Download
@@ -322,10 +360,18 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
           </div>
 
           {/* Chat Interface */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gradient-to-b from-gray-900 to-gray-950">
+          <div
+            className={`flex-1 overflow-y-auto p-6 space-y-4 ${
+              theme === 'dark'
+                ? 'bg-gradient-to-b from-gray-900 to-gray-950'
+                : 'bg-gradient-to-b from-gray-50 to-white'
+            }`}
+          >
             {messages.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-400">No conversation history available</p>
+                <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                  No conversation history available
+                </p>
               </div>
             ) : (
               messages.map((message, index) => {
@@ -344,14 +390,28 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
                     <div
                       className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center border-2 ${
                         isUser
-                          ? 'bg-blue-500/20 border-blue-500/50'
-                          : 'bg-purple-500/20 border-purple-500/50'
-                      } ${isHighlighted ? 'ring-2 ring-white/50' : ''}`}
+                          ? theme === 'dark'
+                            ? 'bg-blue-500/20 border-blue-500/50'
+                            : 'bg-blue-100 border-blue-300'
+                          : theme === 'dark'
+                          ? 'bg-purple-500/20 border-purple-500/50'
+                          : 'bg-purple-100 border-purple-300'
+                      } ${
+                        isHighlighted
+                          ? theme === 'dark'
+                            ? 'ring-2 ring-white/50'
+                            : 'ring-2 ring-blue-500/30'
+                          : ''
+                      }`}
                     >
                       {isUser ? (
-                        <User className="size-5 text-blue-400" />
+                        <User className={`size-5 ${
+                          theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+                        }`} />
                       ) : (
-                        <Bot className="size-5 text-purple-400" />
+                        <Bot className={`size-5 ${
+                          theme === 'dark' ? 'text-purple-400' : 'text-purple-600'
+                        }`} />
                       )}
                     </div>
 
@@ -359,32 +419,50 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
                     <div
                       className={`flex-1 rounded-2xl p-4 transition-all duration-300 ${
                         isUser
-                          ? 'bg-blue-500/10 border border-blue-500/20 ml-auto max-w-[80%]'
-                          : 'bg-purple-500/10 border border-purple-500/20 mr-auto max-w-[80%]'
+                          ? theme === 'dark'
+                            ? 'bg-blue-500/10 border border-blue-500/20 ml-auto max-w-[80%]'
+                            : 'bg-blue-50 border border-blue-200 ml-auto max-w-[80%]'
+                          : theme === 'dark'
+                          ? 'bg-purple-500/10 border border-purple-500/20 mr-auto max-w-[80%]'
+                          : 'bg-purple-50 border border-purple-200 mr-auto max-w-[80%]'
                       } ${
                         isHighlighted
                           ? isUser
-                            ? 'bg-blue-500/20 border-blue-500/40 shadow-lg shadow-blue-500/20'
-                            : 'bg-purple-500/20 border-purple-500/40 shadow-lg shadow-purple-500/20'
+                            ? theme === 'dark'
+                              ? 'bg-blue-500/20 border-blue-500/40 shadow-lg shadow-blue-500/20'
+                              : 'bg-blue-100 border-blue-300 shadow-lg shadow-blue-500/20'
+                            : theme === 'dark'
+                            ? 'bg-purple-500/20 border-purple-500/40 shadow-lg shadow-purple-500/20'
+                            : 'bg-purple-100 border-purple-300 shadow-lg shadow-purple-500/20'
                           : ''
                       }`}
                     >
                       <div className="flex items-center gap-2 mb-2">
                         <span
                           className={`text-xs font-semibold ${
-                            isUser ? 'text-blue-400' : 'text-purple-400'
+                            isUser
+                              ? theme === 'dark'
+                                ? 'text-blue-400'
+                                : 'text-blue-700'
+                              : theme === 'dark'
+                              ? 'text-purple-400'
+                              : 'text-purple-700'
                           }`}
                         >
                           {isUser ? (call?.contact_name || 'User') : (call?.voice_agent_name || 'Voice Agent')}
                         </span>
                         {message.timestamp && (
-                          <span className="text-xs text-gray-500">
+                          <span className={`text-xs ${
+                            theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                          }`}>
                             <Clock className="size-3 inline mr-1" />
                             {new Date(message.timestamp).toLocaleTimeString()}
                           </span>
                         )}
                       </div>
-                      <p className="text-white text-sm leading-relaxed whitespace-pre-wrap">
+                      <p className={`text-sm leading-relaxed whitespace-pre-wrap ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
                         {message.content}
                       </p>
                     </div>

@@ -12,8 +12,10 @@ import VoiceAgentRequestCard from './VoiceAgentRequestCard'
 import VoiceAgentStatusCard from './VoiceAgentStatusCard'
 import VoiceAgentRequestSheet from './VoiceAgentRequestSheet'
 import { useQuery } from '@tanstack/react-query'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function AgentDashboard() {
+  const { theme } = useTheme()
   const { data: dashboard, isLoading, error, refetch, dataUpdatedAt, isFetching } = useAgentDashboard()
   const [isMounted, setIsMounted] = useState(false)
   const [isRequestSheetOpen, setIsRequestSheetOpen] = useState(false)
@@ -59,7 +61,14 @@ export default function AgentDashboard() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen p-6 md:p-8" style={{ background: 'rgba(10, 15, 25, 0.95)' }}>
+      <div
+        className="min-h-screen p-6 md:p-8"
+        style={
+          theme === 'dark'
+            ? { background: 'rgba(10, 15, 25, 0.95)' }
+            : { background: 'rgba(248, 250, 252, 0.98)' }
+        }
+      >
         <div className="max-w-full">
           {/* Header Section with Enhanced Design */}
           <div
@@ -67,26 +76,48 @@ export default function AgentDashboard() {
               isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
             }`}
           >
-            <div className="bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/50 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl">
+            <div
+              className={`rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl ${
+                theme === 'dark'
+                  ? 'bg-gradient-to-br from-gray-900/80 to-gray-950/80 border border-gray-800/50'
+                  : 'bg-gradient-to-br from-white to-gray-50 border border-gray-200 shadow-sm'
+              }`}
+            >
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-4">
                 <div>
                   <div className="flex items-center gap-3 mb-2">
-                    <div className="p-2 rounded-xl bg-gray-800/60 border border-gray-700/50">
-                      <TrendingUp size={24} className="text-gray-300" />
+                    <div
+                      className={`p-2 rounded-xl border ${
+                        theme === 'dark'
+                          ? 'bg-gray-800/60 border-gray-700/50'
+                          : 'bg-blue-50 border-blue-200'
+                      }`}
+                    >
+                      <TrendingUp size={24} className={theme === 'dark' ? 'text-gray-300' : 'text-blue-600'} />
                     </div>
                     <div>
-                      <h1 className="text-3xl md:text-4xl font-bold text-white mb-1">
+                      <h1 className={`text-3xl md:text-4xl font-bold mb-1 ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
                         Agent Dashboard
                       </h1>
-                      <p className="text-gray-400 text-sm md:text-base">
+                      <p className={`text-sm md:text-base ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
                         Your Portfolio Overview & Statistics
                       </p>
                     </div>
                   </div>
                   {dataUpdatedAt && (
                     <div className="flex items-center gap-2 mt-3">
-                      <div className="w-2 h-2 rounded-full bg-green-400/60 animate-pulse"></div>
-                      <p className="text-xs text-gray-500">
+                      <div
+                        className={`w-2 h-2 rounded-full animate-pulse ${
+                          theme === 'dark' ? 'bg-green-400/60' : 'bg-green-500'
+                        }`}
+                      ></div>
+                      <p className={`text-xs ${
+                        theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                      }`}>
                         Last updated: {new Date(dataUpdatedAt).toLocaleTimeString()}
                       </p>
                     </div>
@@ -96,7 +127,11 @@ export default function AgentDashboard() {
                   <button
                     onClick={() => refetch()}
                     disabled={isFetching}
-                    className="p-3 rounded-xl bg-gray-800/60 border border-gray-700/50 text-gray-400 hover:border-gray-600 hover:text-white transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
+                    className={`p-3 rounded-xl border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/60 border-gray-700/50 text-gray-400 hover:border-gray-600 hover:text-white'
+                        : 'bg-white border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-700 shadow-sm'
+                    }`}
                     title="Refresh data"
                   >
                     <RefreshCw size={20} className={isFetching ? 'animate-spin' : ''} />
@@ -113,20 +148,48 @@ export default function AgentDashboard() {
             }`}
             style={{ transitionDelay: '100ms' }}
           >
-            <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl">
-              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-800/50">
-                <div className="p-2 rounded-lg bg-gray-800/60 border border-gray-700/50">
-                  <ShieldCheck size={20} className="text-gray-300" />
+            <div
+              className={`rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl ${
+                theme === 'dark'
+                  ? 'bg-gray-900/60 border border-gray-800/50'
+                  : 'bg-white border border-gray-200 shadow-sm'
+              }`}
+            >
+              <div
+                className={`flex items-center gap-3 mb-6 pb-4 border-b ${
+                  theme === 'dark' ? 'border-gray-800/50' : 'border-gray-200'
+                }`}
+              >
+                <div
+                  className={`p-2 rounded-lg border ${
+                    theme === 'dark'
+                      ? 'bg-gray-800/60 border-gray-700/50'
+                      : 'bg-gray-50 border-gray-200'
+                  }`}
+                >
+                  <ShieldCheck size={20} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} />
                 </div>
-                <h2 className="text-xl font-bold text-white">Account Status</h2>
+                <h2 className={`text-xl font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Account Status
+                </h2>
               </div>
               <div className="flex flex-wrap items-center gap-6">
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-gray-400 font-medium">Verification Status:</span>
+                  <span className={`text-sm font-medium ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    Verification Status:
+                  </span>
                   <span className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 ${
-                    dashboard.is_verified 
-                      ? 'bg-green-500/10 border border-green-500/20 text-green-400' 
-                      : 'bg-red-500/10 border border-red-500/20 text-red-400'
+                    dashboard.is_verified
+                      ? theme === 'dark'
+                        ? 'bg-green-500/10 border border-green-500/20 text-green-400'
+                        : 'bg-green-100 border border-green-300 text-green-700'
+                      : theme === 'dark'
+                      ? 'bg-red-500/10 border border-red-500/20 text-red-400'
+                      : 'bg-red-100 border border-red-300 text-red-700'
                   }`}>
                     {dashboard.is_verified ? (
                       <>
@@ -143,10 +206,24 @@ export default function AgentDashboard() {
                 </div>
                 {dashboard.phone_number && (
                   <div className="flex items-center gap-3">
-                    <span className="text-sm text-gray-400 font-medium">Phone Number:</span>
-                    <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-800/50 border border-gray-700/50">
-                      <Phone size={16} className="text-gray-400" />
-                      <span className="text-sm text-white font-medium">{dashboard.phone_number}</span>
+                    <span className={`text-sm font-medium ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      Phone Number:
+                    </span>
+                    <div
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${
+                        theme === 'dark'
+                          ? 'bg-gray-800/50 border-gray-700/50'
+                          : 'bg-gray-50 border-gray-200'
+                      }`}
+                    >
+                      <Phone size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'} />
+                      <span className={`text-sm font-medium ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {dashboard.phone_number}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -161,32 +238,60 @@ export default function AgentDashboard() {
             }`}
             style={{ transitionDelay: '150ms' }}
           >
-            <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
+            <div
+              className={`rounded-2xl p-5 backdrop-blur-sm shadow-xl ${
+                theme === 'dark'
+                  ? 'bg-gray-900/60 border border-gray-800/50'
+                  : 'bg-white border border-gray-200 shadow-sm'
+              }`}
+            >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gray-800/60 border border-gray-700/50">
-                    <TrendingUp size={18} className="text-gray-300" />
+                  <div
+                    className={`p-2 rounded-lg border ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/60 border-gray-700/50'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
+                    <TrendingUp size={18} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} />
                   </div>
-                  <h3 className="text-lg font-semibold text-white">Quick Actions</h3>
+                  <h3 className={`text-lg font-semibold ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Quick Actions
+                  </h3>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <button
                     onClick={() => window.location.href = '/agent/documents/upload'}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-800/60 border border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium"
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800'
+                        : 'bg-white border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
+                    }`}
                   >
                     <Upload size={16} />
                     <span>Upload Document</span>
                   </button>
                   <button
                     onClick={() => window.location.href = '/agent/contacts/new'}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-800/60 border border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium"
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800'
+                        : 'bg-white border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
+                    }`}
                   >
                     <UserPlus size={16} />
                     <span>Add Contact</span>
                   </button>
                   <button
                     onClick={() => window.location.href = '/agent/contacts'}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-800/60 border border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium"
+                    className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800'
+                        : 'bg-white border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
+                    }`}
                   >
                     <Users size={16} />
                     <span>View Contacts</span>
@@ -194,7 +299,11 @@ export default function AgentDashboard() {
                   {voiceAgent ? (
                     <button
                       onClick={() => window.location.href = '/agent/voice-agent'}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-800/60 border border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium"
+                      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium ${
+                        theme === 'dark'
+                          ? 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800'
+                          : 'bg-white border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
+                      }`}
                     >
                       <Phone size={16} />
                       <span>Voice Agent</span>
@@ -202,7 +311,11 @@ export default function AgentDashboard() {
                   ) : !voiceAgentRequest && (
                     <button
                       onClick={() => setIsRequestSheetOpen(true)}
-                      className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gray-800/60 border border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium"
+                      className={`flex items-center gap-2 px-5 py-2.5 rounded-xl border transition-all duration-200 shadow-lg hover:shadow-xl text-sm font-medium ${
+                        theme === 'dark'
+                          ? 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800'
+                          : 'bg-white border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
+                      }`}
                     >
                       <Phone size={16} />
                       <span>Request Voice Agent</span>
@@ -221,12 +334,32 @@ export default function AgentDashboard() {
               }`}
               style={{ transitionDelay: '200ms' }}
             >
-              <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-800/50">
-                  <div className="p-2 rounded-lg bg-gray-800/60 border border-gray-700/50">
-                    <Phone size={20} className="text-gray-300" />
+              <div
+                className={`rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl ${
+                  theme === 'dark'
+                    ? 'bg-gray-900/60 border border-gray-800/50'
+                    : 'bg-white border border-gray-200 shadow-sm'
+                }`}
+              >
+                <div
+                  className={`flex items-center gap-3 mb-6 pb-4 border-b ${
+                    theme === 'dark' ? 'border-gray-800/50' : 'border-gray-200'
+                  }`}
+                >
+                  <div
+                    className={`p-2 rounded-lg border ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/60 border-gray-700/50'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
+                    <Phone size={20} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} />
                   </div>
-                  <h2 className="text-xl font-bold text-white">Voice Agent</h2>
+                  <h2 className={`text-xl font-bold ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Voice Agent
+                  </h2>
                 </div>
                 {voiceAgent ? (
                   <VoiceAgentStatusCard />
@@ -244,12 +377,32 @@ export default function AgentDashboard() {
             }`}
             style={{ transitionDelay: '250ms' }}
           >
-            <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl">
-              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-800/50">
-                <div className="p-2 rounded-lg bg-gray-800/60 border border-gray-700/50">
-                  <Building size={20} className="text-gray-300" />
+            <div
+              className={`rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl ${
+                theme === 'dark'
+                  ? 'bg-gray-900/60 border border-gray-800/50'
+                  : 'bg-white border border-gray-200 shadow-sm'
+              }`}
+            >
+              <div
+                className={`flex items-center gap-3 mb-6 pb-4 border-b ${
+                  theme === 'dark' ? 'border-gray-800/50' : 'border-gray-200'
+                }`}
+              >
+                <div
+                  className={`p-2 rounded-lg border ${
+                    theme === 'dark'
+                      ? 'bg-gray-800/60 border-gray-700/50'
+                      : 'bg-gray-50 border-gray-200'
+                  }`}
+                >
+                  <Building size={20} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} />
                 </div>
-                <h2 className="text-xl font-bold text-white">Properties</h2>
+                <h2 className={`text-xl font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Properties
+                </h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div
@@ -299,12 +452,32 @@ export default function AgentDashboard() {
             }`}
             style={{ transitionDelay: '300ms' }}
           >
-            <div className="bg-gray-900/60 border border-gray-800/50 rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl">
-              <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-800/50">
-                <div className="p-2 rounded-lg bg-gray-800/60 border border-gray-700/50">
-                  <FileText size={20} className="text-gray-300" />
+            <div
+              className={`rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl ${
+                theme === 'dark'
+                  ? 'bg-gray-900/60 border border-gray-800/50'
+                  : 'bg-white border border-gray-200 shadow-sm'
+              }`}
+            >
+              <div
+                className={`flex items-center gap-3 mb-6 pb-4 border-b ${
+                  theme === 'dark' ? 'border-gray-800/50' : 'border-gray-200'
+                }`}
+              >
+                <div
+                  className={`p-2 rounded-lg border ${
+                    theme === 'dark'
+                      ? 'bg-gray-800/60 border-gray-700/50'
+                      : 'bg-gray-50 border-gray-200'
+                  }`}
+                >
+                  <FileText size={20} className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} />
                 </div>
-                <h2 className="text-xl font-bold text-white">Documents & Contacts</h2>
+                <h2 className={`text-xl font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Documents & Contacts
+                </h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div

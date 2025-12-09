@@ -8,6 +8,7 @@ import { z } from 'zod'
 import { useRouter } from 'next/navigation'
 import { X, User, Phone, Mail, FileText, UserPlus, Loader2 } from 'lucide-react'
 import { useCreateContact } from '@/hooks/useAgent'
+import { useTheme } from '@/contexts/ThemeContext'
 
 const schema = z.object({
   name: z.string().min(1, 'Name is required').max(255, 'Name is too long'),
@@ -26,6 +27,7 @@ interface CreateContactFormProps {
 }
 
 export default function CreateContactForm({ onClose, redirectToContact = true }: CreateContactFormProps) {
+  const { theme } = useTheme()
   const router = useRouter()
   const [isMounted, setIsMounted] = useState(false)
   
@@ -65,25 +67,43 @@ export default function CreateContactForm({ onClose, redirectToContact = true }:
   }
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+    <div
+      className={`fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4 ${
+        theme === 'dark' ? 'bg-black/50' : 'bg-black/30'
+      }`}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
     >
-      <div 
-        className="bg-gray-900 border border-gray-800 rounded-xl p-8 max-w-md w-full shadow-2xl"
+      <div
+        className={`border rounded-xl p-8 max-w-md w-full shadow-2xl ${
+          theme === 'dark'
+            ? 'bg-gray-900 border-gray-800'
+            : 'bg-white border-gray-200'
+        }`}
         style={{ animation: isMounted ? 'slide-in-from-bottom-4 0.3s ease-out' : 'none' }}
       >
         {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-white">Add New Contact</h2>
-            <p className="text-gray-400 text-sm mt-1">Add to your target audience</p>
+            <h2 className={`text-2xl font-bold ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}>
+              Add New Contact
+            </h2>
+            <p className={`text-sm mt-1 ${
+              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+            }`}>
+              Add to your target audience
+            </p>
           </div>
-          <button 
-            onClick={onClose} 
-            className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-all"
+          <button
+            onClick={onClose}
+            className={`p-2 rounded-lg transition-all ${
+              theme === 'dark'
+                ? 'text-gray-400 hover:text-white hover:bg-gray-800'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+            }`}
           >
             <X className="size-5" />
           </button>
@@ -92,14 +112,20 @@ export default function CreateContactForm({ onClose, redirectToContact = true }:
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {/* Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${
+              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               <User className="inline size-4 mr-2" />
               Full Name *
             </label>
             <input
               {...register('name')}
-              className={`w-full px-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-500 focus:outline-none transition-colors ${
-                errors.name ? 'border-red-600 focus:border-red-500' : 'border-gray-700 focus:border-gray-500'
+              className={`w-full px-4 py-3 border rounded-lg placeholder-gray-500 focus:outline-none transition-colors ${
+                errors.name
+                  ? 'border-red-600 focus:border-red-500'
+                  : theme === 'dark'
+                  ? 'bg-gray-800 border-gray-700 focus:border-gray-500 text-white'
+                  : 'bg-white border-gray-300 focus:border-blue-500 text-gray-900'
               }`}
               placeholder="John Doe"
             />
@@ -110,34 +136,50 @@ export default function CreateContactForm({ onClose, redirectToContact = true }:
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${
+              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               <Phone className="inline size-4 mr-2" />
               Phone Number *
             </label>
             <input
               {...register('phone_number')}
-              className={`w-full px-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-500 focus:outline-none transition-colors ${
-                errors.phone_number ? 'border-red-600 focus:border-red-500' : 'border-gray-700 focus:border-gray-500'
+              className={`w-full px-4 py-3 border rounded-lg placeholder-gray-500 focus:outline-none transition-colors ${
+                errors.phone_number
+                  ? 'border-red-600 focus:border-red-500'
+                  : theme === 'dark'
+                  ? 'bg-gray-800 border-gray-700 focus:border-gray-500 text-white'
+                  : 'bg-white border-gray-300 focus:border-blue-500 text-gray-900'
               }`}
               placeholder="+92 300 1234567"
             />
             {errors.phone_number && (
               <p className="text-red-400 text-sm mt-1">{errors.phone_number.message}</p>
             )}
-            <p className="text-gray-500 text-xs mt-1">This will be used for calling campaigns</p>
+            <p className={`text-xs mt-1 ${
+              theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+            }`}>
+              This will be used for calling campaigns
+            </p>
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${
+              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               <Mail className="inline size-4 mr-2" />
               Email (optional)
             </label>
             <input
               {...register('email')}
               type="email"
-              className={`w-full px-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-500 focus:outline-none transition-colors ${
-                errors.email ? 'border-red-600 focus:border-red-500' : 'border-gray-700 focus:border-gray-500'
+              className={`w-full px-4 py-3 border rounded-lg placeholder-gray-500 focus:outline-none transition-colors ${
+                errors.email
+                  ? 'border-red-600 focus:border-red-500'
+                  : theme === 'dark'
+                  ? 'bg-gray-800 border-gray-700 focus:border-gray-500 text-white'
+                  : 'bg-white border-gray-300 focus:border-blue-500 text-gray-900'
               }`}
               placeholder="john@example.com"
             />
@@ -148,15 +190,21 @@ export default function CreateContactForm({ onClose, redirectToContact = true }:
 
           {/* Notes */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label className={`block text-sm font-medium mb-2 ${
+              theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+            }`}>
               <FileText className="inline size-4 mr-2" />
               Notes (optional)
             </label>
             <textarea
               {...register('notes')}
               rows={3}
-              className={`w-full px-4 py-3 bg-gray-800 border rounded-lg text-white placeholder-gray-500 focus:outline-none transition-colors resize-none ${
-                errors.notes ? 'border-red-600 focus:border-red-500' : 'border-gray-700 focus:border-gray-500'
+              className={`w-full px-4 py-3 border rounded-lg placeholder-gray-500 focus:outline-none transition-colors resize-none ${
+                errors.notes
+                  ? 'border-red-600 focus:border-red-500'
+                  : theme === 'dark'
+                  ? 'bg-gray-800 border-gray-700 focus:border-gray-500 text-white'
+                  : 'bg-white border-gray-300 focus:border-blue-500 text-gray-900'
               }`}
               placeholder="Any additional notes about this contact..."
             />
@@ -167,7 +215,11 @@ export default function CreateContactForm({ onClose, redirectToContact = true }:
 
           {/* Error Message */}
           {mutation.error && (
-            <div className="p-3 bg-red-900/30 border border-red-800/50 rounded-lg">
+            <div className={`p-3 border rounded-lg ${
+              theme === 'dark'
+                ? 'bg-red-900/30 border-red-800/50'
+                : 'bg-red-50 border-red-200'
+            }`}>
               <p className="text-red-400 text-sm">{(mutation.error as Error).message}</p>
             </div>
           )}
@@ -177,7 +229,11 @@ export default function CreateContactForm({ onClose, redirectToContact = true }:
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-3 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white rounded-lg font-medium transition-all"
+              className={`flex-1 py-3 border rounded-lg font-medium transition-all ${
+                theme === 'dark'
+                  ? 'border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white'
+                  : 'border-gray-300 hover:border-gray-400 text-gray-700 hover:text-gray-900'
+              }`}
             >
               Cancel
             </button>

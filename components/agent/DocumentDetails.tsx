@@ -10,8 +10,10 @@ import { useRouter } from 'next/navigation'
 import BatchCallButton from './BatchCallButton'
 import PropertyDetailsSheet from './PropertyDetailsSheet'
 import ContactDetailsSheet from './ContactDetailsSheet'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function DocumentDetails({ documentId }: { documentId: string }) {
+  const { theme } = useTheme()
   const router = useRouter()
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null)
   const [isPropertySheetOpen, setIsPropertySheetOpen] = useState(false)
@@ -55,30 +57,61 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
 
   return (
     <PageTransition>
-      <div className="min-h-screen p-6 md:p-8" style={{ background: 'rgba(10, 15, 25, 0.95)' }}>
+      <div
+        className="min-h-screen p-6 md:p-8"
+        style={
+          theme === 'dark'
+            ? { background: 'rgba(10, 15, 25, 0.95)' }
+            : { background: 'rgba(248, 250, 252, 0.98)' }
+        }
+      >
         {/* Use full-width layout starting right from the sidebar, same as other agent pages */}
         <div className="max-w-full">
           {/* Back Button */}
           <div className="flex justify-end mb-8">
-            <button 
-              onClick={() => router.push('/agent/documents')} 
-              className="px-5 py-2.5 bg-gray-800/60 border-2 border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white rounded-xl font-semibold transition-all duration-200"
+            <button
+              onClick={() => router.push('/agent/documents')}
+              className={`px-5 py-2.5 border-2 rounded-xl font-semibold transition-all duration-200 ${
+                theme === 'dark'
+                  ? 'bg-gray-800/60 border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white'
+                  : 'bg-white border-gray-200 hover:border-blue-400 text-gray-700 hover:text-blue-700 shadow-sm'
+              }`}
             >
               Back
             </button>
           </div>
 
           {/* Document Header Card */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 mb-8">
+          <div
+            className={`border rounded-xl p-8 mb-8 ${
+              theme === 'dark'
+                ? 'bg-gray-900 border-gray-800'
+                : 'bg-white border-gray-200 shadow-sm'
+            }`}
+          >
             <div className="flex flex-col md:flex-row justify-between items-start gap-6">
               <div className="flex items-start gap-6">
-                <div className="p-4 bg-gray-800 rounded-xl">
+                <div
+                  className={`p-4 rounded-xl ${
+                    theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+                  }`}
+                >
                   {getFileIcon()}
                 </div>
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">{document.file_name}</h1>
-                  <div className="flex flex-wrap items-center gap-4 text-gray-400">
-                    <span className="px-3 py-1 bg-gray-800 rounded-full text-sm">
+                  <h1 className={`text-2xl md:text-3xl font-bold mb-2 ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {document.file_name}
+                  </h1>
+                  <div className={`flex flex-wrap items-center gap-4 ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    <span className={`px-3 py-1 rounded-full text-sm ${
+                      theme === 'dark'
+                        ? 'bg-gray-800'
+                        : 'bg-gray-100'
+                    }`}>
                       {document.file_type?.toUpperCase()}
                     </span>
                     {document.file_size && (
@@ -94,50 +127,106 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
                     </span>
                   </div>
                   {document.description && (
-                    <p className="mt-4 text-gray-400">{document.description}</p>
+                    <p className={`mt-4 ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      {document.description}
+                    </p>
                   )}
                 </div>
               </div>
               <div className="flex gap-3">
                 <button
                   onClick={() => window.open(document.cloudinary_url, '_blank')}
-                  className="p-3 bg-gray-800 border border-gray-700 hover:border-gray-600 rounded-lg transition-all"
+                  className={`p-3 border rounded-lg transition-all ${
+                    theme === 'dark'
+                      ? 'bg-gray-800 border-gray-700 hover:border-gray-600'
+                      : 'bg-white border-gray-200 hover:border-gray-300 shadow-sm'
+                  }`}
                   title="Download"
                 >
-                  <Download className="size-5 text-gray-300" />
+                  <Download className={`size-5 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                  }`} />
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={deleteMutation.isPending}
-                  className="p-3 bg-red-900/30 border border-red-800/50 hover:border-red-700 rounded-lg transition-all disabled:opacity-50"
+                  className={`p-3 border rounded-lg transition-all disabled:opacity-50 ${
+                    theme === 'dark'
+                      ? 'bg-red-900/30 border-red-800/50 hover:border-red-700'
+                      : 'bg-red-50 border-red-200 hover:border-red-300'
+                  }`}
                   title="Delete"
                 >
-                  <Trash2 className="size-5 text-red-400" />
+                  <Trash2 className={`size-5 ${
+                    theme === 'dark' ? 'text-red-400' : 'text-red-600'
+                  }`} />
                 </button>
               </div>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-              <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+              <div
+                className={`rounded-xl p-4 border ${
+                  theme === 'dark'
+                    ? 'bg-gray-800/50 border-gray-700/50'
+                    : 'bg-gray-50 border-gray-200'
+                }`}
+              >
                 <div className="flex items-center gap-3 mb-2">
-                  <Building className="size-5 text-blue-400" />
-                  <span className="text-gray-400">Properties</span>
+                  <Building className={`size-5 ${
+                    theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+                  }`} />
+                  <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                    Properties
+                  </span>
                 </div>
-                <p className="text-3xl font-bold text-white">{properties.length}</p>
+                <p className={`text-3xl font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {properties.length}
+                </p>
               </div>
-              <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+              <div
+                className={`rounded-xl p-4 border ${
+                  theme === 'dark'
+                    ? 'bg-gray-800/50 border-gray-700/50'
+                    : 'bg-gray-50 border-gray-200'
+                }`}
+              >
                 <div className="flex items-center gap-3 mb-2">
-                  <Users className="size-5 text-emerald-400" />
-                  <span className="text-gray-400">Contacts</span>
+                  <Users className={`size-5 ${
+                    theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
+                  }`} />
+                  <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                    Contacts
+                  </span>
                 </div>
-                <p className="text-3xl font-bold text-white">{contacts.length}</p>
+                <p className={`text-3xl font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {contacts.length}
+                </p>
               </div>
-              <div className="col-span-2 bg-emerald-900/20 rounded-xl p-4 border border-emerald-800/30">
+              <div
+                className={`col-span-2 rounded-xl p-4 border ${
+                  theme === 'dark'
+                    ? 'bg-emerald-900/20 border-emerald-800/30'
+                    : 'bg-emerald-50 border-emerald-200'
+                }`}
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-emerald-400 font-medium">Ready for Calling</p>
-                    <p className="text-emerald-300/70 text-sm mt-1">
+                    <p className={`font-medium ${
+                      theme === 'dark' ? 'text-emerald-400' : 'text-emerald-700'
+                    }`}>
+                      Ready for Calling
+                    </p>
+                    <p className={`text-sm mt-1 ${
+                      theme === 'dark' ? 'text-emerald-300/70' : 'text-emerald-600/80'
+                    }`}>
                       {contacts.length} contacts can be reached
                     </p>
                   </div>
@@ -151,10 +240,20 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
 
           <div className="grid lg:grid-cols-2 gap-8">
             {/* Contacts Section */}
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <div
+              className={`border rounded-xl p-6 ${
+                theme === 'dark'
+                  ? 'bg-gray-900 border-gray-800'
+                  : 'bg-white border-gray-200 shadow-sm'
+              }`}
+            >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-white flex items-center gap-3">
-                  <Users className="size-6 text-emerald-400" />
+                <h2 className={`text-xl font-semibold flex items-center gap-3 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  <Users className={`size-6 ${
+                    theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
+                  }`} />
                   Extracted Contacts ({contacts.length})
                 </h2>
               </div>
@@ -163,9 +262,17 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
                 <LoadingSpinner />
               ) : contacts.length === 0 ? (
                 <div className="text-center py-12">
-                  <Users className="size-12 text-gray-700 mx-auto mb-3" />
-                  <p className="text-gray-500">No contacts extracted</p>
-                  <p className="text-gray-600 text-sm mt-1">CSV files with owner_name and owner_phone columns will populate this</p>
+                  <Users className={`size-12 mx-auto mb-3 ${
+                    theme === 'dark' ? 'text-gray-700' : 'text-gray-400'
+                  }`} />
+                  <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}>
+                    No contacts extracted
+                  </p>
+                  <p className={`text-sm mt-1 ${
+                    theme === 'dark' ? 'text-gray-600' : 'text-gray-500'
+                  }`}>
+                    CSV files with owner_name and owner_phone columns will populate this
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
@@ -176,7 +283,11 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
                         setSelectedContactId(contact.id)
                         setIsContactSheetOpen(true)
                       }}
-                      className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-lg hover:border-gray-600 cursor-pointer transition-all group"
+                      className={`p-4 border rounded-lg cursor-pointer transition-all group ${
+                        theme === 'dark'
+                          ? 'bg-gray-800/50 border-gray-700/50 hover:border-gray-600'
+                          : 'bg-gray-50 border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 shadow-sm'
+                      }`}
                       style={{ animationDelay: `${i * 50}ms` }}
                     >
                       <div className="flex items-center justify-between">
@@ -185,17 +296,27 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
                             {contact.name?.charAt(0)?.toUpperCase() || '?'}
                           </div>
                           <div>
-                            <p className="text-white font-medium group-hover:text-emerald-400 transition-colors">
+                            <p className={`font-medium transition-colors ${
+                              theme === 'dark'
+                                ? 'text-white group-hover:text-emerald-400'
+                                : 'text-gray-900 group-hover:text-emerald-700'
+                            }`}>
                               {contact.name}
                             </p>
-                            <p className="text-sm text-gray-500 flex items-center gap-1">
+                            <p className={`text-sm flex items-center gap-1 ${
+                              theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                            }`}>
                               <Phone className="size-3" />
                               {contact.phone_number}
                             </p>
                           </div>
                         </div>
                         {contact.properties_count > 0 && (
-                          <span className="px-2 py-1 bg-blue-900/30 text-blue-400 text-xs rounded-full">
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            theme === 'dark'
+                              ? 'bg-blue-900/30 text-blue-400'
+                              : 'bg-blue-100 text-blue-700'
+                          }`}>
                             {contact.properties_count} properties
                           </span>
                         )}
@@ -207,10 +328,20 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
             </div>
 
             {/* Properties Section */}
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <div
+              className={`border rounded-xl p-6 ${
+                theme === 'dark'
+                  ? 'bg-gray-900 border-gray-800'
+                  : 'bg-white border-gray-200 shadow-sm'
+              }`}
+            >
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold text-white flex items-center gap-3">
-                  <Building className="size-6 text-blue-400" />
+                <h2 className={`text-xl font-semibold flex items-center gap-3 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  <Building className={`size-6 ${
+                    theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+                  }`} />
                   Extracted Properties ({properties.length})
                 </h2>
               </div>
@@ -219,9 +350,17 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
                 <LoadingSpinner />
               ) : properties.length === 0 ? (
                 <div className="text-center py-12">
-                  <Building className="size-12 text-gray-700 mx-auto mb-3" />
-                  <p className="text-gray-500">No properties extracted</p>
-                  <p className="text-gray-600 text-sm mt-1">Make sure your document has address information</p>
+                  <Building className={`size-12 mx-auto mb-3 ${
+                    theme === 'dark' ? 'text-gray-700' : 'text-gray-400'
+                  }`} />
+                  <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}>
+                    No properties extracted
+                  </p>
+                  <p className={`text-sm mt-1 ${
+                    theme === 'dark' ? 'text-gray-600' : 'text-gray-500'
+                  }`}>
+                    Make sure your document has address information
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
@@ -232,19 +371,33 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
                         setSelectedPropertyId(prop.id)
                         setIsPropertySheetOpen(true)
                       }}
-                      className="p-4 bg-gray-800/50 border border-gray-700/50 rounded-lg hover:border-gray-600 cursor-pointer transition-all group"
+                      className={`p-4 border rounded-lg cursor-pointer transition-all group ${
+                        theme === 'dark'
+                          ? 'bg-gray-800/50 border-gray-700/50 hover:border-gray-600'
+                          : 'bg-gray-50 border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 shadow-sm'
+                      }`}
                       style={{ animationDelay: `${i * 50}ms` }}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-white font-medium group-hover:text-blue-400 transition-colors">
+                          <p className={`font-medium transition-colors ${
+                            theme === 'dark'
+                              ? 'text-white group-hover:text-blue-400'
+                              : 'text-gray-900 group-hover:text-blue-700'
+                          }`}>
                             {prop.address}
                           </p>
-                          <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                          <p className={`text-sm flex items-center gap-1 mt-1 ${
+                            theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                          }`}>
                             <MapPin className="size-3" />
                             {prop.city}{prop.state && `, ${prop.state}`}
                             {prop.property_type && (
-                              <span className="ml-2 px-2 py-0.5 bg-gray-700 rounded text-xs">
+                              <span className={`ml-2 px-2 py-0.5 rounded text-xs ${
+                                theme === 'dark'
+                                  ? 'bg-gray-700'
+                                  : 'bg-gray-200'
+                              }`}>
                                 {prop.property_type}
                               </span>
                             )}
@@ -252,12 +405,20 @@ export default function DocumentDetails({ documentId }: { documentId: string }) 
                         </div>
                         <div className="text-right">
                           {prop.price && (
-                            <p className="text-white font-medium">${prop.price}</p>
+                            <p className={`font-medium ${
+                              theme === 'dark' ? 'text-white' : 'text-gray-900'
+                            }`}>
+                              ${prop.price}
+                            </p>
                           )}
                           <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs ${
-                            prop.is_available === 'true' 
-                              ? 'bg-green-900/50 text-green-400' 
-                              : 'bg-red-900/50 text-red-400'
+                            prop.is_available === 'true'
+                              ? theme === 'dark'
+                                ? 'bg-green-900/50 text-green-400'
+                                : 'bg-green-100 text-green-700'
+                              : theme === 'dark'
+                              ? 'bg-red-900/50 text-red-400'
+                              : 'bg-red-100 text-red-700'
                           }`}>
                             {prop.is_available === 'true' ? 'Available' : 'Unavailable'}
                           </span>
