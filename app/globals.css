@@ -14,9 +14,24 @@ body {
   overflow-x: hidden;
   width: 100vw;
   height: 100vh;
-  background: #000;
   margin: 0;
   padding: 0;
+  transition: background-color 200ms ease-out, 
+              color 200ms ease-out;
+  will-change: background-color, color;
+}
+
+/* Default dark theme */
+html {
+  background: rgba(10, 15, 25, 0.95);
+}
+
+html.dark-theme {
+  background: rgba(10, 15, 25, 0.95);
+}
+
+html.light-theme {
+  background: rgba(248, 250, 252, 0.98);
 }
 
 body {
@@ -25,8 +40,21 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #000 !important;
+  background: transparent;
   color: #fff;
+  transition: background-color 200ms ease-out, 
+              color 200ms ease-out;
+  will-change: background-color, color;
+}
+
+html.dark-theme body {
+  background: rgba(10, 15, 25, 0.95);
+  color: #fff;
+}
+
+html.light-theme body {
+  background: rgba(248, 250, 252, 0.98);
+  color: #000;
 }
 
 a {
@@ -214,4 +242,61 @@ a {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* Industry-standard theme transitions - fast and smooth */
+.theme-transition,
+div:not([class*="animate"]):not([style*="transform"]),
+section:not([class*="animate"]),
+article:not([class*="animate"]),
+aside:not([class*="animate"]),
+header:not([class*="animate"]),
+footer:not([class*="animate"]),
+main:not([class*="animate"]),
+nav:not([class*="animate"]),
+button:not([class*="animate"]):not([style*="transform"]),
+input:not([class*="animate"]),
+select:not([class*="animate"]),
+textarea:not([class*="animate"]),
+a:not([class*="animate"]),
+span:not([class*="animate"]),
+p:not([class*="animate"]),
+h1:not([class*="animate"]), 
+h2:not([class*="animate"]), 
+h3:not([class*="animate"]), 
+h4:not([class*="animate"]), 
+h5:not([class*="animate"]), 
+h6:not([class*="animate"]),
+li:not([class*="animate"]),
+td:not([class*="animate"]),
+th:not([class*="animate"]) {
+  transition: background-color 200ms ease-out,
+              color 200ms ease-out,
+              border-color 200ms ease-out,
+              box-shadow 200ms ease-out;
+  will-change: background-color, color, border-color, box-shadow;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* Exclude elements that shouldn't transition */
+svg,
+path,
+circle,
+rect,
+polygon,
+g,
+[class*="animate"],
+[style*="transform"]:not([style*="background"]),
+[style*="animation"] {
+  transition: none !important;
+  will-change: auto !important;
 }

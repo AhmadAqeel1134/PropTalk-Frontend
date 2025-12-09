@@ -4,13 +4,15 @@ import React from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { ThemeProvider, useTheme } from '@/contexts/ThemeContext';
 
-export default function AdminLayout({
+function AdminLayoutContent({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const router = useRouter();
+  const { theme } = useTheme();
 
   useEffect(() => {
     // Check if admin is authenticated
@@ -21,12 +23,31 @@ export default function AdminLayout({
   }, [router]);
 
   return (
-    <div className="min-h-screen" style={{ background: 'rgba(10, 15, 25, 0.95)' }}>
+    <div
+      className="min-h-screen"
+      style={
+        theme === 'dark'
+          ? { background: 'rgba(10, 15, 25, 0.95)' }
+          : { background: 'rgba(248, 250, 252, 0.98)' }
+      }
+    >
       <Sidebar />
       <main className="lg:ml-[280px]">
         {children}
       </main>
     </div>
+  );
+}
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <ThemeProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </ThemeProvider>
   );
 }
 

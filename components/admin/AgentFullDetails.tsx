@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAgentDetails, useAgentDocumentsPaginated, useAgentPropertiesPaginated } from '@/hooks/useAdmin';
+import { useTheme } from '@/contexts/ThemeContext';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ErrorMessage from '@/components/common/ErrorMessage';
 import PageTransition from '@/components/common/PageTransition';
@@ -39,6 +40,7 @@ interface AgentFullDetailsProps {
 type TabType = 'info' | 'properties' | 'documents' | 'contacts' | 'phone';
 
 const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) => {
+  const { theme } = useTheme();
   const { data, isLoading, error, refetch } = useAgentDetails(agentId);
   const [activeTab, setActiveTab] = useState<TabType>('info');
   const [documentsPage, setDocumentsPage] = useState(1);
@@ -145,44 +147,74 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
 
   return (
     <PageTransition>
-      <div className="min-h-screen" style={{ background: 'rgba(10, 15, 25, 0.95)' }}>
+      <div
+        className="min-h-screen"
+        style={
+          theme === 'dark'
+            ? { background: 'rgba(10, 15, 25, 0.95)' }
+            : { background: 'rgba(248, 250, 252, 0.98)' }
+        }
+      >
         <div className="w-full px-8 py-8">
           {/* Header */}
           <div className="mb-8">
             <div className="flex justify-end mb-6">
               <button
                 onClick={handleBack}
-                className="px-5 py-2.5 bg-gray-800/60 border-2 border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white rounded-xl font-semibold transition-all duration-200"
+                className={`px-5 py-2.5 border-2 rounded-xl font-semibold transition-all duration-200 ${
+                  theme === 'dark'
+                    ? 'bg-gray-800/60 border-gray-700/50 hover:border-gray-600 text-gray-300 hover:text-white'
+                    : 'bg-white border-gray-300 hover:border-blue-400 text-gray-700 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
+                }`}
               >
                 Back
               </button>
             </div>
 
             {/* Profile Section */}
-            <div className="flex items-start gap-6 mb-8 pb-8 border-b border-gray-800 opacity-0" style={{ animation: 'fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) 100ms forwards' }}>
+            <div
+              className={`flex items-start gap-6 mb-8 pb-8 border-b opacity-0 ${
+                theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+              }`}
+              style={{ animation: 'fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) 100ms forwards' }}
+            >
               <div className="relative">
-                <div className="w-16 h-16 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center">
-                  <User size={32} className="text-gray-400" />
+                <div
+                  className={`w-16 h-16 rounded-lg border flex items-center justify-center ${
+                    theme === 'dark'
+                      ? 'bg-gray-800 border-gray-700'
+                      : 'bg-blue-50 border-blue-200 shadow-sm'
+                  }`}
+                >
+                  <User size={32} className={theme === 'dark' ? 'text-gray-400' : 'text-blue-600'} />
                 </div>
-                <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-gray-900 ${
-                  agent.is_active ? 'bg-green-500' : 'bg-red-500'
-                }`}></div>
+                <div
+                  className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 ${
+                    theme === 'dark' ? 'border-gray-900' : 'border-white'
+                  } ${agent.is_active ? 'bg-green-500' : 'bg-red-500'}`}
+                ></div>
               </div>
 
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-2">
-                  <h1 className="text-3xl font-bold text-white">
+                  <h1 className={`text-3xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                     {agent.full_name}
                   </h1>
                   {agent.is_verified && (
-                    <span className="px-2.5 py-1 bg-green-500/10 border border-green-500/20 text-green-400 rounded text-xs font-medium flex items-center gap-1.5">
+                    <span className={`px-2.5 py-1 rounded text-xs font-medium flex items-center gap-1.5 ${
+                      theme === 'dark'
+                        ? 'bg-green-500/10 border border-green-500/30 text-green-400'
+                        : 'bg-green-100 border border-green-300 text-green-700'
+                    }`}>
                       <CheckCircle size={12} />
                       Verified
                     </span>
                   )}
                 </div>
-                <p className="text-gray-400 mb-3">{agent.company_name || 'Independent Real Estate Agent'}</p>
-                <div className="flex items-center gap-6 text-sm text-gray-500">
+                <p className={`mb-3 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {agent.company_name || 'Independent Real Estate Agent'}
+                </p>
+                <div className={`flex items-center gap-6 text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
                   <span className="flex items-center gap-1.5">
                     <Mail size={14} />
                     {agent.email}
@@ -198,24 +230,32 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
 
               <div className="flex items-center gap-6">
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-white">{propertiesCount}</div>
-                  <div className="text-xs text-gray-500">Properties</div>
+                  <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    {propertiesCount}
+                  </div>
+                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Properties</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-bold text-white">{formatLargeNumber(totalPropertyValue)}</div>
-                  <div className="text-xs text-gray-500">Total Value</div>
+                  <div className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    {formatLargeNumber(totalPropertyValue)}
+                  </div>
+                  <div className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>Total Value</div>
                 </div>
                 <button
                   onClick={() => refetch()}
-                  className="p-2.5 rounded-lg bg-gray-800 border border-gray-700 hover:bg-gray-700 transition-colors"
+                  className={`p-2.5 rounded-lg border transition-colors ${
+                    theme === 'dark'
+                      ? 'bg-gray-800 border-gray-700 hover:bg-gray-700'
+                      : 'bg-white border-gray-300 hover:border-blue-400 hover:bg-blue-50 shadow-sm'
+                  }`}
                 >
-                  <RefreshCw size={18} className="text-gray-400" />
+                  <RefreshCw size={18} className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} />
                 </button>
               </div>
             </div>
 
             {/* Navigation Tabs */}
-            <div className="flex items-center gap-1 border-b border-gray-800">
+            <div className={`flex items-center gap-1 border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
               {tabs.map((tab, index) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
@@ -225,8 +265,12 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
                     onClick={() => handleTabChange(tab.id)}
                     className={`relative flex items-center gap-2 px-6 py-3 text-sm font-medium transition-all duration-500 ease-out ${
                       isActive
+                        ? theme === 'dark'
                         ? 'text-white'
-                        : 'text-gray-400 hover:text-white'
+                          : 'text-blue-700'
+                        : theme === 'dark'
+                        ? 'text-gray-400 hover:text-white'
+                        : 'text-gray-600 hover:text-blue-700'
                     }`}
                     style={{
                       animation: `fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) ${index * 80}ms forwards`
@@ -235,14 +279,26 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
                     <Icon size={18} className={`transition-transform duration-500 ${isActive ? 'scale-110' : ''}`} />
                     <span>{tab.label}</span>
                     {tab.count !== null && tab.count !== undefined && (
-                      <span className={`ml-1.5 px-2 py-0.5 rounded text-xs transition-all duration-500 ${
-                        isActive ? 'bg-gray-800 text-white scale-110' : 'bg-gray-900 text-gray-500'
-                      }`}>
+                      <span
+                        className={`ml-1.5 px-2 py-0.5 rounded text-xs transition-all duration-500 ${
+                          isActive
+                            ? theme === 'dark'
+                              ? 'bg-gray-800 text-white scale-110'
+                              : 'bg-blue-50 text-blue-700 scale-110'
+                            : theme === 'dark'
+                            ? 'bg-gray-900 text-gray-500'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
                         {tab.count}
                       </span>
                     )}
                     {isActive && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white transition-all duration-500"></div>
+                      <div
+                        className={`absolute bottom-0 left-0 right-0 h-0.5 transition-all duration-500 ${
+                          theme === 'dark' ? 'bg-white' : 'bg-blue-600'
+                        }`}
+                      ></div>
                     )}
                   </button>
                 );
@@ -252,7 +308,7 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
 
           {/* Tab Content */}
           <div key={activeTab} className="opacity-0" style={{ animation: 'fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards' }}>
-            {activeTab === 'info' && <AgentInfo agent={agent} />}
+            {activeTab === 'info' && <AgentInfo agent={agent} theme={theme} />}
             {activeTab === 'properties' && (
               <PropertiesTab
                 properties={filteredProperties}
@@ -266,6 +322,7 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
                 viewMode={viewMode}
                 onViewModeChange={setViewMode}
                 formatPrice={formatPrice}
+                theme={theme}
               />
             )}
             {activeTab === 'documents' && (
@@ -276,10 +333,11 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
                 pageSize={documentsPageSize}
                 isLoading={documentsLoading}
                 onPageChange={setDocumentsPage}
+                theme={theme}
               />
             )}
-            {activeTab === 'contacts' && <ContactsTab contacts={contacts} />}
-            {activeTab === 'phone' && <PhoneTab phoneNumber={phone_number} />}
+            {activeTab === 'contacts' && <ContactsTab contacts={contacts} theme={theme} />}
+            {activeTab === 'phone' && <PhoneTab phoneNumber={phone_number} theme={theme} />}
           </div>
         </div>
       </div>
@@ -288,7 +346,7 @@ const AgentFullDetails: React.FC<AgentFullDetailsProps> = ({ agentId, onBack }) 
 };
 
 // Agent Info Tab Component
-const AgentInfo: React.FC<{ agent: any }> = ({ agent }) => {
+const AgentInfo: React.FC<{ agent: any; theme: 'dark' | 'light' }> = ({ agent, theme }) => {
   const infoSections = [
     {
       title: 'Contact Information',
@@ -317,7 +375,9 @@ const AgentInfo: React.FC<{ agent: any }> = ({ agent }) => {
     <div className="space-y-8">
       {infoSections.map((section, sectionIndex) => (
         <div key={sectionIndex} className="space-y-3">
-          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          <h3 className={`text-xs font-semibold uppercase tracking-wider ${
+            theme === 'dark' ? 'text-gray-500' : 'text-gray-600'
+          }`}>
             {section.title}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -326,19 +386,31 @@ const AgentInfo: React.FC<{ agent: any }> = ({ agent }) => {
               return (
                 <div
                   key={index}
-                  className="flex items-start gap-4 p-4 rounded-lg bg-gray-900/50 border-2 border-gray-800 hover:border-gray-500 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-500 ease-out opacity-0"
+                  className={`flex items-start gap-4 p-4 rounded-lg border-2 transition-all duration-500 ease-out opacity-0 ${
+                    theme === 'dark'
+                      ? 'bg-gray-900/50 border-gray-800 hover:border-gray-500 hover:scale-[1.02] hover:-translate-y-1'
+                      : 'bg-white border-gray-300 hover:border-blue-400 hover:scale-[1.02] hover:-translate-y-1 shadow-sm'
+                  }`}
                   style={{
                     animation: `fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) ${(sectionIndex * 150) + (index * 100)}ms forwards`
                   }}
                 >
-                  <div className="p-2 rounded bg-gray-800 border border-gray-700">
-                    <Icon size={16} className="text-gray-400" />
+                  <div
+                    className={`p-2 rounded border ${
+                      theme === 'dark'
+                        ? 'bg-gray-800 border-gray-700'
+                        : 'bg-blue-50 border-blue-200 shadow-sm'
+                    }`}
+                  >
+                    <Icon size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-blue-600'} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                    <div className={`text-xs font-medium uppercase tracking-wide mb-1 ${
+                      theme === 'dark' ? 'text-gray-500' : 'text-gray-600'
+                    }`}>
                       {item.label}
                     </div>
-                    <div className="text-white font-medium break-words">
+                    <div className={`font-medium break-words ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                       {item.value}
                     </div>
                   </div>
@@ -365,6 +437,7 @@ interface PropertiesTabProps {
   viewMode: 'grid' | 'list';
   onViewModeChange: (mode: 'grid' | 'list') => void;
   formatPrice: (price: string | null) => string;
+  theme: 'dark' | 'light';
 }
 
 const PropertiesTab: React.FC<PropertiesTabProps> = ({
@@ -379,6 +452,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
   viewMode,
   onViewModeChange,
   formatPrice,
+  theme,
 }) => {
   const totalPages = Math.ceil(total / pageSize);
 
@@ -393,9 +467,13 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
   if (properties.length === 0) {
     return (
       <div className="text-center py-16">
-        <Building size={48} className="text-gray-600 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-white mb-2">No Properties Listed</h3>
-        <p className="text-gray-500">This agent hasn't added any properties yet</p>
+        <Building size={48} className={`mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
+        <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          No Properties Listed
+        </h3>
+        <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}>
+          This agent hasn't added any properties yet
+        </p>
       </div>
     );
   }
@@ -405,21 +483,39 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
       {/* Search and Controls */}
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 relative max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 ${
+            theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+          }`} />
           <input
             type="text"
             placeholder="Search properties..."
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-900/50 border border-gray-800 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-gray-700 transition-colors text-sm"
+            className={`w-full pl-10 pr-4 py-2.5 border rounded-lg placeholder-gray-500 focus:outline-none transition-colors text-sm ${
+              theme === 'dark'
+                ? 'bg-gray-900/50 border-gray-800 text-white focus:border-gray-700'
+                : 'bg-white border-gray-300 text-gray-900 focus:border-blue-400 shadow-sm'
+            }`}
           />
         </div>
 
-        <div className="flex gap-2 p-1 bg-gray-900/50 border border-gray-800 rounded-lg">
+        <div
+          className={`flex gap-2 p-1 border rounded-lg ${
+            theme === 'dark'
+              ? 'bg-gray-900/50 border-gray-800'
+              : 'bg-white border-gray-300 shadow-sm'
+          }`}
+        >
           <button
             onClick={() => onViewModeChange('grid')}
             className={`p-2 rounded transition-colors ${
-              viewMode === 'grid' ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-white'
+              viewMode === 'grid'
+                ? theme === 'dark'
+                  ? 'bg-gray-800 text-white'
+                  : 'bg-blue-50 text-blue-700'
+                : theme === 'dark'
+                ? 'text-gray-500 hover:text-white'
+                : 'text-gray-600 hover:text-blue-700'
             }`}
           >
             <Grid3x3 size={16} />
@@ -427,7 +523,13 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
           <button
             onClick={() => onViewModeChange('list')}
             className={`p-2 rounded transition-colors ${
-              viewMode === 'list' ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-white'
+              viewMode === 'list'
+                ? theme === 'dark'
+                  ? 'bg-gray-800 text-white'
+                  : 'bg-blue-50 text-blue-700'
+                : theme === 'dark'
+                ? 'text-gray-500 hover:text-white'
+                : 'text-gray-600 hover:text-blue-700'
             }`}
           >
             <List size={16} />
@@ -447,16 +549,24 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
           return (
             <div 
               key={i} 
-              className="p-4 rounded-lg bg-gray-900/50 border-2 border-gray-800 hover:border-gray-500 hover:scale-[1.05] hover:-translate-y-1 transition-all duration-500 ease-out opacity-0"
+              className={`p-4 rounded-lg border-2 transition-all duration-500 ease-out opacity-0 ${
+                theme === 'dark'
+                  ? 'bg-gray-900/50 border-gray-800 hover:border-gray-500 hover:scale-[1.05] hover:-translate-y-1'
+                  : 'bg-white border-gray-300 hover:border-blue-400 hover:scale-[1.05] hover:-translate-y-1 shadow-sm'
+              }`}
               style={{
                 animation: `fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) ${i * 120}ms forwards`
               }}
             >
               <div className="flex items-center gap-2 mb-2">
-                <Icon size={16} className="text-gray-500" />
-                <span className="text-xs text-gray-500">{stat.label}</span>
+                <Icon size={16} className={theme === 'dark' ? 'text-gray-500' : 'text-gray-500'} />
+                <span className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                  {stat.label}
+                </span>
               </div>
-              <div className="text-xl font-semibold text-white">{stat.value}</div>
+              <div className={`text-xl font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                {stat.value}
+              </div>
             </div>
           );
         })}
@@ -468,43 +578,55 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
           {properties.map((property, index) => (
             <div
               key={property.id}
-              className="p-5 rounded-lg bg-gray-900/50 border-2 border-gray-800 hover:border-gray-500 hover:scale-[1.03] hover:-translate-y-2 transition-all duration-500 ease-out opacity-0"
+              className={`p-5 rounded-lg border-2 transition-all duration-500 ease-out opacity-0 ${
+                theme === 'dark'
+                  ? 'bg-gray-900/50 border-gray-800 hover:border-gray-500 hover:scale-[1.03] hover:-translate-y-2'
+                  : 'bg-white border-gray-300 hover:border-blue-400 hover:scale-[1.03] hover:-translate-y-2 shadow-sm'
+              }`}
               style={{
                 animation: `fadeInUp 0.9s cubic-bezier(0.4, 0, 0.2, 1) ${index * 100}ms forwards`
               }}
             >
               <div className="flex items-start justify-between mb-3">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold text-white mb-1 truncate">
+                  <h3 className={`text-base font-semibold mb-1 truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                     {property.address}
                   </h3>
-                  <p className="text-xs text-gray-500">{property.city || 'N/A'}</p>
+                  <p className={`text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                    {property.city || 'N/A'}
+                  </p>
                 </div>
                 <span className={`px-2 py-1 rounded text-xs font-medium ${
                   property.is_available === 'yes' || property.is_available === 'true'
-                    ? 'text-green-400 bg-green-500/10 border border-green-500/20'
-                    : 'text-red-400 bg-red-500/10 border border-red-500/20'
+                    ? theme === 'dark'
+                      ? 'text-green-400 bg-green-500/10 border border-green-500/30'
+                      : 'text-green-700 bg-green-100 border border-green-300'
+                    : theme === 'dark'
+                    ? 'text-red-400 bg-red-500/10 border border-red-500/30'
+                    : 'text-red-700 bg-red-100 border border-red-300'
                 }`}>
                   {property.is_available === 'yes' || property.is_available === 'true' ? 'Available' : 'Unavailable'}
                 </span>
               </div>
 
               {(property.bedrooms || property.bathrooms || property.square_feet) && (
-                <div className="flex items-center gap-4 mb-3 pb-3 border-b border-gray-800">
+                <div className={`flex items-center gap-4 mb-3 pb-3 border-b ${
+                  theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+                }`}>
                   {property.bedrooms > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                    <div className={`flex items-center gap-1.5 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                       <Bed size={14} />
                       <span>{property.bedrooms}</span>
                     </div>
                   )}
                   {property.bathrooms > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                    <div className={`flex items-center gap-1.5 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                       <Bath size={14} />
                       <span>{property.bathrooms}</span>
                     </div>
                   )}
                   {property.square_feet && (
-                    <div className="flex items-center gap-1.5 text-xs text-gray-400">
+                    <div className={`flex items-center gap-1.5 text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                       <Maximize2 size={14} />
                       <span>{property.square_feet} sqft</span>
                     </div>
@@ -513,10 +635,12 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
               )}
 
               <div>
-                <div className="text-lg font-bold text-white">
+                <div className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   {formatPrice(property.price)}
                 </div>
-                <div className="text-xs text-gray-500 mt-1">{property.property_type || 'Property'}</div>
+                <div className={`text-xs mt-1 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                  {property.property_type || 'Property'}
+                </div>
               </div>
             </div>
           ))}
@@ -526,17 +650,21 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
           {properties.map((property, index) => (
             <div
               key={property.id}
-              className="p-4 rounded-lg bg-gray-900/50 border-2 border-gray-800 hover:border-gray-500 hover:scale-[1.02] hover:-translate-y-1 transition-all duration-500 ease-out opacity-0"
+              className={`p-4 rounded-lg border-2 transition-all duration-500 ease-out opacity-0 ${
+                theme === 'dark'
+                  ? 'bg-gray-900/50 border-gray-800 hover:border-gray-500 hover:scale-[1.02] hover:-translate-y-1'
+                  : 'bg-white border-gray-300 hover:border-blue-400 hover:scale-[1.02] hover:-translate-y-1 shadow-sm'
+              }`}
               style={{
                 animation: `fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) ${index * 80}ms forwards`
               }}
             >
               <div className="flex items-center justify-between gap-4">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-base font-semibold text-white mb-1">
+                  <h3 className={`text-base font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                     {property.address}
                   </h3>
-                  <div className="flex items-center gap-4 text-xs text-gray-500">
+                  <div className={`flex items-center gap-4 text-xs ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
                     <span>{property.property_type || 'N/A'}</span>
                     {property.bedrooms > 0 && <span>{property.bedrooms} beds</span>}
                     {property.bathrooms > 0 && <span>{property.bathrooms} baths</span>}
@@ -544,13 +672,17 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-lg font-bold text-white mb-1">
+                  <div className={`text-lg font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                     {formatPrice(property.price)}
                   </div>
                   <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
                     property.is_available === 'yes' || property.is_available === 'true'
-                      ? 'text-green-400 bg-green-500/10 border border-green-500/20'
-                      : 'text-red-400 bg-red-500/10 border border-red-500/20'
+                      ? theme === 'dark'
+                        ? 'text-green-400 bg-green-500/10 border border-green-500/30'
+                        : 'text-green-700 bg-green-100 border border-green-300'
+                      : theme === 'dark'
+                      ? 'text-red-400 bg-red-500/10 border border-red-500/30'
+                      : 'text-red-700 bg-red-100 border border-red-300'
                   }`}>
                     {property.is_available === 'yes' || property.is_available === 'true' ? 'Available' : 'Unavailable'}
                   </span>
@@ -563,14 +695,20 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
       
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-6 border-t border-gray-800">
+        <div className={`flex items-center justify-center gap-2 pt-6 border-t ${
+          theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+        }`}>
           <button
             onClick={() => onPageChange(page - 1)}
             disabled={page === 1}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
               page === 1
-                ? 'text-gray-600 bg-gray-900 border border-gray-800 cursor-not-allowed'
-                : 'text-white bg-gray-900 border border-gray-800 hover:bg-gray-800'
+                ? theme === 'dark'
+                  ? 'text-gray-600 bg-gray-900 border-gray-800 cursor-not-allowed'
+                  : 'text-gray-400 bg-gray-50 border-gray-300 cursor-not-allowed'
+                : theme === 'dark'
+                ? 'text-white bg-gray-900 border-gray-800 hover:bg-gray-800'
+                : 'text-gray-700 bg-white border-gray-300 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
             }`}
           >
             <ChevronLeft size={16} className="inline" />
@@ -593,10 +731,14 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
                 <button
                   key={pageNum}
                   onClick={() => onPageChange(pageNum)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
                     page === pageNum
-                      ? 'text-white bg-gray-800 border border-gray-700'
-                      : 'text-gray-400 bg-gray-900 border border-gray-800 hover:text-white hover:bg-gray-800'
+                      ? theme === 'dark'
+                        ? 'text-white bg-gray-800 border-gray-700'
+                        : 'text-blue-700 bg-blue-50 border-blue-200 shadow-sm'
+                      : theme === 'dark'
+                      ? 'text-gray-400 bg-gray-900 border-gray-800 hover:text-white hover:bg-gray-800'
+                      : 'text-gray-600 bg-white border-gray-300 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
                   }`}
                 >
                   {pageNum}
@@ -608,10 +750,14 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
           <button
             onClick={() => onPageChange(page + 1)}
             disabled={page === totalPages}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
               page === totalPages
-                ? 'text-gray-600 bg-gray-900 border border-gray-800 cursor-not-allowed'
-                : 'text-white bg-gray-900 border border-gray-800 hover:bg-gray-800'
+                ? theme === 'dark'
+                  ? 'text-gray-600 bg-gray-900 border-gray-800 cursor-not-allowed'
+                  : 'text-gray-400 bg-gray-50 border-gray-300 cursor-not-allowed'
+                : theme === 'dark'
+                ? 'text-white bg-gray-900 border-gray-800 hover:bg-gray-800'
+                : 'text-gray-700 bg-white border-gray-300 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
             }`}
           >
             <ChevronRight size={16} className="inline" />
@@ -630,9 +776,10 @@ interface DocumentsTabProps {
   pageSize: number;
   isLoading: boolean;
   onPageChange: (page: number) => void;
+  theme: 'dark' | 'light';
 }
 
-const DocumentsTab: React.FC<DocumentsTabProps> = ({ documents, total, page, pageSize, isLoading, onPageChange }) => {
+const DocumentsTab: React.FC<DocumentsTabProps> = ({ documents, total, page, pageSize, isLoading, onPageChange, theme }) => {
   const totalPages = Math.ceil(total / pageSize);
 
   if (isLoading) {
@@ -646,9 +793,13 @@ const DocumentsTab: React.FC<DocumentsTabProps> = ({ documents, total, page, pag
   if (documents.length === 0) {
     return (
       <div className="text-center py-16">
-        <FileText size={48} className="text-gray-600 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-white mb-2">No Documents</h3>
-        <p className="text-gray-500">This agent hasn't uploaded any documents yet</p>
+        <FileText size={48} className={`mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
+        <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          No Documents
+        </h3>
+        <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}>
+          This agent hasn't uploaded any documents yet
+        </p>
       </div>
     );
   }
@@ -656,8 +807,10 @@ const DocumentsTab: React.FC<DocumentsTabProps> = ({ documents, total, page, pag
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-white mb-1">Document Library</h2>
-        <p className="text-sm text-gray-500">
+        <h2 className={`text-xl font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          Document Library
+        </h2>
+        <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
           Showing {(page - 1) * pageSize + 1} - {Math.min(page * pageSize, total)} of {total} documents
         </p>
       </div>
@@ -666,28 +819,50 @@ const DocumentsTab: React.FC<DocumentsTabProps> = ({ documents, total, page, pag
         {documents.map((doc, index) => (
           <div
             key={doc.id}
-            className="p-4 rounded-lg bg-gray-900/50 border-2 border-gray-800 hover:border-gray-500 hover:scale-[1.03] hover:-translate-y-2 transition-all duration-500 ease-out opacity-0"
+            className={`p-4 rounded-lg border-2 transition-all duration-500 ease-out opacity-0 ${
+              theme === 'dark'
+                ? 'bg-gray-900/50 border-gray-800 hover:border-gray-500 hover:scale-[1.03] hover:-translate-y-2'
+                : 'bg-white border-gray-300 hover:border-blue-400 hover:scale-[1.03] hover:-translate-y-2 shadow-sm'
+            }`}
             style={{
               animation: `fadeInUp 0.9s cubic-bezier(0.4, 0, 0.2, 1) ${index * 100}ms forwards`
             }}
           >
             <div className="flex items-start justify-between mb-3">
-              <div className="p-2 rounded bg-gray-800 border border-gray-700">
-                <FileText size={18} className="text-gray-400" />
+              <div
+                className={`p-2 rounded border ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 border-gray-700'
+                    : 'bg-blue-50 border-blue-200 shadow-sm'
+                }`}
+              >
+                <FileText size={18} className={theme === 'dark' ? 'text-gray-400' : 'text-blue-600'} />
               </div>
-              <span className="px-2 py-1 rounded text-xs font-medium text-gray-300 bg-gray-800 border border-gray-700 uppercase">
+              <span
+                className={`px-2 py-1 rounded text-xs font-medium uppercase border ${
+                  theme === 'dark'
+                    ? 'text-gray-300 bg-gray-800 border-gray-700'
+                    : 'text-gray-700 bg-gray-100 border-gray-200'
+                }`}
+              >
                 {doc.file_type}
               </span>
             </div>
-            <h4 className="text-white font-medium mb-2 truncate">{doc.file_name}</h4>
-            <p className="text-xs text-gray-500 mb-3">
+            <h4 className={`font-medium mb-2 truncate ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              {doc.file_name}
+            </h4>
+            <p className={`text-xs mb-3 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
               {doc.file_size || 'Size unknown'} • {new Date(doc.created_at).toLocaleDateString()}
             </p>
             <a
               href={doc.cloudinary_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg text-sm font-medium text-white bg-gray-800 border border-gray-700 hover:bg-gray-700 transition-colors"
+              className={`flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                theme === 'dark'
+                  ? 'text-white bg-gray-800 border-gray-700 hover:bg-gray-700'
+                  : 'text-gray-700 bg-white border-gray-300 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
+              }`}
             >
               <Download size={14} />
               <span>Download</span>
@@ -697,14 +872,20 @@ const DocumentsTab: React.FC<DocumentsTabProps> = ({ documents, total, page, pag
       </div>
       
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2 pt-6 border-t border-gray-800">
+        <div className={`flex items-center justify-center gap-2 pt-6 border-t ${
+          theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+        }`}>
           <button
             onClick={() => onPageChange(page - 1)}
             disabled={page === 1}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
               page === 1
-                ? 'text-gray-600 bg-gray-900 border border-gray-800 cursor-not-allowed'
-                : 'text-white bg-gray-900 border border-gray-800 hover:bg-gray-800'
+                ? theme === 'dark'
+                  ? 'text-gray-600 bg-gray-900 border-gray-800 cursor-not-allowed'
+                  : 'text-gray-400 bg-gray-50 border-gray-300 cursor-not-allowed'
+                : theme === 'dark'
+                ? 'text-white bg-gray-900 border-gray-800 hover:bg-gray-800'
+                : 'text-gray-700 bg-white border-gray-300 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
             }`}
           >
             <ChevronLeft size={16} className="inline" />
@@ -727,10 +908,14 @@ const DocumentsTab: React.FC<DocumentsTabProps> = ({ documents, total, page, pag
                 <button
                   key={pageNum}
                   onClick={() => onPageChange(pageNum)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
                     page === pageNum
-                      ? 'text-white bg-gray-800 border border-gray-700'
-                      : 'text-gray-400 bg-gray-900 border border-gray-800 hover:text-white hover:bg-gray-800'
+                      ? theme === 'dark'
+                        ? 'text-white bg-gray-800 border-gray-700'
+                        : 'text-blue-700 bg-blue-50 border-blue-200 shadow-sm'
+                      : theme === 'dark'
+                      ? 'text-gray-400 bg-gray-900 border-gray-800 hover:text-white hover:bg-gray-800'
+                      : 'text-gray-600 bg-white border-gray-300 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
                   }`}
                 >
                   {pageNum}
@@ -742,10 +927,14 @@ const DocumentsTab: React.FC<DocumentsTabProps> = ({ documents, total, page, pag
           <button
             onClick={() => onPageChange(page + 1)}
             disabled={page === totalPages}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border ${
               page === totalPages
-                ? 'text-gray-600 bg-gray-900 border border-gray-800 cursor-not-allowed'
-                : 'text-white bg-gray-900 border border-gray-800 hover:bg-gray-800'
+                ? theme === 'dark'
+                  ? 'text-gray-600 bg-gray-900 border-gray-800 cursor-not-allowed'
+                  : 'text-gray-400 bg-gray-50 border-gray-300 cursor-not-allowed'
+                : theme === 'dark'
+                ? 'text-white bg-gray-900 border-gray-800 hover:bg-gray-800'
+                : 'text-gray-700 bg-white border-gray-300 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
             }`}
           >
             <ChevronRight size={16} className="inline" />
@@ -757,13 +946,17 @@ const DocumentsTab: React.FC<DocumentsTabProps> = ({ documents, total, page, pag
 };
 
 // Contacts Tab Component
-const ContactsTab: React.FC<{ contacts: any[] }> = ({ contacts }) => {
+const ContactsTab: React.FC<{ contacts: any[]; theme: 'dark' | 'light' }> = ({ contacts, theme }) => {
   if (contacts.length === 0) {
     return (
       <div className="text-center py-16">
-        <Contact size={48} className="text-gray-600 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-white mb-2">No Contacts</h3>
-        <p className="text-gray-500">This agent hasn't added any contacts yet</p>
+        <Contact size={48} className={`mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
+        <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          No Contacts
+        </h3>
+        <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}>
+          This agent hasn't added any contacts yet
+        </p>
       </div>
     );
   }
@@ -771,45 +964,61 @@ const ContactsTab: React.FC<{ contacts: any[] }> = ({ contacts }) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-white mb-1">Contact List</h2>
-        <p className="text-sm text-gray-500">{contacts.length} total contacts</p>
+        <h2 className={`text-xl font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          Contact List
+        </h2>
+        <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
+          {contacts.length} total contacts
+        </p>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {contacts.map((contact, index) => (
           <div
             key={contact.id}
-            className="p-4 rounded-lg bg-gray-900/50 border-2 border-gray-800 hover:border-gray-500 hover:scale-[1.03] hover:-translate-y-2 transition-all duration-500 ease-out opacity-0"
+            className={`p-4 rounded-lg border-2 transition-all duration-500 ease-out opacity-0 ${
+              theme === 'dark'
+                ? 'bg-gray-900/50 border-gray-800 hover:border-gray-500 hover:scale-[1.03] hover:-translate-y-2'
+                : 'bg-white border-gray-300 hover:border-blue-400 hover:scale-[1.03] hover:-translate-y-2 shadow-sm'
+            }`}
             style={{
               animation: `fadeInUp 0.9s cubic-bezier(0.4, 0, 0.2, 1) ${index * 100}ms forwards`
             }}
           >
             <div className="flex items-start gap-3">
-              <div className="p-2 rounded bg-gray-800 border border-gray-700">
-                <Contact size={16} className="text-gray-400" />
+              <div
+                className={`p-2 rounded border ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 border-gray-700'
+                    : 'bg-blue-50 border-blue-200 shadow-sm'
+                }`}
+              >
+                <Contact size={16} className={theme === 'dark' ? 'text-gray-400' : 'text-blue-600'} />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-white font-medium mb-2">
+                <h3 className={`font-medium mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
                   {contact.name || 'Unnamed Contact'}
                 </h3>
                 <div className="space-y-1.5 text-sm">
                   {contact.phone_number && (
-                    <div className="flex items-center gap-2 text-gray-400">
+                    <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       <Phone size={14} />
                       <span>{contact.phone_number}</span>
                     </div>
                   )}
                   {contact.email && (
-                    <div className="flex items-center gap-2 text-gray-400">
+                    <div className={`flex items-center gap-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       <Mail size={14} />
                       <span className="truncate">{contact.email}</span>
                     </div>
                   )}
                   {contact.notes && (
-                    <p className="text-gray-500 text-xs mt-2 line-clamp-2">{contact.notes}</p>
+                    <p className={`text-xs mt-2 line-clamp-2 ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                      {contact.notes}
+                    </p>
                   )}
                 </div>
-                <div className="text-xs text-gray-600 mt-2">
+                <div className={`text-xs mt-2 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-500'}`}>
                   Added {contact.created_at ? new Date(contact.created_at).toLocaleDateString() : 'N/A'}
                 </div>
               </div>
@@ -822,13 +1031,17 @@ const ContactsTab: React.FC<{ contacts: any[] }> = ({ contacts }) => {
 };
 
 // Phone Tab Component
-const PhoneTab: React.FC<{ phoneNumber: any }> = ({ phoneNumber }) => {
+const PhoneTab: React.FC<{ phoneNumber: any; theme: 'dark' | 'light' }> = ({ phoneNumber, theme }) => {
   if (!phoneNumber) {
     return (
       <div className="text-center py-16">
-        <Phone size={48} className="text-gray-600 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-white mb-2">No Phone Number</h3>
-        <p className="text-gray-500">This agent doesn't have a Twilio phone number assigned</p>
+        <Phone size={48} className={`mx-auto mb-4 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
+        <h3 className={`text-lg font-semibold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          No Phone Number
+        </h3>
+        <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}>
+          This agent doesn't have a Twilio phone number assigned
+        </p>
       </div>
     );
   }
@@ -840,26 +1053,48 @@ const PhoneTab: React.FC<{ phoneNumber: any }> = ({ phoneNumber }) => {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-xl font-semibold text-white mb-1">Twilio Phone Number</h2>
-        <p className="text-sm text-gray-500">Voice agent communication number</p>
+        <h2 className={`text-xl font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          Twilio Phone Number
+        </h2>
+        <p className={`text-sm ${theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}`}>
+          Voice agent communication number
+        </p>
       </div>
       
-      <div className="p-8 rounded-lg bg-gray-900/50 border border-gray-800 w-full max-w-2xl">
+      <div
+        className={`p-8 rounded-lg border w-full max-w-2xl ${
+          theme === 'dark'
+            ? 'bg-gray-900/50 border-gray-800'
+            : 'bg-white border-gray-300 shadow-sm'
+        }`}
+      >
         <div className="space-y-6">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-16 h-16 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center">
-              <Phone size={28} className="text-gray-400" />
+            <div
+              className={`w-16 h-16 rounded-lg border flex items-center justify-center ${
+                theme === 'dark'
+                  ? 'bg-gray-800 border-gray-700'
+                  : 'bg-blue-50 border-blue-200 shadow-sm'
+              }`}
+            >
+              <Phone size={28} className={theme === 'dark' ? 'text-gray-400' : 'text-blue-600'} />
             </div>
             <div className="flex-1">
-              <p className="text-3xl font-bold text-white mb-3 tracking-wide font-mono">
+              <p className={`text-3xl font-bold mb-3 tracking-wide font-mono ${
+                theme === 'dark' ? 'text-white' : 'text-gray-900'
+              }`}>
                 {phoneNumber.twilio_phone_number}
               </p>
               <div className="flex items-center gap-3">
               <span
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
                   phoneNumber.is_active
-                    ? 'text-green-400 bg-green-500/10 border border-green-500/20'
-                    : 'text-red-400 bg-red-500/10 border border-red-500/20'
+                    ? theme === 'dark'
+                      ? 'text-green-400 bg-green-500/10 border border-green-500/30'
+                      : 'text-green-700 bg-green-100 border border-green-300'
+                    : theme === 'dark'
+                    ? 'text-red-400 bg-red-500/10 border border-red-500/30'
+                    : 'text-red-700 bg-red-100 border border-red-300'
                 }`}
               >
                 {phoneNumber.is_active ? 'Active' : 'Inactive'}
@@ -870,19 +1105,27 @@ const PhoneTab: React.FC<{ phoneNumber: any }> = ({ phoneNumber }) => {
           
           <button
             onClick={copyToClipboard}
-            className="flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium text-white bg-gray-800 border border-gray-700 hover:bg-gray-700 transition-colors"
+            className={`flex items-center gap-2 px-6 py-3 rounded-lg text-sm font-medium border transition-colors ${
+              theme === 'dark'
+                ? 'text-white bg-gray-800 border-gray-700 hover:bg-gray-700'
+                : 'text-gray-700 bg-white border-gray-300 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
+            }`}
           >
             <Copy size={16} />
             <span>Copy Number</span>
           </button>
           
-          <div className="pt-6 border-t border-gray-800 space-y-2 text-xs text-gray-500">
+          <div className={`pt-6 border-t space-y-2 text-xs ${
+            theme === 'dark' ? 'border-gray-800 text-gray-500' : 'border-gray-200 text-gray-500'
+          }`}>
             <p>
-              <span className="text-gray-400 font-medium">SID:</span>{' '}
-              <span className="font-mono text-gray-500">{phoneNumber.twilio_sid}</span>
+              <span className={`font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>SID:</span>{' '}
+              <span className={`font-mono ${theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}`}>
+                {phoneNumber.twilio_sid}
+              </span>
             </p>
             <p>
-              <span className="text-gray-400 font-medium">Created:</span>{' '}
+              <span className={`font-medium ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Created:</span>{' '}
               <span>{new Date(phoneNumber.created_at).toLocaleString()}</span>
             </p>
           </div>

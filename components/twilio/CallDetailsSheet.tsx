@@ -9,6 +9,7 @@ import {
   Play, Pause, Volume2, FileText, CheckCircle 
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface CallDetailsSheetProps {
   callId: string;
@@ -17,6 +18,7 @@ interface CallDetailsSheetProps {
 }
 
 export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetailsSheetProps) {
+  const { theme } = useTheme();
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -81,21 +83,47 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
 
   return (
     <>
-      <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-in fade-in duration-300"
+      <div
+        className={`fixed inset-0 backdrop-blur-sm z-40 animate-in fade-in duration-300 ${
+          theme === 'dark' ? 'bg-black/50' : 'bg-black/30'
+        }`}
         onClick={onClose}
       />
       <div className="fixed top-0 right-0 h-full w-full md:w-[600px] z-50 animate-in slide-in-from-right duration-300">
-        <div className="bg-gray-900 border-l border-gray-800 h-full overflow-y-auto">
-          <div className="sticky top-0 z-10 p-6 border-b border-gray-800 bg-gray-900/95 backdrop-blur-sm">
+        <div
+          className={`border-l h-full overflow-y-auto ${
+            theme === 'dark'
+              ? 'bg-gray-900 border-gray-800'
+              : 'bg-white border-gray-200'
+          }`}
+        >
+          <div
+            className={`sticky top-0 z-10 p-6 border-b backdrop-blur-sm ${
+              theme === 'dark'
+                ? 'border-gray-800 bg-gray-900/95'
+                : 'border-gray-200 bg-white'
+            }`}
+          >
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold text-white mb-1">Call Details</h2>
-                <p className="text-gray-400 text-sm">ID: {callId}</p>
+                <h2 className={`text-2xl font-bold mb-1 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Call Details
+                </h2>
+                <p className={`text-sm ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  ID: {callId}
+                </p>
               </div>
-              <button 
+              <button
                 onClick={onClose}
-                className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-all hover:rotate-90 duration-300"
+                className={`p-2 rounded-lg transition-all hover:rotate-90 duration-300 ${
+                  theme === 'dark'
+                    ? 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                    : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                }`}
               >
                 <X size={24} />
               </button>
@@ -105,38 +133,94 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
           <div className="p-6 space-y-6">
             {call && (
               <>
-                <div className="rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 p-6">
+                <div
+                  className={`rounded-xl border p-6 ${
+                    theme === 'dark'
+                      ? 'bg-gradient-to-br from-gray-800 to-gray-900 border-gray-700'
+                      : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-sm'
+                  }`}
+                >
                   <div className="flex items-start gap-4 mb-4">
-                    <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30">
-                      <User className="text-blue-400" size={24} />
+                    <div
+                      className={`p-3 rounded-xl border ${
+                        theme === 'dark'
+                          ? 'bg-blue-500/10 border-blue-500/30'
+                          : 'bg-blue-50 border-blue-200'
+                      }`}
+                    >
+                      <User
+                        className={theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}
+                        size={24}
+                      />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl font-bold text-white mb-1">{call.contact_name || 'Unknown Contact'}</h3>
-                      <p className="text-gray-400 font-mono text-sm">{call.from_number}</p>
+                      <h3 className={`text-xl font-bold mb-1 ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {call.contact_name || 'Unknown Contact'}
+                      </h3>
+                      <p className={`font-mono text-sm ${
+                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        {call.from_number}
+                      </p>
                     </div>
-                    <div className="px-3 py-1 rounded-md bg-green-500/10 border border-green-500/30">
-                      <span className="text-green-400 text-sm font-medium capitalize">{call.status}</span>
+                    <div
+                      className={`px-3 py-1 rounded-md border ${
+                        theme === 'dark'
+                          ? 'bg-green-500/10 border-green-500/30'
+                          : 'bg-green-100 border-green-300'
+                      }`}
+                    >
+                      <span className={`text-sm font-medium capitalize ${
+                        theme === 'dark' ? 'text-green-400' : 'text-green-700'
+                      }`}>
+                        {call.status}
+                      </span>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div className="space-y-2">
-                      <p className="text-gray-500">From</p>
-                      <p className="text-white font-mono">{call.from_number}</p>
+                      <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}>
+                        From
+                      </p>
+                      <p className={`font-mono ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {call.from_number}
+                      </p>
                     </div>
                     <div className="space-y-2">
-                      <p className="text-gray-500">To</p>
-                      <p className="text-white font-mono">{call.to_number}</p>
+                      <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}>
+                        To
+                      </p>
+                      <p className={`font-mono ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
+                        {call.to_number}
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-gray-800/50 border border-gray-700 p-6">
-                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                    <Clock className="text-purple-400" size={20} />
+                <div
+                  className={`rounded-xl border p-6 ${
+                    theme === 'dark'
+                      ? 'bg-gray-800/50 border-gray-700'
+                      : 'bg-gray-50 border-gray-200'
+                  }`}
+                >
+                  <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    <Clock
+                      className={theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}
+                      size={20}
+                    />
                     Call Timeline
                   </h3>
-                  
+
                   <div className="space-y-4">
                     {[
                       { label: 'Initiated', time: call.started_at, icon: Phone, color: 'blue' },
@@ -144,14 +228,38 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                       { label: 'Ended', time: call.ended_at, icon: Clock, color: 'gray' }
                     ].map((event, i) => {
                       const Icon = event.icon;
+                      const colorClasses = {
+                        blue: {
+                          bg: theme === 'dark' ? 'bg-blue-500/10' : 'bg-blue-50',
+                          border: theme === 'dark' ? 'border-blue-500/30' : 'border-blue-200',
+                          text: theme === 'dark' ? 'text-blue-400' : 'text-blue-600'
+                        },
+                        green: {
+                          bg: theme === 'dark' ? 'bg-green-500/10' : 'bg-green-50',
+                          border: theme === 'dark' ? 'border-green-500/30' : 'border-green-200',
+                          text: theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                        },
+                        gray: {
+                          bg: theme === 'dark' ? 'bg-gray-500/10' : 'bg-gray-50',
+                          border: theme === 'dark' ? 'border-gray-500/30' : 'border-gray-200',
+                          text: theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }
+                      };
+                      const colors = colorClasses[event.color as keyof typeof colorClasses] || colorClasses.blue;
                       return (
                         <div key={i} className="flex items-center gap-4">
-                          <div className={`p-2 rounded-lg bg-${event.color}-500/10 border border-${event.color}-500/30`}>
-                            <Icon className={`text-${event.color}-400`} size={16} />
+                          <div className={`p-2 rounded-lg border ${colors.bg} ${colors.border}`}>
+                            <Icon className={colors.text} size={16} />
                           </div>
                           <div className="flex-1">
-                            <p className="text-white font-medium">{event.label}</p>
-                            <p className="text-gray-400 text-sm">
+                            <p className={`font-medium ${
+                              theme === 'dark' ? 'text-white' : 'text-gray-900'
+                            }`}>
+                              {event.label}
+                            </p>
+                            <p className={`text-sm ${
+                              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                            }`}>
                               {event.time ? new Date(event.time).toLocaleString() : 'N/A'}
                             </p>
                           </div>
@@ -160,10 +268,16 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                     })}
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-gray-700">
+                  <div className={`mt-4 pt-4 border-t ${
+                    theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+                  }`}>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-400">Total Duration</span>
-                      <span className="text-white font-bold text-lg">
+                      <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                        Total Duration
+                      </span>
+                      <span className={`font-bold text-lg ${
+                        theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      }`}>
                         {formatTime(call.duration_seconds || 0)}
                       </span>
                     </div>
@@ -171,14 +285,31 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                 </div>
 
                 {call.recording_url && (
-                  <div className="rounded-xl bg-gradient-to-br from-purple-900/20 to-pink-900/20 border border-purple-500/30 p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                      <Volume2 className="text-purple-400" size={20} />
+                  <div
+                    className={`rounded-xl border p-6 ${
+                      theme === 'dark'
+                        ? 'bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-500/30'
+                        : 'bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200 shadow-sm'
+                    }`}
+                  >
+                    <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${
+                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      <Volume2
+                        className={theme === 'dark' ? 'text-purple-400' : 'text-purple-600'}
+                        size={20}
+                      />
                       Recording
                     </h3>
                     <audio ref={audioRef} src={call.recording_url} preload="metadata" />
 
-                    <div className="mb-4 h-16 rounded-lg bg-gray-900/50 border border-gray-700 flex items-center px-4">
+                    <div
+                      className={`mb-4 h-16 rounded-lg border flex items-center px-4 ${
+                        theme === 'dark'
+                          ? 'bg-gray-900/50 border-gray-700'
+                          : 'bg-gray-100 border-gray-200'
+                      }`}
+                    >
                       <div className="flex-1 flex items-end gap-1 h-12">
                         {Array.from({ length: 50 }).map((_, i) => (
                           <div
@@ -186,7 +317,14 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                             className="flex-1 rounded-t transition-all duration-150"
                             style={{
                               height: `${Math.random() * 100}%`,
-                              backgroundColor: i / 50 < currentTime / duration ? '#a78bfa' : '#374151',
+                              backgroundColor:
+                                i / 50 < currentTime / duration
+                                  ? theme === 'dark'
+                                    ? '#a78bfa'
+                                    : '#9333ea'
+                                  : theme === 'dark'
+                                  ? '#374151'
+                                  : '#d1d5db',
                               opacity: i / 50 < currentTime / duration ? 1 : 0.3
                             }}
                           />
@@ -201,11 +339,21 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                         max={duration || 0}
                         value={currentTime}
                         onChange={handleSeek}
-                        className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500 [&::-webkit-slider-thumb]:cursor-pointer"
+                        className={`w-full h-2 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500 [&::-webkit-slider-thumb]:cursor-pointer ${
+                          theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
+                        }`}
                       />
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-400">{formatTime(currentTime)}</span>
-                        <span className="text-sm text-gray-400">{formatTime(duration)}</span>
+                        <span className={`text-sm ${
+                          theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}>
+                          {formatTime(currentTime)}
+                        </span>
+                        <span className={`text-sm ${
+                          theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}>
+                          {formatTime(duration)}
+                        </span>
                       </div>
                       <div className="flex gap-3">
                         <button
@@ -217,7 +365,13 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                             {isPlaying ? 'Pause' : 'Play'}
                           </span>
                         </button>
-                        <button className="px-6 py-3 rounded-xl bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white transition-all hover:scale-105">
+                        <button
+                          className={`px-6 py-3 rounded-xl border transition-all hover:scale-105 ${
+                            theme === 'dark'
+                              ? 'bg-gray-800 border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white'
+                              : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900 shadow-sm'
+                          }`}
+                        >
                           <Download size={20} />
                         </button>
                       </div>
@@ -226,13 +380,32 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                 )}
 
                 {call.transcript && (
-                  <div className="rounded-xl bg-gray-800/50 border border-gray-700 p-6">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                      <FileText className="text-blue-400" size={20} />
+                  <div
+                    className={`rounded-xl border p-6 ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/50 border-gray-700'
+                        : 'bg-gray-50 border-gray-200'
+                    }`}
+                  >
+                    <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${
+                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      <FileText
+                        className={theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}
+                        size={20}
+                      />
                       Transcript
                     </h3>
-                    <div className="p-4 rounded-lg bg-gray-900/50 border border-gray-700">
-                      <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">
+                    <div
+                      className={`p-4 rounded-lg border ${
+                        theme === 'dark'
+                          ? 'bg-gray-900/50 border-gray-700'
+                          : 'bg-white border-gray-200'
+                      }`}
+                    >
+                      <p className={`leading-relaxed whitespace-pre-wrap ${
+                        theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
                         {call.transcript}
                       </p>
                     </div>
