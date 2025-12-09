@@ -90,7 +90,7 @@ export default function VoiceAgentPage() {
           {/* Voice Agent Status or Request Card */}
           <div className="mb-8">
             {voiceAgent ? (
-              <VoiceAgentStatusCard />
+              <VoiceAgentStatusCard onConfigure={() => setShowConfigSheet(true)} />
             ) : voiceAgentRequest ? (
               <VoiceAgentRequestCard />
             ) : (
