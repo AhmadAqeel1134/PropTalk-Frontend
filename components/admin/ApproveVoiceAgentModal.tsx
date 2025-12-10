@@ -44,8 +44,8 @@ export default function ApproveVoiceAgentModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-md w-full animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-md w-full animate-in zoom-in-95 duration-300 shadow-2xl">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">

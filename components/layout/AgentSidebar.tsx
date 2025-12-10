@@ -12,11 +12,16 @@ import {
   LogOut,
   Menu,
   X,
+  Phone,
+  Radio,
 } from 'lucide-react'
+import { useTheme } from '@/contexts/ThemeContext'
+import ThemeToggle from '@/components/admin/ThemeToggle'
 
 const AgentSidebar: React.FC = () => {
   const pathname = usePathname()
   const router = useRouter()
+  const { theme } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
 
   const navigation = [
@@ -41,6 +46,16 @@ const AgentSidebar: React.FC = () => {
       icon: FileText,
     },
     {
+      name: 'Call History',
+      href: '/agent/calls',
+      icon: Phone,
+    },
+    {
+      name: 'Voice Agent',
+      href: '/agent/voice-agent',
+      icon: Radio,
+    },
+    {
       name: 'Profile',
       href: '/agent/profile',
       icon: User,
@@ -59,7 +74,11 @@ const AgentSidebar: React.FC = () => {
       <div className="lg:hidden fixed top-4 left-4 z-50">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="p-2 bg-gray-900 border border-gray-800 rounded-lg text-gray-400 hover:text-white"
+          className={`p-2 border rounded-lg transition-all duration-200 ${
+            theme === 'dark'
+              ? 'bg-gray-900 border-gray-800 text-gray-400 hover:text-white'
+              : 'bg-white border-gray-200 text-gray-600 hover:text-gray-900 shadow-sm'
+          }`}
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -71,15 +90,15 @@ const AgentSidebar: React.FC = () => {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
         style={{
-          background: 'rgba(10, 15, 25, 0.95)',
-          borderRight: '1px solid rgba(77, 184, 255, 0.2)',
+          background: theme === 'dark' ? 'rgba(10, 15, 25, 0.95)' : 'rgba(255, 255, 255, 0.98)',
+          borderRight: theme === 'dark' ? '1px solid rgba(77, 184, 255, 0.2)' : '1px solid rgba(229, 231, 235, 0.8)',
         }}
       >
         <div className="h-full flex flex-col p-6">
           {/* Logo */}
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-white">PropTalk</h1>
-            <p className="text-sm text-gray-400">Agent Portal</p>
+            <h1 className={`text-2xl font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>PropTalk</h1>
+            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>Agent Portal</p>
           </div>
 
           {/* Navigation */}
@@ -95,8 +114,12 @@ const AgentSidebar: React.FC = () => {
                   onClick={() => setIsOpen(false)}
                   className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                     isActive
-                      ? 'bg-gray-800 border border-gray-700 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-900'
+                      ? theme === 'dark'
+                        ? 'bg-gray-800 border border-gray-700 text-white'
+                        : 'bg-blue-50 border border-blue-200 text-blue-700 shadow-sm'
+                      : theme === 'dark'
+                      ? 'text-gray-400 hover:text-white hover:bg-gray-900'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                   }`}
                 >
                   <Icon size={20} />
@@ -106,10 +129,19 @@ const AgentSidebar: React.FC = () => {
             })}
           </nav>
 
+          {/* Theme Toggle */}
+          <div className="mb-4">
+            <ThemeToggle />
+          </div>
+
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-900 transition-all duration-200"
+            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+              theme === 'dark'
+                ? 'text-gray-400 hover:text-white hover:bg-gray-900'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+            }`}
           >
             <LogOut size={20} />
             <span className="font-medium">Logout</span>
@@ -120,7 +152,9 @@ const AgentSidebar: React.FC = () => {
       {/* Overlay for mobile */}
       {isOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30"
+          className={`lg:hidden fixed inset-0 z-30 ${
+            theme === 'dark' ? 'bg-black/50' : 'bg-black/30'
+          }`}
           onClick={() => setIsOpen(false)}
         />
       )}

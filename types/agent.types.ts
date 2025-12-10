@@ -74,3 +74,14 @@ export interface Document {
   created_at: string
   updated_at?: string
 }
+
+export interface CallStatistics {
+  period: 'day' | 'week' | 'month'
+  total_calls: number
+  completed_calls: number
+  failed_calls: number
+  total_duration_seconds: number
+  average_duration_seconds: number
+  calls_by_status: Record<string, number>
+  calls_by_day: { date: string; count: number }[]
+}

@@ -11,8 +11,10 @@ import { useQuery } from '@tanstack/react-query'
 import { Phone, Settings, History } from 'lucide-react'
 import PageTransition from '@/components/common/PageTransition'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
+import { useTheme } from '@/contexts/ThemeContext'
 
 export default function VoiceAgentPage() {
+  const { theme } = useTheme()
   const [showConfigSheet, setShowConfigSheet] = useState(false)
   const [showCallModal, setShowCallModal] = useState(false)
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null)
@@ -51,7 +53,14 @@ export default function VoiceAgentPage() {
   if (loadingRequest || loadingAgent) {
     return (
       <PageTransition>
-        <div className="min-h-screen p-6 md:p-8" style={{ background: 'rgba(10, 15, 25, 0.95)' }}>
+        <div
+          className="min-h-screen p-6 md:p-8"
+          style={
+            theme === 'dark'
+              ? { background: 'rgba(10, 15, 25, 0.95)' }
+              : { background: 'rgba(248, 250, 252, 0.98)' }
+          }
+        >
           <LoadingSpinner />
         </div>
       </PageTransition>
@@ -60,12 +69,25 @@ export default function VoiceAgentPage() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen p-6 md:p-8" style={{ background: 'rgba(10, 15, 25, 0.95)' }}>
+      <div
+        className="min-h-screen p-6 md:p-8"
+        style={
+          theme === 'dark'
+            ? { background: 'rgba(10, 15, 25, 0.95)' }
+            : { background: 'rgba(248, 250, 252, 0.98)' }
+        }
+      >
         <div className="max-w-full">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-3xl md:text-4xl font-semibold text-white mb-2">Voice Agent</h1>
-              <p className="text-gray-400">Manage your AI-powered calling assistant</p>
+              <h1 className={`text-3xl md:text-4xl font-semibold mb-2 ${
+                theme === 'dark' ? 'text-white' : 'text-gray-900'
+              }`}>
+                Voice Agent
+              </h1>
+              <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                Manage your AI-powered calling assistant
+              </p>
             </div>
             {voiceAgent && (
               <div className="flex gap-3">
@@ -78,7 +100,11 @@ export default function VoiceAgentPage() {
                 </button>
                 <button
                   onClick={() => setShowConfigSheet(true)}
-                  className="flex items-center gap-2 bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white px-6 py-3 rounded-lg transition-all"
+                  className={`flex items-center gap-2 border px-6 py-3 rounded-lg transition-all ${
+                    theme === 'dark'
+                      ? 'bg-gray-800 border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white'
+                      : 'bg-white border-gray-200 hover:border-blue-400 text-gray-700 hover:text-blue-700 shadow-sm'
+                  }`}
                 >
                   <Settings className="size-5" />
                   Configure
@@ -90,14 +116,30 @@ export default function VoiceAgentPage() {
           {/* Voice Agent Status or Request Card */}
           <div className="mb-8">
             {voiceAgent ? (
-              <VoiceAgentStatusCard />
+              <VoiceAgentStatusCard onConfigure={() => setShowConfigSheet(true)} />
             ) : voiceAgentRequest ? (
               <VoiceAgentRequestCard />
             ) : (
-              <div className="bg-gray-900 border border-gray-800 rounded-lg p-8 text-center">
-                <Phone className="size-16 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-white mb-2">No Voice Agent</h3>
-                <p className="text-gray-400 mb-6">Request a voice agent to start automating your calls</p>
+              <div
+                className={`border rounded-lg p-8 text-center ${
+                  theme === 'dark'
+                    ? 'bg-gray-900 border-gray-800'
+                    : 'bg-white border-gray-200 shadow-sm'
+                }`}
+              >
+                <Phone className={`size-16 mx-auto mb-4 ${
+                  theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
+                }`} />
+                <h3 className={`text-xl font-semibold mb-2 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  No Voice Agent
+                </h3>
+                <p className={`mb-6 ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Request a voice agent to start automating your calls
+                </p>
                 <button
                   onClick={() => window.location.href = '/agent/voice-agent/request'}
                   className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white px-8 py-3 rounded-lg transition-all"
@@ -112,14 +154,20 @@ export default function VoiceAgentPage() {
           {voiceAgent && (
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-semibold text-white flex items-center gap-2">
+                <h2 className={`text-2xl font-semibold flex items-center gap-2 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
                   <History className="size-6" />
                   Call History
                 </h2>
               </div>
               <CallHistoryList
-                onViewDetails={(callId) => setSelectedCallId(callId)}
-                onListen={(url) => console.log('Play recording:', url)}
+                onViewDetails={(id) => setSelectedCallId(id)}
+                onListen={(id) => setSelectedCallId(id)}
+                enforceUniformHeight
+                hideTranscriptIconButton
+                forceTranscriptButtonVisible
+                forceEnableActions
               />
             </div>
           )}

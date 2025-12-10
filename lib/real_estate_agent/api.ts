@@ -216,6 +216,13 @@ export const changePassword = async (data: { old_password: string; new_password:
   })
 }
 
+export const getCallStatistics = async (period: 'day' | 'week' | 'month' = 'week') => {
+  const queryParams = new URLSearchParams()
+  queryParams.append('period', period)
+  const qs = queryParams.toString()
+  return authenticatedFetch(`/agent/calls/stats${qs ? `?${qs}` : ''}`)
+}
+
 // Voice Agent API functions
 export const requestVoiceAgent = async () => {
   return authenticatedFetch('/agent/voice-agent/request', {

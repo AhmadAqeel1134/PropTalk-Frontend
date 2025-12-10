@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useAgents } from '@/hooks/useAdmin';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useTheme } from '@/contexts/ThemeContext';
 import AgentCard from './AgentCard';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ErrorMessage from '@/components/common/ErrorMessage';
@@ -10,6 +11,7 @@ import PageTransition from '@/components/common/PageTransition';
 import { Search, Users, RefreshCw } from 'lucide-react';
 
 const AgentsList: React.FC = () => {
+  const { theme } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [verificationFilter, setVerifiedFilter] = useState<'all' | 'verified' | 'unverified'>('all');
@@ -64,43 +66,79 @@ const AgentsList: React.FC = () => {
     <PageTransition>
       <div
         className="min-h-screen p-4 md:p-8"
-        style={{
-          background: 'rgba(10, 15, 25, 0.95)',
-        }}
+        style={
+          theme === 'dark'
+            ? { background: 'rgba(10, 15, 25, 0.95)' }
+            : { background: 'rgba(248, 250, 252, 0.98)' }
+        }
       >
         <div className="max-w-full">
-        {/* Header */}
+        {/* Header Section */}
         <div
-          className={`mb-8 flex items-center justify-between transition-all duration-500 ease-out ${
+          className={`mb-8 transition-all duration-500 ease-out ${
             isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
           }`}
         >
-          <div>
-            <h1 className="text-3xl md:text-4xl font-semibold text-white mb-2">
-              Agents
-            </h1>
-            <p className="text-gray-400">
-              {agents ? `${agents.length} ${agents.length === 1 ? 'Agent' : 'Agents'} Found` : 'Loading...'}
-            </p>
+          <div
+            className={`rounded-2xl p-6 md:p-8 backdrop-blur-sm shadow-xl border ${
+              theme === 'dark'
+                ? 'bg-gradient-to-br from-gray-900/80 to-gray-950/80 border-gray-800/50'
+                : 'bg-gradient-to-br from-white to-gray-50 border-gray-300 shadow-blue-50/50'
+            }`}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`p-2 rounded-xl border ${
+                    theme === 'dark'
+                      ? 'bg-gray-800/60 border-gray-700/50'
+                      : 'bg-blue-50 border-blue-200 shadow-sm'
+                  }`}
+                >
+                  <Users size={24} className={theme === 'dark' ? 'text-gray-300' : 'text-blue-600'} />
+                </div>
+                <div>
+                  <h1 className={`text-3xl md:text-4xl font-bold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                    Agents
+                  </h1>
+                  <p className={`text-sm md:text-base ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {agents ? `${agents.length} ${agents.length === 1 ? 'Agent' : 'Agents'} Found` : 'Loading...'}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => refetch()}
+                disabled={isFetching}
+                className={`p-3 rounded-xl border transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl self-start sm:self-auto ${
+                  theme === 'dark'
+                    ? 'bg-gray-800/60 border-gray-700/50 text-gray-400 hover:border-gray-600 hover:text-white'
+                    : 'bg-white border-gray-300 text-gray-600 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-gray-200/50'
+                }`}
+                title="Refresh agents list"
+              >
+                <RefreshCw size={20} className={isFetching ? 'animate-spin' : ''} />
+              </button>
+            </div>
           </div>
-            <button
-              onClick={() => refetch()}
-              disabled={isFetching}
-              className="p-3 rounded-lg bg-gray-900 border border-gray-800 text-gray-400 hover:border-gray-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Refresh agents list"
-            >
-              <RefreshCw size={20} className={isFetching ? 'animate-spin' : ''} />
-            </button>
         </div>
 
         {/* Filters Section */}
-        <div className="mb-8 rounded-lg p-6 bg-gray-900 border border-gray-800">
+        <div
+          className={`mb-8 rounded-2xl p-6 backdrop-blur-sm shadow-xl border opacity-0 ${
+            theme === 'dark'
+              ? 'bg-gray-900/60 border-gray-800/50'
+              : 'bg-white border-gray-300 shadow-blue-50/30'
+          }`}
+          style={{ animation: 'fadeInUp 0.9s cubic-bezier(0.4, 0, 0.2, 1) 150ms forwards' }}
+        >
           <div className="flex flex-col lg:flex-row gap-4">
             {/* Search */}
             <div className="flex-1">
               <div className="relative">
                 <Search
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                  className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                  }`}
                   size={18}
                 />
                 <input
@@ -108,7 +146,11 @@ const AgentsList: React.FC = () => {
                   placeholder="Search by name, email, or company..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg text-white placeholder-gray-500 bg-gray-800 border border-gray-700 focus:outline-none focus:border-gray-600 transition-colors duration-200"
+                  className={`w-full pl-12 pr-4 py-3 rounded-xl placeholder-gray-500 border focus:outline-none transition-all duration-200 ${
+                    theme === 'dark'
+                      ? 'text-white bg-gray-800/60 border-gray-700/50 focus:border-gray-600 focus:bg-gray-800/80'
+                      : 'text-gray-900 bg-white border-gray-300 focus:border-blue-400 focus:bg-white shadow-sm'
+                  }`}
                 />
               </div>
             </div>
@@ -118,7 +160,11 @@ const AgentsList: React.FC = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="px-4 py-3 rounded-lg text-white bg-gray-800 border border-gray-700 focus:outline-none focus:border-gray-600 cursor-pointer transition-colors duration-200"
+                className={`px-4 py-3 rounded-xl border focus:outline-none cursor-pointer transition-all duration-200 w-full lg:w-auto ${
+                  theme === 'dark'
+                    ? 'text-white bg-gray-800/60 border-gray-700/50 focus:border-gray-600 focus:bg-gray-800/80'
+                    : 'text-gray-900 bg-white border-gray-300 focus:border-blue-400 focus:bg-white shadow-sm'
+                }`}
               >
                 <option value="all">All Status</option>
                 <option value="active">Active</option>
@@ -131,7 +177,11 @@ const AgentsList: React.FC = () => {
               <select
                 value={verificationFilter}
                 onChange={(e) => setVerifiedFilter(e.target.value as any)}
-                className="px-4 py-3 rounded-lg text-white bg-gray-800 border border-gray-700 focus:outline-none focus:border-gray-600 cursor-pointer transition-colors duration-200"
+                className={`px-4 py-3 rounded-xl border focus:outline-none cursor-pointer transition-all duration-200 w-full lg:w-auto ${
+                  theme === 'dark'
+                    ? 'text-white bg-gray-800/60 border-gray-700/50 focus:border-gray-600 focus:bg-gray-800/80'
+                    : 'text-gray-900 bg-white border-gray-300 focus:border-blue-400 focus:bg-white shadow-sm'
+                }`}
               >
                 <option value="all">All Verification</option>
                 <option value="verified">Verified</option>
@@ -143,7 +193,11 @@ const AgentsList: React.FC = () => {
             {(searchTerm || statusFilter !== 'all' || verificationFilter !== 'all') && (
               <button
                 onClick={handleClearFilters}
-                className="px-4 py-3 rounded-lg text-sm font-medium text-gray-300 bg-gray-800 border border-gray-700 hover:border-gray-600 hover:text-white transition-all duration-200 whitespace-nowrap"
+                className={`px-5 py-3 rounded-xl text-sm font-medium border transition-all duration-200 whitespace-nowrap shadow-lg hover:shadow-xl ${
+                  theme === 'dark'
+                    ? 'text-gray-300 bg-gray-800/60 border-gray-700/50 hover:border-gray-600 hover:text-white hover:bg-gray-800/80'
+                    : 'text-gray-700 bg-white border-gray-300 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-gray-200/50'
+                }`}
               >
                 Clear Filters
               </button>
@@ -155,24 +209,40 @@ const AgentsList: React.FC = () => {
         {isLoading ? (
           <LoadingSpinner text="Loading agents..." />
         ) : !agents || agents.length === 0 ? (
-          <div className="rounded-lg p-12 bg-gray-900 border border-gray-800 text-center">
-            <Users size={48} className="text-gray-400 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-white mb-2">No Agents Found</h3>
-            <p className="text-gray-400">
+          <div
+            className={`rounded-2xl p-12 border text-center backdrop-blur-sm shadow-xl ${
+              theme === 'dark'
+                ? 'bg-gray-900/60 border-gray-800/50'
+                : 'bg-white border-gray-300 shadow-blue-50/30'
+            }`}
+          >
+            <div
+              className={`inline-flex items-center justify-center w-20 h-20 rounded-full border mb-6 mx-auto ${
+                theme === 'dark'
+                  ? 'bg-gray-800/60 border-gray-700/50'
+                  : 'bg-blue-50 border-blue-200 shadow-sm'
+              }`}
+            >
+              <Users size={40} className={theme === 'dark' ? 'text-gray-400' : 'text-blue-400'} />
+            </div>
+            <h3 className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+              No Agents Found
+            </h3>
+            <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
               {debouncedSearchTerm || statusFilter !== 'all' || verificationFilter !== 'all'
                 ? 'Try adjusting your search or filters'
                 : 'No agents registered yet'}
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {agents.map((agent, index) => (
               <div
                 key={agent.id}
-                className={`transition-all duration-500 ease-out ${
-                  isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-                }`}
-                style={{ transitionDelay: `${index * 50}ms` }}
+                className="opacity-0"
+                style={{ 
+                  animation: `fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) ${index * 150}ms forwards`
+                }}
               >
                 <AgentCard
                   agent={agent}

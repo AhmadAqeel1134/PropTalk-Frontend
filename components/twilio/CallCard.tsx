@@ -4,7 +4,8 @@
 // Purpose: Individual call card component
 
 import React from 'react';
-import { PhoneIncoming, PhoneOutgoing, Clock, Play, Eye, CheckCircle, XCircle, PhoneOff } from 'lucide-react';
+import { PhoneIncoming, PhoneOutgoing, Clock, Play, Eye, CheckCircle, XCircle, PhoneOff, FileText } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface Call {
   id: string;
@@ -17,21 +18,83 @@ interface Call {
   recording_url: string | null;
   started_at: string | null;
   created_at: string;
+  transcript?: string | null;
+  transcript_json?: any[] | null;
+  user_pov_summary?: string | null;
 }
 
 interface CallCardProps {
   call: Call;
   onViewDetails: (id: string) => void;
-  onListen?: (recordingUrl: string) => void;
+  onListen?: (id: string) => void;
+  onViewTranscript?: (id: string) => void;
+  hideTranscriptIconButton?: boolean;
+  hideTranscriptIconWhenNoAnswer?: boolean;
+  disableActionsOnNoAnswer?: boolean;
+  forceActionsVisibleOnNoAnswer?: boolean;
+  enforceUniformHeight?: boolean;
+  forceTranscriptButtonVisible?: boolean;
+  forceEnableActions?: boolean;
 }
 
-export default function CallCard({ call, onViewDetails, onListen }: CallCardProps) {
+export default function CallCard({
+  call,
+  onViewDetails,
+  onListen,
+  onViewTranscript,
+  hideTranscriptIconButton = false,
+  hideTranscriptIconWhenNoAnswer = false,
+  disableActionsOnNoAnswer = false,
+  forceActionsVisibleOnNoAnswer = false,
+  enforceUniformHeight = false,
+  forceTranscriptButtonVisible = false,
+  forceEnableActions = false
+}: CallCardProps) {
+  const { theme } = useTheme();
+  const isNoAnswerDisabled = forceEnableActions ? false : (disableActionsOnNoAnswer && call.status === 'no-answer');
+  const transcriptAvailable = forceEnableActions ? true : !!(call.transcript_json?.length || call.transcript);
+  const listenAvailable = forceEnableActions ? true : !!call.recording_url;
+  const showTranscriptAction = forceEnableActions || transcriptAvailable || forceTranscriptButtonVisible || (isNoAnswerDisabled && forceActionsVisibleOnNoAnswer);
+  const showListenAction = forceEnableActions || listenAvailable || (isNoAnswerDisabled && forceActionsVisibleOnNoAnswer);
+  const transcriptDisabled = forceEnableActions ? false : (isNoAnswerDisabled && !forceTranscriptButtonVisible);
+  const listenDisabled = forceEnableActions ? false : (isNoAnswerDisabled || !listenAvailable);
+  
   const statusConfig = {
-    completed: { icon: CheckCircle, color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20', label: 'Completed' },
-    failed: { icon: XCircle, color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', label: 'Failed' },
-    busy: { icon: PhoneOff, color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', label: 'Busy' },
-    'no-answer': { icon: PhoneOff, color: 'text-gray-400', bg: 'bg-gray-500/10', border: 'border-gray-500/20', label: 'No Answer' },
-    'in-progress': { icon: Clock, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', label: 'In Progress' }
+    completed: {
+      icon: CheckCircle,
+      color: theme === 'dark' ? 'text-green-400' : 'text-green-700',
+      bg: theme === 'dark' ? 'bg-green-500/10' : 'bg-green-100',
+      border: theme === 'dark' ? 'border-green-500/20' : 'border-green-300',
+      label: 'Completed'
+    },
+    failed: {
+      icon: XCircle,
+      color: theme === 'dark' ? 'text-red-400' : 'text-red-700',
+      bg: theme === 'dark' ? 'bg-red-500/10' : 'bg-red-100',
+      border: theme === 'dark' ? 'border-red-500/20' : 'border-red-300',
+      label: 'Failed'
+    },
+    busy: {
+      icon: PhoneOff,
+      color: theme === 'dark' ? 'text-yellow-400' : 'text-yellow-700',
+      bg: theme === 'dark' ? 'bg-yellow-500/10' : 'bg-yellow-100',
+      border: theme === 'dark' ? 'border-yellow-500/20' : 'border-yellow-300',
+      label: 'Busy'
+    },
+    'no-answer': {
+      icon: PhoneOff,
+      color: theme === 'dark' ? 'text-gray-400' : 'text-gray-700',
+      bg: theme === 'dark' ? 'bg-gray-500/10' : 'bg-gray-100',
+      border: theme === 'dark' ? 'border-gray-500/20' : 'border-gray-300',
+      label: 'No Answer'
+    },
+    'in-progress': {
+      icon: Clock,
+      color: theme === 'dark' ? 'text-blue-400' : 'text-blue-700',
+      bg: theme === 'dark' ? 'bg-blue-500/10' : 'bg-blue-100',
+      border: theme === 'dark' ? 'border-blue-500/20' : 'border-blue-300',
+      label: 'In Progress'
+    }
   };
 
   const config = statusConfig[call.status] || statusConfig.completed;
@@ -50,26 +113,44 @@ export default function CallCard({ call, onViewDetails, onListen }: CallCardProp
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-xl bg-gray-900 border border-gray-800 hover:border-gray-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/20">
-      <div className="p-6">
+    <div
+      className={`group relative overflow-hidden rounded-xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg ${
+        theme === 'dark'
+          ? 'bg-gray-900 border-gray-800 hover:border-gray-700 hover:shadow-black/20'
+          : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-blue-100/50 shadow-sm'
+      } ${enforceUniformHeight ? 'h-full min-h-[340px]' : ''}`}
+    >
+      <div className="p-6 h-full flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${config.bg} border ${config.border}`}>
+            <div className={`p-2 rounded-lg border ${config.bg} ${config.border}`}>
               {call.direction === 'inbound' ? (
-                <PhoneIncoming className="text-green-400" size={20} />
+                <PhoneIncoming
+                  className={theme === 'dark' ? 'text-green-400' : 'text-green-600'}
+                  size={20}
+                />
               ) : (
-                <PhoneOutgoing className="text-blue-400" size={20} />
+                <PhoneOutgoing
+                  className={theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}
+                  size={20}
+                />
               )}
             </div>
             <div>
-              <h3 className="text-white font-semibold">
+              <h3 className={`font-semibold ${
+                theme === 'dark' ? 'text-white' : 'text-gray-900'
+              }`}>
                 {call.contact_name || call.from_number}
               </h3>
-              <p className="text-gray-400 text-xs font-mono">{call.from_number}</p>
+              <p className={`text-xs font-mono ${
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                {call.from_number}
+              </p>
             </div>
           </div>
-          <div className={`px-2.5 py-1 rounded-md text-xs font-medium ${config.color} ${config.bg} border ${config.border}`}>
+          <div className={`px-2.5 py-1 rounded-md text-xs font-medium border ${config.color} ${config.bg} ${config.border}`}>
             <div className="flex items-center gap-1">
               <StatusIcon size={12} />
               {config.label}
@@ -80,35 +161,128 @@ export default function CallCard({ call, onViewDetails, onListen }: CallCardProp
         {/* Details */}
         <div className="space-y-2 mb-4">
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Duration</span>
-            <span className="text-white font-medium">{formatDuration(call.duration_seconds)}</span>
+            <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}>
+              Duration
+            </span>
+            <span className={`font-medium ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}>
+              {formatDuration(call.duration_seconds)}
+            </span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Date</span>
-            <span className="text-gray-400">{formatDate(call.started_at || call.created_at)}</span>
+            <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}>
+              Date
+            </span>
+            <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+              {formatDate(call.started_at || call.created_at)}
+            </span>
           </div>
           <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Direction</span>
-            <span className={`font-medium ${call.direction === 'inbound' ? 'text-green-400' : 'text-blue-400'}`}>
+            <span className={theme === 'dark' ? 'text-gray-500' : 'text-gray-500'}>
+              Direction
+            </span>
+            <span className={`font-medium ${
+              call.direction === 'inbound'
+                ? theme === 'dark'
+                  ? 'text-green-400'
+                  : 'text-green-700'
+                : theme === 'dark'
+                ? 'text-blue-400'
+                : 'text-blue-700'
+            }`}>
               {call.direction === 'inbound' ? 'Inbound' : 'Outbound'}
             </span>
           </div>
         </div>
 
+          <div
+            className={`mb-4 rounded-lg border p-3 text-sm ${
+              theme === 'dark'
+                ? 'bg-purple-500/5 border-purple-500/20 text-gray-200'
+                : 'bg-purple-50 border-purple-200 text-gray-800'
+            }`}
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-purple-500">User POV</p>
+          <p className={`mt-1 leading-relaxed ${
+            call.user_pov_summary
+              ? ''
+              : theme === 'dark'
+                ? 'text-gray-400'
+                : 'text-gray-500'
+          }`}>
+            {call.user_pov_summary || 'User POV not available'}
+          </p>
+          </div>
+
         {/* Actions */}
-        <div className="flex gap-2">
-          {call.recording_url && (
+        <div className="flex gap-2 mt-auto">
+          {!hideTranscriptIconButton && !(hideTranscriptIconWhenNoAnswer && call.status === 'no-answer') && (
+          <button
+              onClick={() => {
+                if (isNoAnswerDisabled) return;
+                onViewTranscript?.(call.id);
+              }}
+              disabled={isNoAnswerDisabled}
+            className={`px-3 py-2 rounded-lg border font-medium transition-all text-sm flex items-center justify-center gap-2 ${
+              theme === 'dark'
+                ? 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 text-blue-300 hover:text-blue-200'
+                : 'bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-700 hover:text-blue-800 shadow-sm'
+            }`}
+              aria-disabled={isNoAnswerDisabled}
+            title="View transcript"
+          >
+            <FileText size={16} />
+          </button>
+          )}
+          {showListenAction && (
             <button
-              onClick={() => onListen?.(call.recording_url!)}
-              className="flex-1 px-4 py-2 rounded-lg bg-purple-600/10 border border-purple-600/30 hover:bg-purple-600/20 text-purple-400 hover:text-purple-300 font-medium transition-all text-sm flex items-center justify-center gap-2"
+              onClick={() => {
+                if (listenDisabled) return;
+                onListen?.(call.id);
+              }}
+              disabled={listenDisabled}
+              className={`flex-1 px-4 py-2 rounded-lg border font-medium transition-all text-sm flex items-center justify-center gap-2 ${
+                theme === 'dark'
+                  ? 'bg-purple-600/10 border-purple-600/30 hover:bg-purple-600/20 text-purple-400 hover:text-purple-300'
+                  : 'bg-purple-50 border-purple-200 hover:bg-purple-100 text-purple-700 hover:text-purple-800 shadow-sm'
+              }`}
+              aria-disabled={listenDisabled}
             >
               <Play size={16} />
               Listen
             </button>
           )}
+          {showTranscriptAction && (
+            <button
+              onClick={() => {
+                if (transcriptDisabled) return;
+                onViewTranscript?.(call.id);
+              }}
+              disabled={transcriptDisabled}
+              className={`flex-1 px-4 py-2 rounded-lg border font-medium transition-all text-sm flex items-center justify-center gap-2 ${
+                theme === 'dark'
+                  ? 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 text-blue-300 hover:text-blue-200'
+                  : 'bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-700 hover:text-blue-800 shadow-sm'
+              }`}
+              aria-disabled={transcriptDisabled}
+            >
+              <FileText size={16} />
+              Transcript
+            </button>
+          )}
           <button
-            onClick={() => onViewDetails(call.id)}
-            className="flex-1 px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white font-medium transition-all text-sm flex items-center justify-center gap-2"
+            onClick={() => {
+              if (isNoAnswerDisabled) return;
+              onViewDetails(call.id);
+            }}
+            disabled={isNoAnswerDisabled}
+            className={`flex-1 px-4 py-2 rounded-lg border font-medium transition-all text-sm flex items-center justify-center gap-2 ${
+              theme === 'dark'
+                ? 'bg-gray-800 border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white'
+                : 'bg-white border-gray-200 hover:border-blue-400 text-gray-700 hover:text-blue-700 shadow-sm'
+            }`}
+            aria-disabled={isNoAnswerDisabled}
           >
             <Eye size={16} />
             Details

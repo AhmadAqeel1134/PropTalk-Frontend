@@ -6,6 +6,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Phone, Search, User, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { useTheme } from '@/contexts/ThemeContext';
 
 interface CallInitiationModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ interface Contact {
 }
 
 export default function CallInitiationModal({ isOpen, onClose, onSuccess }: CallInitiationModalProps) {
+  const { theme } = useTheme();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [manualPhone, setManualPhone] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -95,33 +97,57 @@ export default function CallInitiationModal({ isOpen, onClose, onSuccess }: Call
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300 shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div
+        className={`border rounded-2xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300 shadow-2xl ${
+          theme === 'dark'
+            ? 'bg-gray-900 border-gray-800'
+            : 'bg-white border-gray-200 shadow-lg'
+        }`}
+      >
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-xl bg-gradient-to-br from-green-600 to-emerald-600">
               <Phone className="text-white" size={24} />
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-white">Initiate Call</h2>
-              <p className="text-gray-400 text-sm">Start a conversation with a contact</p>
+              <h2 className={`text-2xl font-bold ${
+                theme === 'dark' ? 'text-white' : 'text-gray-900'
+              }`}>
+                Initiate Call
+              </h2>
+              <p className={`text-sm ${
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                Start a conversation with a contact
+              </p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-800 text-gray-400 hover:text-white transition-all hover:rotate-90 duration-300"
+            className={`p-2 rounded-lg transition-all hover:rotate-90 duration-300 ${
+              theme === 'dark'
+                ? 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+            }`}
           >
             <X size={24} />
           </button>
         </div>
 
-        <div className="flex gap-2 p-1 bg-gray-800 rounded-xl mb-6">
+        <div
+          className={`flex gap-2 p-1 rounded-xl mb-6 ${
+            theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+          }`}
+        >
           <button
             onClick={() => setMode('contact')}
             className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all duration-300 ${
               mode === 'contact'
                 ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                : 'text-gray-400 hover:text-white'
+                : theme === 'dark'
+                ? 'text-gray-400 hover:text-white'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             <span className="flex items-center justify-center gap-2">
@@ -134,7 +160,9 @@ export default function CallInitiationModal({ isOpen, onClose, onSuccess }: Call
             className={`flex-1 px-4 py-2.5 rounded-lg font-medium transition-all duration-300 ${
               mode === 'manual'
                 ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg'
-                : 'text-gray-400 hover:text-white'
+                : theme === 'dark'
+                ? 'text-gray-400 hover:text-white'
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             <span className="flex items-center justify-center gap-2">
@@ -147,13 +175,22 @@ export default function CallInitiationModal({ isOpen, onClose, onSuccess }: Call
         {mode === 'contact' && (
           <div className="space-y-4">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              <Search
+                className={`absolute left-4 top-1/2 -translate-y-1/2 ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                }`}
+                size={20}
+              />
               <input
                 type="text"
                 placeholder="Search contacts..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                className={`w-full pl-12 pr-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 transition-all ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500/20'
+                    : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm'
+                }`}
               />
             </div>
 
@@ -164,38 +201,73 @@ export default function CallInitiationModal({ isOpen, onClose, onSuccess }: Call
                   onClick={() => setSelectedContact(contact)}
                   className={`w-full p-4 rounded-xl border-2 transition-all duration-300 text-left ${
                     selectedContact?.id === contact.id
-                      ? 'border-green-500 bg-green-500/10'
-                      : 'border-gray-700 bg-gray-800 hover:border-gray-600 hover:bg-gray-750'
+                      ? theme === 'dark'
+                        ? 'border-green-500 bg-green-500/10'
+                        : 'border-green-500 bg-green-50'
+                      : theme === 'dark'
+                      ? 'border-gray-700 bg-gray-800 hover:border-gray-600 hover:bg-gray-750'
+                      : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50 shadow-sm'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${
-                        selectedContact?.id === contact.id
-                          ? 'bg-green-500/20'
-                          : 'bg-gray-700'
-                      }`}>
-                        <User className={
+                      <div
+                        className={`p-2 rounded-lg ${
                           selectedContact?.id === contact.id
-                            ? 'text-green-400'
-                            : 'text-gray-400'
-                        } size={20} />
+                            ? theme === 'dark'
+                              ? 'bg-green-500/20'
+                              : 'bg-green-100'
+                            : theme === 'dark'
+                            ? 'bg-gray-700'
+                            : 'bg-gray-100'
+                        }`}
+                      >
+                        <User
+                          className={
+                            selectedContact?.id === contact.id
+                              ? theme === 'dark'
+                                ? 'text-green-400'
+                                : 'text-green-600'
+                              : theme === 'dark'
+                              ? 'text-gray-400'
+                              : 'text-gray-500'
+                          }
+                          size={20}
+                        />
                       </div>
                       <div>
-                        <p className="text-white font-medium">{contact.name}</p>
-                        <p className="text-gray-400 text-sm font-mono">{contact.phone_number}</p>
+                        <p className={`font-medium ${
+                          theme === 'dark' ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          {contact.name}
+                        </p>
+                        <p className={`text-sm font-mono ${
+                          theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                        }`}>
+                          {contact.phone_number}
+                        </p>
                       </div>
                     </div>
                     {selectedContact?.id === contact.id && (
-                      <CheckCircle className="text-green-400" size={20} />
+                      <CheckCircle
+                        className={theme === 'dark' ? 'text-green-400' : 'text-green-600'}
+                        size={20}
+                      />
                     )}
                   </div>
                 </button>
               ))}
               {contacts?.length === 0 && (
                 <div className="text-center py-8">
-                  <User className="mx-auto text-gray-600 mb-2" size={32} />
-                  <p className="text-gray-400">No contacts found</p>
+                  <User
+                    className={`mx-auto mb-2 ${
+                      theme === 'dark' ? 'text-gray-600' : 'text-gray-400'
+                    }`}
+                    size={32}
+                  />
+                  <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                    No contacts found
+                  </p>
                 </div>
               )}
             </div>
@@ -205,7 +277,9 @@ export default function CallInitiationModal({ isOpen, onClose, onSuccess }: Call
         {mode === 'manual' && (
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className={`block text-sm font-medium mb-2 ${
+                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              }`}>
                 Phone Number (E.164 format)
               </label>
               <input
@@ -213,9 +287,15 @@ export default function CallInitiationModal({ isOpen, onClose, onSuccess }: Call
                 placeholder="+15551234567"
                 value={manualPhone}
                 onChange={(e) => setManualPhone(e.target.value)}
-                className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all font-mono"
+                className={`w-full px-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 transition-all font-mono ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500/20'
+                    : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm'
+                }`}
               />
-              <p className="mt-2 text-xs text-gray-500">
+              <p className={`mt-2 text-xs ${
+                theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+              }`}>
                 Format: +[country code][number] (e.g., +15551234567)
               </p>
             </div>
@@ -223,21 +303,55 @@ export default function CallInitiationModal({ isOpen, onClose, onSuccess }: Call
         )}
 
         {error && (
-          <div className="mt-4 p-4 rounded-xl bg-red-500/10 border border-red-500/30 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-            <AlertCircle className="text-red-400 flex-shrink-0" size={20} />
-            <p className="text-red-400 text-sm">{error}</p>
+          <div
+            className={`mt-4 p-4 rounded-xl border flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
+              theme === 'dark'
+                ? 'bg-red-500/10 border-red-500/30'
+                : 'bg-red-50 border-red-200'
+            }`}
+          >
+            <AlertCircle
+              className={`flex-shrink-0 ${
+                theme === 'dark' ? 'text-red-400' : 'text-red-600'
+              }`}
+              size={20}
+            />
+            <p className={`text-sm ${
+              theme === 'dark' ? 'text-red-400' : 'text-red-700'
+            }`}>
+              {error}
+            </p>
           </div>
         )}
 
         {(selectedContact || (manualPhone && validatePhone(manualPhone))) && !error && (
-          <div className="mt-4 p-4 rounded-xl bg-green-500/10 border border-green-500/30 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div
+            className={`mt-4 p-4 rounded-xl border animate-in fade-in slide-in-from-top-2 duration-300 ${
+              theme === 'dark'
+                ? 'bg-green-500/10 border-green-500/30'
+                : 'bg-green-50 border-green-200'
+            }`}
+          >
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-500/20">
-                <Phone className="text-green-400" size={16} />
+              <div
+                className={`p-2 rounded-lg ${
+                  theme === 'dark' ? 'bg-green-500/20' : 'bg-green-100'
+                }`}
+              >
+                <Phone
+                  className={theme === 'dark' ? 'text-green-400' : 'text-green-600'}
+                  size={16}
+                />
               </div>
               <div>
-                <p className="text-green-400 font-medium text-sm">Ready to call</p>
-                <p className="text-gray-400 text-xs">
+                <p className={`font-medium text-sm ${
+                  theme === 'dark' ? 'text-green-400' : 'text-green-700'
+                }`}>
+                  Ready to call
+                </p>
+                <p className={`text-xs ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                }`}>
                   {mode === 'contact' ? selectedContact?.name : manualPhone}
                 </p>
               </div>
@@ -249,7 +363,11 @@ export default function CallInitiationModal({ isOpen, onClose, onSuccess }: Call
           <button
             onClick={onClose}
             disabled={initiateCall.isPending}
-            className="flex-1 px-6 py-3 rounded-xl bg-gray-800 border border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white font-medium transition-all disabled:opacity-50"
+            className={`flex-1 px-6 py-3 rounded-xl border font-medium transition-all disabled:opacity-50 ${
+              theme === 'dark'
+                ? 'bg-gray-800 border-gray-700 hover:border-gray-600 text-gray-300 hover:text-white'
+                : 'bg-white border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900 shadow-sm'
+            }`}
           >
             Cancel
           </button>
