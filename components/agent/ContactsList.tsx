@@ -82,14 +82,14 @@ export default function ContactsList() {
   return (
     <PageTransition>
       <div
-        className="min-h-screen p-6 md:p-8"
+        className="min-h-screen p-6 md:p-8 overflow-x-hidden"
         style={
           theme === 'dark'
             ? { background: 'rgba(10, 15, 25, 0.95)' }
             : { background: 'rgba(248, 250, 252, 0.98)' }
         }
       >
-        <div className="max-w-full">
+        <div className="max-w-full overflow-x-hidden">
           {/* Enhanced Header */}
           <div
             className={`mb-8 transition-all duration-500 ease-out ${
@@ -129,7 +129,7 @@ export default function ContactsList() {
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex items-center gap-3 flex-shrink-0">
                   {callableContacts.length > 0 && (
                     <BatchCallButton 
                       contacts={callableContacts.map(c => ({
@@ -141,7 +141,7 @@ export default function ContactsList() {
                   )}
                   <button
                     onClick={() => router.push('/agent/contacts/new')}
-                    className={`flex items-center gap-2 border px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl ${
+                    className={`flex items-center gap-2 border px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap ${
                       theme === 'dark'
                         ? 'bg-gray-800/60 border-gray-700/50 text-gray-300 hover:border-gray-600 hover:text-white hover:bg-gray-800'
                         : 'bg-white border-gray-200 text-gray-700 hover:border-blue-400 hover:text-blue-700 hover:bg-blue-50 shadow-sm'
