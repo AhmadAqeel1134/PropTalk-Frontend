@@ -34,6 +34,8 @@ interface CallHistoryListProps {
   disableActionsOnNoAnswer?: boolean;
   forceActionsVisibleOnNoAnswer?: boolean;
   enforceUniformHeight?: boolean;
+  forceTranscriptButtonVisible?: boolean;
+  forceEnableActions?: boolean;
 }
 
 export default function CallHistoryList({
@@ -43,7 +45,9 @@ export default function CallHistoryList({
   hideTranscriptIconWhenNoAnswer = false,
   disableActionsOnNoAnswer = false,
   forceActionsVisibleOnNoAnswer = false,
-  enforceUniformHeight = false
+  enforceUniformHeight = false,
+  forceTranscriptButtonVisible = false,
+  forceEnableActions = false
 }: CallHistoryListProps) {
   const { theme } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
@@ -263,6 +267,8 @@ export default function CallHistoryList({
                 disableActionsOnNoAnswer={disableActionsOnNoAnswer}
                 forceActionsVisibleOnNoAnswer={forceActionsVisibleOnNoAnswer}
                 enforceUniformHeight={enforceUniformHeight}
+                forceTranscriptButtonVisible={forceTranscriptButtonVisible}
+                forceEnableActions={forceEnableActions}
               />
             </div>
           ))}
