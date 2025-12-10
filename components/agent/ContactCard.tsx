@@ -1,7 +1,7 @@
 // components/agent/ContactCard.tsx
 'use client'
 
-import { Phone, Mail, Building, ChevronRight, Trash2, User } from 'lucide-react'
+import { Phone, Mail, Building, ChevronRight, Trash2, User, Loader2 } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 
 interface ContactCardProps {
@@ -14,10 +14,11 @@ interface ContactCardProps {
   }
   onViewDetails: (id: string) => void
   onCall?: (id: string) => void
+  callingId?: string | null
   onDelete?: (id: string) => void
 }
 
-export default function ContactCard({ contact, onViewDetails, onCall, onDelete }: ContactCardProps) {
+export default function ContactCard({ contact, onViewDetails, onCall, onDelete, callingId }: ContactCardProps) {
   const { theme } = useTheme()
   const initials = contact.name
     .split(' ')
@@ -133,14 +134,19 @@ export default function ContactCard({ contact, onViewDetails, onCall, onDelete }
       <div className="flex gap-2">
         <button
           onClick={() => onCall?.(contact.id)}
-          className={`flex-1 flex items-center justify-center gap-2 border-2 py-2.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105 ${
+          disabled={contact.id === (callingId as any)}
+          className={`flex-1 flex items-center justify-center gap-2 border-2 py-2.5 rounded-xl font-semibold transition-all duration-300 hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed ${
             theme === 'dark'
               ? 'bg-gray-800/80 border-gray-700/50 hover:border-gray-600 hover:bg-gray-800 text-white shadow-lg hover:shadow-xl'
               : 'bg-white border-gray-200 hover:border-blue-500 hover:bg-blue-50 text-gray-700 hover:text-blue-700 shadow-sm hover:shadow-md'
           }`}
         >
-          <Phone className="size-4" />
-          Call
+          {contact.id === (callingId as any) ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Phone className="size-4" />
+          )}
+          {contact.id === (callingId as any) ? 'Calling...' : 'Call'}
         </button>
         <button
           onClick={() => onViewDetails(contact.id)}

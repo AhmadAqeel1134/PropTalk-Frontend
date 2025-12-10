@@ -162,8 +162,12 @@ export default function VoiceAgentPage() {
                 </h2>
               </div>
               <CallHistoryList
-                onViewDetails={(callId) => setSelectedCallId(callId)}
-                onListen={(url) => console.log('Play recording:', url)}
+                onViewDetails={(id) => setSelectedCallId(id)}
+                onListen={(id) => setSelectedCallId(id)}
+                hideTranscriptIconButton
+                disableActionsOnNoAnswer
+                forceActionsVisibleOnNoAnswer
+                enforceUniformHeight
               />
             </div>
           )}

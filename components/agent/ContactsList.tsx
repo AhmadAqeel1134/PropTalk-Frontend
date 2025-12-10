@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { Search, Plus, Users, Phone, Building, Filter, X, TrendingUp } from 'lucide-react'
+import { initiateCall } from '@/lib/real_estate_agent/api'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ErrorMessage from '@/components/common/ErrorMessage'
 import PageTransition from '@/components/common/PageTransition'
@@ -23,6 +24,7 @@ export default function ContactsList() {
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null)
   const [isDetailsSheetOpen, setIsDetailsSheetOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [callingId, setCallingId] = useState<string | null>(null)
   const debouncedSearch = useDebounce(search, 500)
   const deleteMutation = useDeleteContact()
 
@@ -42,6 +44,30 @@ export default function ContactsList() {
 
   // Filter contacts with phone numbers for calling (all should have phone numbers)
   const callableContacts = contacts.filter(c => c.phone_number)
+
+  const initiateCallToContact = async (contactId: string) => {
+    if (callingId) return
+    const contact = contacts.find(c => c.id === contactId)
+    if (!contact?.phone_number) return
+
+    // Normalize to E.164 (fallback to +92 if missing country code)
+    let phoneNumber = contact.phone_number.trim()
+    if (!phoneNumber.startsWith('+')) {
+      phoneNumber = phoneNumber.startsWith('0')
+        ? `+92${phoneNumber.slice(1)}`
+        : `+92${phoneNumber}`
+    }
+
+    setCallingId(contactId)
+    try {
+      await initiateCall({ contact_id: contactId, phone_number: phoneNumber })
+    } catch (err) {
+      console.error('Failed to initiate call', err)
+      alert('Failed to initiate call. Please try again.')
+    } finally {
+      setCallingId(null)
+    }
+  }
 
   const clearFilters = () => {
     setSearch('')
@@ -349,7 +375,8 @@ export default function ContactsList() {
                       setSelectedContactId(id)
                       setIsDetailsSheetOpen(true)
                     }}
-                    onCall={() => console.log('Initiating call to:', contact.id)}
+                    onCall={(id) => initiateCallToContact(id)}
+                    callingId={callingId}
                     onDelete={(id) => {
                       if (deleteMutation.isPending) return
                       if (confirm('Are you sure you want to delete this contact? Properties linked to this contact will be unlinked but not deleted.')) {

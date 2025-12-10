@@ -182,6 +182,26 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
     }
   }, [isOpen, messages.length])
 
+  // Prevent background scroll while modal is open
+  useEffect(() => {
+    if (!isOpen) return
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
+    const previousOverflow = document.body.style.overflow
+    const previousHtmlOverflow = document.documentElement.style.overflow
+    const previousPaddingRight = document.body.style.paddingRight
+
+    document.body.style.overflow = 'hidden'
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.paddingRight = `${scrollbarWidth}px`
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.documentElement.style.overflow = previousHtmlOverflow
+      document.body.style.paddingRight = previousPaddingRight
+    }
+  }, [isOpen])
+
   const handlePlayPause = () => {
     const audio = audioRef.current
     if (!audio) return
@@ -255,9 +275,9 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
       />
 
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-hidden">
         <div
-          className={`border rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-300 ${
+          className={`border rounded-2xl shadow-2xl w-full max-w-5xl max-h-[80vh] flex flex-col animate-in zoom-in-95 duration-300 overscroll-contain ${
             theme === 'dark'
               ? 'bg-gray-900 border-gray-800'
               : 'bg-white border-gray-200'
@@ -361,7 +381,7 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
 
           {/* Chat Interface */}
           <div
-            className={`flex-1 overflow-y-auto p-6 space-y-4 ${
+            className={`flex-1 min-h-0 overflow-y-auto p-6 space-y-4 ${
               theme === 'dark'
                 ? 'bg-gradient-to-b from-gray-900 to-gray-950'
                 : 'bg-gradient-to-b from-gray-50 to-white'

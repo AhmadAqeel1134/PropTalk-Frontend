@@ -1,10 +1,10 @@
 // components/agent/CallsList.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getCalls } from '@/lib/real_estate_agent/api'
-import { Phone, PhoneIncoming, PhoneOutgoing, PhoneOff, PhoneCall, Search, Filter, Play, Clock, User, Calendar, X } from 'lucide-react'
+import { Phone, PhoneIncoming, PhoneOutgoing, PhoneOff, PhoneCall, Search, Filter, Play, Clock, User, Calendar, X, FileText } from 'lucide-react'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ErrorMessage from '@/components/common/ErrorMessage'
 import PageTransition from '@/components/common/PageTransition'
@@ -27,6 +27,9 @@ interface Call {
   started_at?: string
   answered_at?: string
   ended_at?: string
+   transcript?: string | null
+   transcript_json?: any[] | null
+   user_pov_summary?: string | null
 }
 
 export default function CallsList() {
@@ -38,10 +41,22 @@ export default function CallsList() {
   const [selectedCallId, setSelectedCallId] = useState<string | null>(null)
   const [isDetailsSheetOpen, setIsDetailsSheetOpen] = useState(false)
   const [isMounted, setIsMounted] = useState(false)
+  const [transcriptCall, setTranscriptCall] = useState<Call | null>(null)
+  const [transcriptLoading, setTranscriptLoading] = useState(false)
+  const [transcriptPage, setTranscriptPage] = useState(1)
+  const transcriptPageSize = 30
+  const transcriptScrollRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  useEffect(() => {
+    setTranscriptPage(1)
+    if (transcriptScrollRef.current) {
+      transcriptScrollRef.current.scrollTop = 0
+    }
+  }, [transcriptCall])
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['agent', 'calls', page, statusFilter, directionFilter, searchQuery],
@@ -65,6 +80,24 @@ export default function CallsList() {
 
   const calls: Call[] = data?.items || []
   const total = data?.total || 0
+
+  const visibleTranscriptMessages =
+    transcriptCall?.transcript_json && Array.isArray(transcriptCall.transcript_json)
+      ? transcriptCall.transcript_json.slice(0, transcriptPage * transcriptPageSize)
+      : []
+
+  const handleOpenTranscript = async (id: string) => {
+    try {
+      setTranscriptLoading(true)
+      const { getCallById } = await import('@/lib/real_estate_agent/api')
+      const fullCall = await getCallById(id)
+      setTranscriptCall(fullCall as any)
+    } catch (error) {
+      console.error('Error loading transcript', error)
+    } finally {
+      setTranscriptLoading(false)
+    }
+  }
 
   const handleCallClick = (callId: string) => {
     setSelectedCallId(callId)
@@ -470,25 +503,41 @@ export default function CallsList() {
                               </div>
                             </div>
                           </div>
-                          {call.recording_url && (
-                            <div className="flex-shrink-0">
-                              <div
-                                className={`p-2 rounded-lg border transition-colors ${
-                                  theme === 'dark'
-                                    ? 'bg-gray-800/50 border-gray-700/50 group-hover:border-gray-600'
-                                    : 'bg-gray-50 border-gray-200 group-hover:border-blue-300'
-                                }`}
-                              >
-                                <Play
-                                  className={`size-5 transition-colors ${
-                                    theme === 'dark'
-                                      ? 'text-gray-400 group-hover:text-white'
-                                      : 'text-gray-500 group-hover:text-blue-600'
-                                  }`}
-                                />
+                              <div className="flex-shrink-0 flex items-center gap-2">
+                                {call.status !== 'no-answer' && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleOpenTranscript(call.id)
+                                    }}
+                                    className={`p-2 rounded-lg border transition-colors ${
+                                      theme === 'dark'
+                                        ? 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 text-blue-300 hover:text-blue-200'
+                                        : 'bg-blue-50 border-blue-200 hover:border-blue-300 text-blue-700 hover:text-blue-800'
+                                    }`}
+                                    title="View transcript"
+                                  >
+                                    <FileText className="size-5" />
+                                  </button>
+                                )}
+                                {call.recording_url && (
+                                  <div
+                                    className={`p-2 rounded-lg border transition-colors ${
+                                      theme === 'dark'
+                                        ? 'bg-gray-800/50 border-gray-700/50 group-hover:border-gray-600'
+                                        : 'bg-gray-50 border-gray-200 group-hover:border-blue-300'
+                                    }`}
+                                  >
+                                    <Play
+                                      className={`size-5 transition-colors ${
+                                        theme === 'dark'
+                                          ? 'text-gray-400 group-hover:text-white'
+                                          : 'text-gray-500 group-hover:text-blue-600'
+                                      }`}
+                                    />
+                                  </div>
+                                )}
                               </div>
-                            </div>
-                          )}
                         </div>
                       </div>
                     </div>
@@ -530,6 +579,137 @@ export default function CallsList() {
                   Next
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Transcript Side Sheet */}
+          {transcriptCall && (
+            <div className="fixed inset-0 z-50">
+              <div
+                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+                onClick={() => setTranscriptCall(null)}
+              />
+              <aside
+                className={`absolute right-0 top-0 h-full w-full md:w-[720px] lg:w-[860px] border-l shadow-2xl overflow-hidden ${
+                  theme === 'dark'
+                    ? 'bg-gray-900 border-gray-800'
+                    : 'bg-white border-gray-200'
+                }`}
+              >
+                <div
+                  className={`flex items-center justify-between px-6 py-4 border-b ${
+                    theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+                  }`}
+                >
+                  <div>
+                    <p className={theme === 'dark' ? 'text-sm text-gray-400' : 'text-sm text-gray-600'}>
+                      Transcript
+                    </p>
+                    <h3 className={theme === 'dark' ? 'text-lg text-white font-semibold' : 'text-lg text-gray-900 font-semibold'}>
+                      {transcriptCall.contact_name || 'Unknown Contact'}
+                    </h3>
+                    {(transcriptCall.started_at || transcriptCall.created_at) && (
+                      <p className={theme === 'dark' ? 'text-xs text-gray-500' : 'text-xs text-gray-500'}>
+                        {new Date(transcriptCall.started_at || transcriptCall.created_at || '').toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </p>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => setTranscriptCall(null)}
+                    className={`p-2 rounded-full ${
+                      theme === 'dark'
+                        ? 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                        : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    <span className="sr-only">Close</span>
+                    ×
+                  </button>
+                </div>
+
+                <div
+                  ref={transcriptScrollRef}
+                  className="p-6 space-y-3 h-[calc(100%-64px)] overflow-y-auto"
+                  onScroll={(e) => {
+                    if (
+                      transcriptCall?.transcript_json &&
+                      transcriptCall.transcript_json.length > visibleTranscriptMessages.length
+                    ) {
+                      const target = e.currentTarget;
+                      if (target.scrollTop + target.clientHeight >= target.scrollHeight - 40) {
+                        setTranscriptPage((p) => p + 1);
+                      }
+                    }
+                  }}
+                >
+                  {transcriptLoading && (
+                    <p className={theme === 'dark' ? 'text-gray-400 text-sm' : 'text-gray-600 text-sm'}>
+                      Loading transcript...
+                    </p>
+                  )}
+                  {!transcriptLoading && Array.isArray(transcriptCall.transcript_json) && transcriptCall.transcript_json.length > 0 ? (
+                    visibleTranscriptMessages.map((msg: any, idx: number) => {
+                      const isAgent = msg.role === 'assistant';
+                      return (
+                        <div
+                          key={`${msg.timestamp || idx}-${idx}`}
+                          className={`flex ${isAgent ? 'justify-start' : 'justify-end'}`}
+                        >
+                          <div
+                            className={`max-w-[85%] rounded-2xl px-4 py-3 border text-sm leading-relaxed ${
+                              isAgent
+                                ? theme === 'dark'
+                                  ? 'bg-blue-500/10 border-blue-500/30 text-blue-100'
+                                  : 'bg-blue-50 border-blue-200 text-blue-900'
+                                : theme === 'dark'
+                                ? 'bg-green-500/10 border-green-500/30 text-green-100'
+                                : 'bg-green-50 border-green-200 text-green-900'
+                            }`}
+                          >
+                            <p className="font-semibold text-xs mb-1 uppercase tracking-wide opacity-80">
+                              {isAgent ? 'Twilio Agent' : 'User'}
+                            </p>
+                            <p className="whitespace-pre-wrap">{msg.content || ''}</p>
+                            {msg.timestamp && (
+                              <p className="text-[11px] mt-2 opacity-70 text-right">
+                                {new Date(msg.timestamp).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })
+                  ) : !transcriptLoading && transcriptCall.transcript ? (
+                    <div
+                      className={`rounded-2xl px-4 py-3 border text-sm leading-relaxed ${
+                        theme === 'dark'
+                          ? 'bg-blue-500/10 border-blue-500/30 text-blue-100'
+                          : 'bg-blue-50 border-blue-200 text-blue-900'
+                      }`}
+                    >
+                      <p className="font-semibold text-xs mb-1 uppercase tracking-wide opacity-80">
+                        Twilio Agent
+                      </p>
+                      <p className="whitespace-pre-wrap">{transcriptCall.transcript}</p>
+                      {(transcriptCall.started_at || transcriptCall.created_at) && (
+                        <p className="text-[11px] mt-2 opacity-70 text-right">
+                          {new Date(transcriptCall.started_at || transcriptCall.created_at || '').toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    !transcriptLoading && (
+                      <p className={theme === 'dark' ? 'text-gray-400 text-sm' : 'text-gray-600 text-sm'}>
+                        No transcript available for this call.
+                      </p>
+                    )
+                  )}
+                </div>
+              </aside>
             </div>
           )}
         </div>

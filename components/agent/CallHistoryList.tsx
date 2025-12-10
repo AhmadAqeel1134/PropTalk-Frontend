@@ -3,7 +3,7 @@
 // Component: CallHistoryList
 // Purpose: Advanced call history with real-time filters, search, and smooth animations
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { Search, Filter, PhoneIncoming, PhoneOutgoing, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import CallCard from '@/components/twilio/CallCard';
@@ -21,16 +21,58 @@ interface Call {
   recording_url: string | null;
   started_at: string | null;
   created_at: string;
+  transcript?: string | null;
+  transcript_json?: any[] | null;
+  user_pov_summary?: string | null;
 }
 
-export default function CallHistoryList() {
+interface CallHistoryListProps {
+  onViewDetails?: (id: string) => void;
+  onListen?: (id: string) => void;
+  hideTranscriptIconButton?: boolean;
+  hideTranscriptIconWhenNoAnswer?: boolean;
+  disableActionsOnNoAnswer?: boolean;
+  forceActionsVisibleOnNoAnswer?: boolean;
+  enforceUniformHeight?: boolean;
+}
+
+export default function CallHistoryList({
+  onViewDetails,
+  onListen,
+  hideTranscriptIconButton = false,
+  hideTranscriptIconWhenNoAnswer = false,
+  disableActionsOnNoAnswer = false,
+  forceActionsVisibleOnNoAnswer = false,
+  enforceUniformHeight = false
+}: CallHistoryListProps) {
   const { theme } = useTheme();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [directionFilter, setDirectionFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
-  const [selectedCall, setSelectedCall] = useState<string | null>(null);
+  const [transcriptCall, setTranscriptCall] = useState<Call | null>(null);
+  const [transcriptPage, setTranscriptPage] = useState(1);
+  const [transcriptLoading, setTranscriptLoading] = useState(false);
+  const transcriptPageSize = 30;
+  const transcriptScrollRef = useRef<HTMLDivElement | null>(null);
   const pageSize = 12;
+
+  const formatDate = (dateString?: string | null) => {
+    if (!dateString) return 'Date unknown';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const formatTime = (dateString?: string | null) => {
+    if (!dateString) return '';
+    return new Date(dateString).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['calls', currentPage, statusFilter, directionFilter, searchTerm],
@@ -63,6 +105,31 @@ export default function CallHistoryList() {
   }, [data?.items, searchTerm, statusFilter, directionFilter]);
 
   const totalPages = Math.ceil((data?.total || 0) / pageSize);
+
+  useEffect(() => {
+    setTranscriptPage(1);
+    if (transcriptScrollRef.current) {
+      transcriptScrollRef.current.scrollTop = 0;
+    }
+  }, [transcriptCall]);
+
+  const visibleTranscriptMessages =
+    transcriptCall?.transcript_json && Array.isArray(transcriptCall.transcript_json)
+      ? transcriptCall.transcript_json.slice(0, transcriptPage * transcriptPageSize)
+      : [];
+
+  const handleOpenTranscript = async (id: string) => {
+    try {
+      setTranscriptLoading(true);
+      const { getCallById } = await import('@/lib/real_estate_agent/api');
+      const fullCall = await getCallById(id);
+      setTranscriptCall(fullCall as any);
+    } catch (err) {
+      console.error('Failed to load transcript', err);
+    } finally {
+      setTranscriptLoading(false);
+    }
+  };
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -188,8 +255,14 @@ export default function CallHistoryList() {
             >
               <CallCard
                 call={call}
-                onViewDetails={(id) => setSelectedCall(id)}
-                onListen={(url) => console.log('Play recording:', url)}
+                onViewDetails={(id) => onViewDetails?.(id)}
+                onListen={(id) => onListen?.(id)}
+                onViewTranscript={(id) => handleOpenTranscript(id)}
+                hideTranscriptIconButton={hideTranscriptIconButton}
+                hideTranscriptIconWhenNoAnswer={hideTranscriptIconWhenNoAnswer}
+                disableActionsOnNoAnswer={disableActionsOnNoAnswer}
+                forceActionsVisibleOnNoAnswer={forceActionsVisibleOnNoAnswer}
+                enforceUniformHeight={enforceUniformHeight}
               />
             </div>
           ))}
@@ -305,6 +378,125 @@ export default function CallHistoryList() {
               <ChevronRight size={20} />
             </button>
           </div>
+        </div>
+      )}
+
+      {transcriptCall && (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setTranscriptCall(null)}
+          />
+          <aside
+            className={`absolute right-0 top-0 h-full w-full md:w-[720px] lg:w-[860px] border-l shadow-2xl overflow-hidden ${
+              theme === 'dark'
+                ? 'bg-gray-900 border-gray-800'
+                : 'bg-white border-gray-200'
+            }`}
+          >
+            <div
+              className={`flex items-center justify-between px-6 py-4 border-b ${
+                theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+              }`}
+            >
+              <div>
+                <p className={theme === 'dark' ? 'text-sm text-gray-400' : 'text-sm text-gray-600'}>
+                  Transcript
+                </p>
+                <h3 className={theme === 'dark' ? 'text-lg text-white font-semibold' : 'text-lg text-gray-900 font-semibold'}>
+                  {transcriptCall.contact_name || 'Unknown Contact'}
+                </h3>
+                {(transcriptCall.started_at || transcriptCall.created_at) && (
+                  <p className={theme === 'dark' ? 'text-xs text-gray-500' : 'text-xs text-gray-500'}>
+                    {formatDate(transcriptCall.started_at || transcriptCall.created_at)}
+                  </p>
+                )}
+              </div>
+              <button
+                onClick={() => setTranscriptCall(null)}
+                className={`p-2 rounded-full ${
+                  theme === 'dark'
+                    ? 'hover:bg-gray-800 text-gray-400 hover:text-white'
+                    : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <span className="sr-only">Close</span>
+                ×
+              </button>
+            </div>
+
+            <div
+              ref={transcriptScrollRef}
+              className="p-6 space-y-3 h-[calc(100%-64px)] overflow-y-auto"
+              onScroll={(e) => {
+                if (
+                  transcriptCall?.transcript_json &&
+                  transcriptCall.transcript_json.length > visibleTranscriptMessages.length
+                ) {
+                  const target = e.currentTarget;
+                  if (target.scrollTop + target.clientHeight >= target.scrollHeight - 40) {
+                    setTranscriptPage((p) => p + 1);
+                  }
+                }
+              }}
+            >
+              {Array.isArray(transcriptCall.transcript_json) && transcriptCall.transcript_json.length > 0 ? (
+                visibleTranscriptMessages.map((msg: any, idx: number) => {
+                  const isAgent = msg.role === 'assistant';
+                  return (
+                    <div
+                      key={`${msg.timestamp || idx}-${idx}`}
+                      className={`flex ${isAgent ? 'justify-start' : 'justify-end'}`}
+                    >
+                      <div
+                        className={`max-w-[85%] rounded-2xl px-4 py-3 border text-sm leading-relaxed ${
+                          isAgent
+                            ? theme === 'dark'
+                              ? 'bg-blue-500/10 border-blue-500/30 text-blue-100'
+                              : 'bg-blue-50 border-blue-200 text-blue-900'
+                            : theme === 'dark'
+                            ? 'bg-green-500/10 border-green-500/30 text-green-100'
+                            : 'bg-green-50 border-green-200 text-green-900'
+                        }`}
+                      >
+                        <p className="font-semibold text-xs mb-1 uppercase tracking-wide opacity-80">
+                          {isAgent ? 'Twilio Agent' : 'User'}
+                        </p>
+                        <p className="whitespace-pre-wrap">{msg.content || ''}</p>
+                        {msg.timestamp && (
+                          <p className="text-[11px] mt-2 opacity-70 text-right">
+                            {formatTime(msg.timestamp)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : transcriptCall.transcript ? (
+                <div
+                  className={`rounded-2xl px-4 py-3 border text-sm leading-relaxed ${
+                    theme === 'dark'
+                      ? 'bg-blue-500/10 border-blue-500/30 text-blue-100'
+                      : 'bg-blue-50 border-blue-200 text-blue-900'
+                  }`}
+                >
+                  <p className="font-semibold text-xs mb-1 uppercase tracking-wide opacity-80">
+                    Twilio Agent
+                  </p>
+                  <p className="whitespace-pre-wrap">{transcriptCall.transcript}</p>
+                  {(transcriptCall.started_at || transcriptCall.created_at) && (
+                    <p className="text-[11px] mt-2 opacity-70 text-right">
+                      {formatTime(transcriptCall.started_at || transcriptCall.created_at)}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className={theme === 'dark' ? 'text-gray-400 text-sm' : 'text-gray-600 text-sm'}>
+                  No transcript available for this call.
+                </p>
+              )}
+            </div>
+          </aside>
         </div>
       )}
 

@@ -1,14 +1,14 @@
 // components/agent/CallDetailsSheet.tsx
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getCallById, getCallRecording } from '@/lib/real_estate_agent/api'
 import CallRecordingModal from './CallRecordingModal'
 import { useTheme } from '@/contexts/ThemeContext'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
-import { X, Phone, PhoneIncoming, PhoneOutgoing, Clock, Calendar, User, Play, FileText } from 'lucide-react'
+import { X, Phone, PhoneIncoming, PhoneOutgoing, Clock, Calendar, User, Play, Pause, FileText } from 'lucide-react'
 import LoadingSpinner from '@/components/common/LoadingSpinner'
 import ErrorMessage from '@/components/common/ErrorMessage'
 
@@ -21,6 +21,16 @@ interface CallDetailsSheetProps {
 export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetailsSheetProps) {
   const { theme } = useTheme()
   const [isRecordingModalOpen, setIsRecordingModalOpen] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null)
+  const [barValues, setBarValues] = useState<number[]>(() => Array(32).fill(0))
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const audioContextRef = useRef<AudioContext | null>(null)
+  const mediaSourceRef = useRef<MediaElementAudioSourceNode | null>(null)
+  const analyserRef = useRef<AnalyserNode | null>(null)
+  const animationRef = useRef<number>()
 
   const { data: call, isLoading, error } = useQuery({
     queryKey: ['agent', 'call', callId],
@@ -50,6 +60,126 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
 
   const recordingUrl = getRecordingUrl()
 
+  // Fetch the recording with auth and create a blob URL to avoid direct Twilio auth prompts
+  useEffect(() => {
+    if (!isOpen || !recordingUrl || !call?.recording_url) return
+
+    const fetchRecording = async () => {
+      try {
+        const token = localStorage.getItem('agent_token') || localStorage.getItem('access_token')
+        if (!token) return
+
+        const response = await fetch(recordingUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (response.ok) {
+          const blob = await response.blob()
+          const url = URL.createObjectURL(blob)
+          setAudioBlobUrl(url)
+        }
+      } catch (error) {
+        console.error('Error fetching recording:', error)
+      }
+    }
+
+    fetchRecording()
+
+    return () => {
+      if (audioBlobUrl) {
+        URL.revokeObjectURL(audioBlobUrl)
+        setAudioBlobUrl(null)
+      }
+    }
+  }, [isOpen, recordingUrl, call?.recording_url])
+
+  // Wire audio element to analyser for live bars
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || !audioBlobUrl || !isOpen) return
+
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioCtx()
+    }
+    const ctx = audioContextRef.current
+
+    if (!analyserRef.current) {
+      const analyser = ctx.createAnalyser()
+      analyser.fftSize = 64
+      analyserRef.current = analyser
+    }
+
+    // MediaElementAudioSourceNode can only be created once per media element.
+    if (!mediaSourceRef.current) {
+      mediaSourceRef.current = ctx.createMediaElementSource(audio)
+      mediaSourceRef.current.connect(analyserRef.current)
+      analyserRef.current.connect(ctx.destination)
+    }
+
+    const analyser = analyserRef.current!
+    const dataArray = new Uint8Array(analyser.frequencyBinCount)
+    const barsCount = 32
+
+    const animate = () => {
+      analyser.getByteFrequencyData(dataArray)
+      const bucketSize = Math.max(1, Math.floor(dataArray.length / barsCount))
+      const next: number[] = []
+      for (let i = 0; i < barsCount; i++) {
+        const start = i * bucketSize
+        const end = Math.min(dataArray.length, start + bucketSize)
+        let sum = 0
+        for (let j = start; j < end; j++) sum += dataArray[j]
+        const avg = sum / (end - start || 1)
+        const height = Math.max(8, (avg / 255) * 100)
+        next.push(height)
+      }
+      setBarValues(next)
+      animationRef.current = requestAnimationFrame(animate)
+    }
+
+    animationRef.current = requestAnimationFrame(animate)
+
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+      // Keep audio context and source alive to avoid createMediaElementSource
+      // InvalidStateError on re-renders/StrictMode.
+    }
+  }, [audioBlobUrl, isOpen])
+
+  // Sync play/pause state and time
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio) return
+
+    const handleTimeUpdate = () => setCurrentTime(audio.currentTime)
+    const handleLoaded = () => setDuration(audio.duration || 0)
+    const handleEnded = () => setIsPlaying(false)
+
+    audio.addEventListener('timeupdate', handleTimeUpdate)
+    audio.addEventListener('loadedmetadata', handleLoaded)
+    audio.addEventListener('ended', handleEnded)
+
+    return () => {
+      audio.removeEventListener('timeupdate', handleTimeUpdate)
+      audio.removeEventListener('loadedmetadata', handleLoaded)
+      audio.removeEventListener('ended', handleEnded)
+    }
+  }, [audioBlobUrl])
+
+  const togglePlay = () => {
+    const audio = audioRef.current
+    if (!audio) return
+    if (isPlaying) {
+      audio.pause()
+    } else {
+      audio.play()
+    }
+    setIsPlaying(!isPlaying)
+  }
+
   const formatDuration = (seconds: number) => {
     if (seconds === 0) return 'N/A'
     const mins = Math.floor(seconds / 60)
@@ -69,7 +199,16 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
     })
   }
 
-  if (!isOpen) return null
+  const formatCompactTime = (seconds: number) => {
+    if (!Number.isFinite(seconds) || seconds < 0) return '0s'
+    const total = Math.floor(seconds)
+    const mins = Math.floor(total / 60)
+    const secs = total % 60
+    if (mins === 0) return `${secs}s`
+    return `${mins}m ${secs}s`
+  }
+
+  if (!isOpen || !call) return null
 
   const isOutbound = call?.direction === 'outbound'
   const callerName = isOutbound 
@@ -314,16 +453,53 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                   </div>
 
                   <div className="space-y-4">
+                    <audio
+                      ref={audioRef}
+                      src={audioBlobUrl || undefined}
+                      className="hidden"
+                    />
+                    <div
+                      className={`h-16 rounded-lg border flex items-center px-4 ${
+                        theme === 'dark'
+                          ? 'bg-gray-900/50 border-gray-700'
+                          : 'bg-gray-100 border-gray-200'
+                      }`}
+                    >
+                      <div className="flex-1 flex items-end gap-1 h-12">
+                        {barValues.map((value, i) => (
+                          <div
+                            key={i}
+                            className="flex-1 rounded-t transition-[height,background-color,opacity] duration-150"
+                            style={{
+                              height: `${value}%`,
+                              backgroundColor:
+                                theme === 'dark'
+                                  ? '#a78bfa'
+                                  : '#9333ea',
+                              opacity: 0.8
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between text-xs px-1">
+                      <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                        {formatCompactTime(currentTime)}
+                      </span>
+                      <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                        {formatCompactTime(duration)}
+                      </span>
+                    </div>
                     <button
-                      onClick={() => setIsRecordingModalOpen(true)}
+                      onClick={togglePlay}
                       className={`w-full flex items-center justify-center gap-3 px-6 py-4 border-2 rounded-xl transition-all hover:scale-[1.02] font-semibold ${
                         theme === 'dark'
                           ? 'bg-gray-800 border-gray-700 hover:border-gray-600 text-white'
                           : 'bg-white border-gray-200 hover:border-blue-400 text-gray-700 hover:text-blue-700 shadow-sm'
                       }`}
                     >
-                      <Play className="size-5" />
-                      <span>Play Recording with Transcription</span>
+                    {isPlaying ? <Pause className="size-5" /> : <Play className="size-5" />}
+                    <span>{isPlaying ? 'Pause' : 'Play'}</span>
                     </button>
                   </div>
                 </div>
@@ -408,8 +584,76 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                 </div>
               </div>
 
+              {/* User POV */}
+              <div
+                className={`border rounded-2xl p-6 ${
+                  theme === 'dark'
+                    ? 'bg-purple-500/5 border-purple-500/20'
+                    : 'bg-purple-50 border-purple-200'
+                }`}
+              >
+                <h3 className={`text-lg font-semibold mb-2 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  User POV
+                </h3>
+                <p className={theme === 'dark' ? 'text-gray-200' : 'text-gray-800'}>
+                  {call.user_pov_summary || 'User POV not available'}
+                </p>
+              </div>
+
               {/* Transcript */}
-              {call.transcript && (
+              {Array.isArray(call.transcript_json) && call.transcript_json.length > 0 ? (
+                <div
+                  className={`border rounded-2xl p-6 ${
+                    theme === 'dark'
+                      ? 'bg-gradient-to-br from-gray-800/60 to-gray-900/60 border-gray-700/50'
+                      : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 shadow-sm'
+                  }`}
+                >
+                  <h3 className={`text-lg font-semibold mb-4 flex items-center gap-2 ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    <FileText className={theme === 'dark' ? 'text-blue-400' : 'text-blue-600'} size={20} />
+                    Structured Transcript
+                  </h3>
+                  <div className="space-y-3">
+                    {call.transcript_json.map((message: any, idx: number) => {
+                      const role = message?.role
+                      const isAgent = role === 'assistant'
+                      const colors = isAgent
+                        ? {
+                            bg: theme === 'dark' ? 'bg-blue-500/10' : 'bg-blue-50',
+                            text: theme === 'dark' ? 'text-blue-100' : 'text-blue-900',
+                            border: theme === 'dark' ? 'border-blue-500/20' : 'border-blue-200',
+                            label: 'Agent',
+                          }
+                        : {
+                            bg: theme === 'dark' ? 'bg-purple-500/10' : 'bg-purple-50',
+                            text: theme === 'dark' ? 'text-purple-100' : 'text-purple-900',
+                            border: theme === 'dark' ? 'border-purple-500/20' : 'border-purple-200',
+                            label: 'User',
+                          }
+
+                      return (
+                        <div key={`${message?.timestamp || idx}-${idx}`} className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+                            <span className={colors.text}>{colors.label}</span>
+                            {message?.timestamp && (
+                              <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>
+                                {new Date(message.timestamp).toLocaleString()}
+                              </span>
+                            )}
+                          </div>
+                          <div className={`rounded-lg border p-3 ${colors.bg} ${colors.border} ${colors.text}`}>
+                            <p className="leading-relaxed whitespace-pre-wrap">{message?.content || ''}</p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ) : call.transcript ? (
                 <div
                   className={`border rounded-2xl p-6 ${
                     theme === 'dark'
@@ -436,7 +680,7 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                     </p>
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
           )}
         </div>
