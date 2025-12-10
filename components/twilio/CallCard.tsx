@@ -33,6 +33,8 @@ interface CallCardProps {
   disableActionsOnNoAnswer?: boolean;
   forceActionsVisibleOnNoAnswer?: boolean;
   enforceUniformHeight?: boolean;
+  forceTranscriptButtonVisible?: boolean;
+  forceEnableActions?: boolean;
 }
 
 export default function CallCard({
@@ -44,14 +46,18 @@ export default function CallCard({
   hideTranscriptIconWhenNoAnswer = false,
   disableActionsOnNoAnswer = false,
   forceActionsVisibleOnNoAnswer = false,
-  enforceUniformHeight = false
+  enforceUniformHeight = false,
+  forceTranscriptButtonVisible = false,
+  forceEnableActions = false
 }: CallCardProps) {
   const { theme } = useTheme();
-  const isNoAnswerDisabled = disableActionsOnNoAnswer && call.status === 'no-answer';
-  const transcriptAvailable = !!(call.transcript_json?.length || call.transcript);
-  const listenAvailable = !!call.recording_url;
-  const showTranscriptAction = transcriptAvailable || (isNoAnswerDisabled && forceActionsVisibleOnNoAnswer);
-  const showListenAction = listenAvailable || (isNoAnswerDisabled && forceActionsVisibleOnNoAnswer);
+  const isNoAnswerDisabled = forceEnableActions ? false : (disableActionsOnNoAnswer && call.status === 'no-answer');
+  const transcriptAvailable = forceEnableActions ? true : !!(call.transcript_json?.length || call.transcript);
+  const listenAvailable = forceEnableActions ? true : !!call.recording_url;
+  const showTranscriptAction = forceEnableActions || transcriptAvailable || forceTranscriptButtonVisible || (isNoAnswerDisabled && forceActionsVisibleOnNoAnswer);
+  const showListenAction = forceEnableActions || listenAvailable || (isNoAnswerDisabled && forceActionsVisibleOnNoAnswer);
+  const transcriptDisabled = forceEnableActions ? false : (isNoAnswerDisabled && !forceTranscriptButtonVisible);
+  const listenDisabled = forceEnableActions ? false : (isNoAnswerDisabled || !listenAvailable);
   
   const statusConfig = {
     completed: {
@@ -232,16 +238,16 @@ export default function CallCard({
           {showListenAction && (
             <button
               onClick={() => {
-                if (isNoAnswerDisabled || !listenAvailable) return;
+                if (listenDisabled) return;
                 onListen?.(call.id);
               }}
-              disabled={isNoAnswerDisabled || !listenAvailable}
+              disabled={listenDisabled}
               className={`flex-1 px-4 py-2 rounded-lg border font-medium transition-all text-sm flex items-center justify-center gap-2 ${
                 theme === 'dark'
                   ? 'bg-purple-600/10 border-purple-600/30 hover:bg-purple-600/20 text-purple-400 hover:text-purple-300'
                   : 'bg-purple-50 border-purple-200 hover:bg-purple-100 text-purple-700 hover:text-purple-800 shadow-sm'
               }`}
-              aria-disabled={isNoAnswerDisabled || !listenAvailable}
+              aria-disabled={listenDisabled}
             >
               <Play size={16} />
               Listen
@@ -250,16 +256,16 @@ export default function CallCard({
           {showTranscriptAction && (
             <button
               onClick={() => {
-                if (isNoAnswerDisabled || !transcriptAvailable) return;
-                onViewTranscript?.(call);
+                if (transcriptDisabled) return;
+                onViewTranscript?.(call.id);
               }}
-              disabled={isNoAnswerDisabled || !transcriptAvailable}
+              disabled={transcriptDisabled}
               className={`flex-1 px-4 py-2 rounded-lg border font-medium transition-all text-sm flex items-center justify-center gap-2 ${
                 theme === 'dark'
                   ? 'bg-blue-500/10 border-blue-500/30 hover:bg-blue-500/20 text-blue-300 hover:text-blue-200'
                   : 'bg-blue-50 border-blue-200 hover:bg-blue-100 text-blue-700 hover:text-blue-800 shadow-sm'
               }`}
-              aria-disabled={isNoAnswerDisabled || !transcriptAvailable}
+              aria-disabled={transcriptDisabled}
             >
               <FileText size={16} />
               Transcript

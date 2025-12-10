@@ -164,10 +164,10 @@ export default function VoiceAgentPage() {
               <CallHistoryList
                 onViewDetails={(id) => setSelectedCallId(id)}
                 onListen={(id) => setSelectedCallId(id)}
-                hideTranscriptIconButton
-                disableActionsOnNoAnswer
-                forceActionsVisibleOnNoAnswer
                 enforceUniformHeight
+                hideTranscriptIconButton
+                forceTranscriptButtonVisible
+                forceEnableActions
               />
             </div>
           )}
