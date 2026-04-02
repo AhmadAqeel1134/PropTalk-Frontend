@@ -24,6 +24,8 @@ interface Call {
   transcript?: string | null;
   transcript_json?: any[] | null;
   user_pov_summary?: string | null;
+  sentiment_label?: string | null;
+  sentiment_scores?: { negative?: number; neutral?: number; positive?: number } | null;
 }
 
 interface CallHistoryListProps {

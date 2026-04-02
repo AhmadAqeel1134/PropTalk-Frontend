@@ -4,7 +4,7 @@
 // Purpose: Individual call card component
 
 import React from 'react';
-import { PhoneIncoming, PhoneOutgoing, Clock, Play, Eye, CheckCircle, XCircle, PhoneOff, FileText } from 'lucide-react';
+import { PhoneIncoming, PhoneOutgoing, Clock, Play, Eye, CheckCircle, XCircle, PhoneOff, FileText, Smile } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 
 interface Call {
@@ -21,6 +21,8 @@ interface Call {
   transcript?: string | null;
   transcript_json?: any[] | null;
   user_pov_summary?: string | null;
+  sentiment_label?: string | null;
+  sentiment_scores?: { negative?: number; neutral?: number; positive?: number } | null;
 }
 
 interface CallCardProps {
@@ -106,11 +108,36 @@ export default function CallCard({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const sentimentStyles = (label?: string | null) => {
+    const key = (label || '').toLowerCase();
+    if (key === 'positive') {
+      return {
+        bg: theme === 'dark' ? 'bg-emerald-500/15' : 'bg-emerald-50',
+        border: theme === 'dark' ? 'border-emerald-500/35' : 'border-emerald-200',
+        text: theme === 'dark' ? 'text-emerald-300' : 'text-emerald-800',
+      };
+    }
+    if (key === 'negative') {
+      return {
+        bg: theme === 'dark' ? 'bg-rose-500/15' : 'bg-rose-50',
+        border: theme === 'dark' ? 'border-rose-500/35' : 'border-rose-200',
+        text: theme === 'dark' ? 'text-rose-300' : 'text-rose-800',
+      };
+    }
+    return {
+      bg: theme === 'dark' ? 'bg-amber-500/15' : 'bg-amber-50',
+      border: theme === 'dark' ? 'border-amber-500/35' : 'border-amber-200',
+      text: theme === 'dark' ? 'text-amber-200' : 'text-amber-900',
+    };
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
   };
+
+  const sentimentBadgeStyle = call.sentiment_label ? sentimentStyles(call.sentiment_label) : null;
 
   return (
     <div
@@ -150,11 +177,26 @@ export default function CallCard({
               </p>
             </div>
           </div>
-          <div className={`px-2.5 py-1 rounded-md text-xs font-medium border ${config.color} ${config.bg} ${config.border}`}>
-            <div className="flex items-center gap-1">
-              <StatusIcon size={12} />
-              {config.label}
+          <div className="flex flex-col items-end gap-1.5">
+            <div className={`px-2.5 py-1 rounded-md text-xs font-medium border ${config.color} ${config.bg} ${config.border}`}>
+              <div className="flex items-center gap-1">
+                <StatusIcon size={12} />
+                {config.label}
+              </div>
             </div>
+            {call.sentiment_label && sentimentBadgeStyle && (
+              <div
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border ${sentimentBadgeStyle.bg} ${sentimentBadgeStyle.border} ${sentimentBadgeStyle.text}`}
+                title={
+                  call.sentiment_scores
+                    ? `Scores — neg: ${(call.sentiment_scores.negative ?? 0).toFixed(2)}, neu: ${(call.sentiment_scores.neutral ?? 0).toFixed(2)}, pos: ${(call.sentiment_scores.positive ?? 0).toFixed(2)}`
+                    : 'Call sentiment (user messages)'
+                }
+              >
+                <Smile size={12} className="opacity-90" />
+                {call.sentiment_label.charAt(0).toUpperCase() + call.sentiment_label.slice(1).toLowerCase()}
+              </div>
+            )}
           </div>
         </div>
 
