@@ -26,6 +26,8 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
   const [duration, setDuration] = useState(0);
   const [barValues, setBarValues] = useState<number[]>(() => Array(32).fill(0));
   const [audioBlobUrl, setAudioBlobUrl] = useState<string | null>(null);
+  const [recordingLoading, setRecordingLoading] = useState(false);
+  const [recordingError, setRecordingError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const mediaSourceRef = useRef<MediaElementAudioSourceNode | null>(null);
@@ -47,10 +49,15 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
 
     const fetchRecording = async () => {
       try {
+        setRecordingLoading(true);
+        setRecordingError(null);
         const token = typeof window !== 'undefined'
           ? localStorage.getItem('agent_token') || localStorage.getItem('access_token')
           : null;
-        if (!token) return;
+        if (!token) {
+          setRecordingError('Session token not found. Please login again.');
+          return;
+        }
 
         const proxiedUrl = `${API_URL}/agent/calls/${callId}/recording/stream`;
         const response = await fetch(proxiedUrl, {
@@ -59,13 +66,27 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
           },
         });
 
-        if (response.ok) {
-          const blob = await response.blob();
-          const url = URL.createObjectURL(blob);
-          setAudioBlobUrl(url);
+        if (!response.ok) {
+          let message = `Failed to load recording (HTTP ${response.status})`;
+          try {
+            const errorData = await response.json();
+            if (errorData?.detail) {
+              message = errorData.detail;
+            }
+          } catch {
+            // Keep default message if error payload isn't JSON.
+          }
+          setRecordingError(message);
+          return;
         }
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setAudioBlobUrl(url);
       } catch (error) {
         console.error('Error fetching recording:', error);
+        setRecordingError('Unable to fetch recording. Please try again.');
+      } finally {
+        setRecordingLoading(false);
       }
     };
 
@@ -167,14 +188,20 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
     setIsPlaying(false);
   }, [effectiveAudioSrc]);
 
-  const togglePlay = () => {
+  const togglePlay = async () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !effectiveAudioSrc) return;
 
     if (isPlaying) {
       audio.pause();
     } else {
-      audio.play();
+      try {
+        await audio.play();
+      } catch (error) {
+        console.error('Audio playback failed:', error);
+        setRecordingError('Audio playback was blocked or failed. Try pressing play again.');
+        return;
+      }
     }
     setIsPlaying(!isPlaying);
   };
@@ -479,6 +506,7 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                       max={duration || 0}
                       value={currentTime}
                       onChange={handleSeek}
+                      disabled={!effectiveAudioSrc}
                       className={`w-full h-2 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500 [&::-webkit-slider-thumb]:cursor-pointer ${
                         theme === 'dark' ? 'bg-gray-700' : 'bg-gray-300'
                       }`}
@@ -498,11 +526,12 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                     <div className="flex gap-3">
                       <button
                         onClick={togglePlay}
+                        disabled={!effectiveAudioSrc}
                         className={`flex-1 px-6 py-3 rounded-xl border font-medium transition-all text-sm flex items-center justify-center gap-2 ${
                           theme === 'dark'
                             ? 'bg-gray-900 border-gray-700 hover:border-gray-600 text-gray-200'
                             : 'bg-white border-gray-300 hover:border-gray-400 text-gray-700'
-                        }`}
+                        } ${!effectiveAudioSrc ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         {isPlaying ? <Pause size={16} /> : <Play size={16} />}
                         {isPlaying ? 'Pause' : 'Play'}
@@ -517,6 +546,14 @@ export default function CallDetailsSheet({ callId, isOpen, onClose }: CallDetail
                         <Download size={20} />
                       </button>
                     </div>
+                    {recordingLoading && (
+                      <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                        Loading recording...
+                      </p>
+                    )}
+                    {recordingError && (
+                      <p className="text-xs text-red-500">{recordingError}</p>
+                    )}
                   </div>
                 </div>
               )}
