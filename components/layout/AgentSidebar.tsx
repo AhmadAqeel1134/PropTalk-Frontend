@@ -14,6 +14,7 @@ import {
   X,
   Phone,
   Radio,
+  CalendarCheck,
 } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import ThemeToggle from '@/components/admin/ThemeToggle'
@@ -44,6 +45,11 @@ const AgentSidebar: React.FC = () => {
       name: 'Documents',
       href: '/agent/documents',
       icon: FileText,
+    },
+    {
+      name: 'Showings',
+      href: '/agent/showings',
+      icon: CalendarCheck,
     },
     {
       name: 'Call History',

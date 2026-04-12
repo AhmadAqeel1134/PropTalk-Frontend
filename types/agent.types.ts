@@ -85,3 +85,41 @@ export interface CallStatistics {
   calls_by_status: Record<string, number>
   calls_by_day: { date: string; count: number }[]
 }
+
+export interface Showing {
+  id: string
+  real_estate_agent_id: string
+  voice_agent_id: string | null
+  contact_id: string | null
+  contact_name: string | null
+  contact_phone: string | null
+  contact_email: string | null
+  property_id: string | null
+  property_address: string | null
+  property_city: string | null
+  property_state: string | null
+  property_type: string | null
+  property_price: number | null
+  property_bedrooms: number | null
+  property_bathrooms: number | null
+  property_sqft: number | null
+  call_id: string | null
+  caller_phone: string | null
+  caller_name: string | null
+  visit_type: string
+  scheduled_start: string
+  scheduled_end: string | null
+  status: string
+  source: string
+  twilio_call_sid: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface PaginatedShowings {
+  items: Showing[]
+  total: number
+  page: number
+  page_size: number
+}

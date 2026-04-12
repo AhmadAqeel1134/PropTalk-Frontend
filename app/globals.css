@@ -300,3 +300,23 @@ g,
   transition: none !important;
   will-change: auto !important;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Native <select> dropdown list — readable text on Windows/Chrome in themes */
+/* Closed field uses app colors; the popup is OS-native unless we hint scheme   */
+/* and set option colors (otherwise white list + white text = invisible).      */
+/* -------------------------------------------------------------------------- */
+html.dark-theme select {
+  color-scheme: dark;
+}
+html.dark-theme select option {
+  background-color: #1f2937;
+  color: #f3f4f6;
+}
+html.light-theme select {
+  color-scheme: light;
+}
+html.light-theme select option {
+  background-color: #ffffff;
+  color: #111827;
+}
