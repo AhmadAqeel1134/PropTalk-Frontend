@@ -27,8 +27,11 @@ import {
   getVoiceAgent,
   updateVoiceAgent,
   toggleVoiceAgentStatus,
+  getShowings,
+  createShowing,
+  updateShowing,
 } from '@/lib/real_estate_agent/api'
-import type { AgentDashboardData, Contact, Property, Document, PaginatedProperties } from '@/types/agent.types'
+import type { AgentDashboardData, Contact, Property, Document, PaginatedProperties, PaginatedShowings } from '@/types/agent.types'
 import { getSmartRefetchInterval } from './useVisibilityRefetch'
 
 const SMART_REFETCH_INTERVAL = getSmartRefetchInterval(60000)
@@ -307,6 +310,44 @@ export function useToggleVoiceAgentStatus() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agent', 'voice-agent'] })
       queryClient.invalidateQueries({ queryKey: ['agent', 'call-stats'] })
+    },
+  })
+}
+
+// Showings
+export function useShowings(params?: {
+  page?: number
+  page_size?: number
+  status?: string
+  visit_type?: string
+}) {
+  return useQuery<PaginatedShowings>({
+    queryKey: ['agent', 'showings', params?.page, params?.status, params?.visit_type],
+    queryFn: () => getShowings(params),
+    staleTime: 0,
+    gcTime: 30000,
+    refetchOnMount: 'always',
+  })
+}
+
+export function useCreateShowing() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: createShowing,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agent', 'showings'] })
+      queryClient.invalidateQueries({ queryKey: ['agent', 'dashboard'] })
+    },
+  })
+}
+
+export function useUpdateShowing() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateShowing>[1] }) =>
+      updateShowing(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agent', 'showings'] })
     },
   })
 }

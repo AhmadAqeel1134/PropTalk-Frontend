@@ -310,3 +310,66 @@ export const getCallTranscript = async (callId: string) => {
   return authenticatedFetch(`/agent/calls/${callId}/transcript`)
 }
 
+
+// ==================== Showings ====================
+
+export const getShowings = async (params?: {
+  page?: number
+  page_size?: number
+  status?: string
+  visit_type?: string
+  property_id?: string
+  contact_id?: string
+  from_date?: string
+  to_date?: string
+}) => {
+  const qp = new URLSearchParams()
+  if (params?.page) qp.append('page', params.page.toString())
+  if (params?.page_size) qp.append('page_size', params.page_size.toString())
+  if (params?.status) qp.append('status', params.status)
+  if (params?.visit_type) qp.append('visit_type', params.visit_type)
+  if (params?.property_id) qp.append('property_id', params.property_id)
+  if (params?.contact_id) qp.append('contact_id', params.contact_id)
+  if (params?.from_date) qp.append('from_date', params.from_date)
+  if (params?.to_date) qp.append('to_date', params.to_date)
+  const qs = qp.toString()
+  return authenticatedFetch(qs ? `/agent/showings?${qs}` : '/agent/showings')
+}
+
+export const getShowingById = async (showingId: string) => {
+  return authenticatedFetch(`/agent/showings/${showingId}`)
+}
+
+export const createShowing = async (data: {
+  property_id?: string
+  contact_id?: string
+  caller_phone?: string
+  caller_name?: string
+  visit_type?: string
+  scheduled_start: string
+  scheduled_end?: string
+  source?: string
+  notes?: string
+}) => {
+  return authenticatedFetch('/agent/showings', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const updateShowing = async (showingId: string, data: {
+  status?: string
+  scheduled_start?: string
+  scheduled_end?: string
+  notes?: string
+  visit_type?: string
+  contact_id?: string
+  property_id?: string
+  caller_name?: string
+}) => {
+  return authenticatedFetch(`/agent/showings/${showingId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  })
+}
+
