@@ -1,6 +1,6 @@
 'use client'
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import {
   getAgentDashboard,
   getMyContacts,
@@ -293,12 +293,18 @@ export function useVoiceAgent() {
   })
 }
 
+/** Keep dashboard + sheets in sync (two query keys are used across the app). */
+export function invalidateVoiceAgentQueries(queryClient: QueryClient) {
+  queryClient.invalidateQueries({ queryKey: ['voice-agent'] })
+  queryClient.invalidateQueries({ queryKey: ['agent', 'voice-agent'] })
+}
+
 export function useUpdateVoiceAgent() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: updateVoiceAgent,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agent', 'voice-agent'] })
+      invalidateVoiceAgentQueries(queryClient)
     },
   })
 }
@@ -308,7 +314,7 @@ export function useToggleVoiceAgentStatus() {
   return useMutation({
     mutationFn: toggleVoiceAgentStatus,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['agent', 'voice-agent'] })
+      invalidateVoiceAgentQueries(queryClient)
       queryClient.invalidateQueries({ queryKey: ['agent', 'call-stats'] })
     },
   })

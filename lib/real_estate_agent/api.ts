@@ -38,7 +38,18 @@ async function authenticatedFetch(endpoint: string, options: RequestInit = {}) {
       throw new Error('Session expired. Please login again.')
     }
     
-    throw new Error(error.detail || `HTTP error! status: ${response.status}`)
+    const d = error.detail
+    const detailMsg =
+      typeof d === 'string'
+        ? d
+        : Array.isArray(d)
+          ? d.map((x: { msg?: string }) => x?.msg || JSON.stringify(x)).join('; ')
+          : d && typeof d === 'object' && d !== null && 'message' in d
+            ? String((d as { message: string }).message)
+            : d != null
+              ? JSON.stringify(d)
+              : ''
+    throw new Error(detailMsg || `HTTP error! status: ${response.status}`)
   }
 
   // Handle 204/empty responses (e.g. DELETE) gracefully
@@ -249,12 +260,33 @@ export const updateVoiceAgent = async (data: {
     greeting_message?: string
     custom_commands?: string[]
     recording_enabled?: boolean
+    elevenlabs_voice_id?: string
+    elevenlabs_speed?: number
+    elevenlabs_stability?: number
+    elevenlabs_similarity_boost?: number
   }
 }) => {
   return authenticatedFetch('/agent/voice-agent', {
     method: 'PATCH',
     body: JSON.stringify(data),
   })
+}
+
+export const previewVoice = async (data: {
+  voice_id: string
+  text?: string
+  speed?: number
+  stability?: number
+  similarity_boost?: number
+}) => {
+  return authenticatedFetch('/agent/voice-agent/voice/preview', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
+}
+
+export const getVoiceTtsStatus = async () => {
+  return authenticatedFetch('/agent/voice-agent/voice/status')
 }
 
 export const toggleVoiceAgentStatus = async (status: 'active' | 'inactive') => {

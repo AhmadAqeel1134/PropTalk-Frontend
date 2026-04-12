@@ -123,3 +123,16 @@ export interface PaginatedShowings {
   page: number
   page_size: number
 }
+
+export interface VoiceAgentSettings {
+  voice_gender?: 'female' | 'male'
+  voice_speed?: 'normal' | 'slow' | 'fast'
+  language?: string
+  greeting_message?: string
+  custom_commands?: string[]
+  recording_enabled?: boolean
+  elevenlabs_voice_id?: string
+  elevenlabs_speed?: number
+  elevenlabs_stability?: number
+  elevenlabs_similarity_boost?: number
+}

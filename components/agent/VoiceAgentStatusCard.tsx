@@ -4,12 +4,14 @@
 // Purpose: Display active voice agent status with real-time indicators and quick actions
 
 import React, { useState } from 'react';
-import { Phone, Radio, Settings, TrendingUp, Zap, PhoneCall, MoreVertical } from 'lucide-react';
+import { Phone, Radio, Settings, TrendingUp, Zap, PhoneCall, MoreVertical, Volume2 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useVoiceAgent, useToggleVoiceAgentStatus, useCallStatistics } from '@/hooks/useAgent';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ErrorMessage from '@/components/common/ErrorMessage';
 import { useTheme } from '@/contexts/ThemeContext';
+import VoiceStudioModal from './VoiceStudioModal';
+import voices from '@/lib/voice/elevenlabsVoices';
 
 interface VoiceAgent {
   id: string;
@@ -29,6 +31,7 @@ interface VoiceAgentStatusCardProps {
 export default function VoiceAgentStatusCard({ onConfigure }: VoiceAgentStatusCardProps) {
   const { theme } = useTheme();
   const [showMenu, setShowMenu] = useState(false);
+  const [voiceStudioOpen, setVoiceStudioOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: agent, isLoading, error } = useVoiceAgent();
@@ -186,6 +189,25 @@ export default function VoiceAgentStatusCard({ onConfigure }: VoiceAgentStatusCa
             </span>
           </div>
 
+          {/* Voice chip */}
+          {(() => {
+            const voiceId = (agent as any).settings?.elevenlabs_voice_id;
+            const activeVoice = voices.find((v: any) => v.id === voiceId);
+            return (
+              <button
+                onClick={() => setVoiceStudioOpen(true)}
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-medium transition-all mb-6 ${
+                  theme === 'dark'
+                    ? 'bg-gray-800/40 border-gray-700/50 text-gray-300 hover:border-blue-500/40 hover:text-blue-400'
+                    : 'bg-white border-gray-200 text-gray-600 hover:border-blue-300 hover:text-blue-600 shadow-sm'
+                }`}
+              >
+                <Volume2 size={13} />
+                {activeVoice ? activeVoice.name : 'Default'} voice
+              </button>
+            );
+          })()}
+
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div
               className={`p-4 rounded-xl border backdrop-blur-sm transition-all duration-300 group/stat ${
@@ -333,7 +355,12 @@ export default function VoiceAgentStatusCard({ onConfigure }: VoiceAgentStatusCa
           </div>
         </div>
       </div>
+      <VoiceStudioModal
+        isOpen={voiceStudioOpen}
+        onClose={() => setVoiceStudioOpen(false)}
+        currentVoiceId={(agent as any).settings?.elevenlabs_voice_id}
+        currentSettings={(agent as any).settings}
+      />
     </div>
   );
 }
-
