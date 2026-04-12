@@ -72,7 +72,11 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
     enabled: isOpen && !!callId,
   })
 
-  const messages: ConversationMessage[] = conversationData?.history || []
+  const rawMessages: ConversationMessage[] = conversationData?.history || []
+  const messages = [...rawMessages].sort((a, b) => {
+    if (!a.timestamp || !b.timestamp) return 0
+    return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  })
 
   // Get recording URL
   const getRecordingUrl = () => {
@@ -173,12 +177,12 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
     }
   }, [highlightedMessageIndex])
 
-  // Scroll to bottom on mount
+  // Scroll to bottom when messages arrive or modal opens
   useEffect(() => {
-    if (isOpen && messagesEndRef.current) {
+    if (isOpen && messages.length > 0 && messagesEndRef.current) {
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-      }, 100)
+      }, 150)
     }
   }, [isOpen, messages.length])
 
@@ -402,9 +406,9 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
                   <div
                     key={index}
                     id={`message-${index}`}
-                    className={`flex items-start gap-3 transition-all duration-300 ${
-                      isHighlighted ? 'scale-[1.02]' : ''
-                    }`}
+                    className={`flex gap-3 transition-all duration-300 ${
+                      isUser ? 'flex-row-reverse' : 'flex-row'
+                    } ${isHighlighted ? 'scale-[1.02]' : ''}`}
                   >
                     {/* Avatar */}
                     <div
@@ -498,28 +502,48 @@ export default function CallRecordingModal({ callId, isOpen, onClose }: CallReco
   )
 }
 
-// Helper function to parse plain text transcript into messages
 function parseTranscriptToMessages(transcript: string, direction: string): ConversationMessage[] {
   const messages: ConversationMessage[] = []
-  
-  // Split by common sentence endings
+  if (!transcript) return messages
+
+  // Backend's _history_to_text produces lines like "[HH:MM:SS] Agent: ..." or "Agent: ..."
+  const lines = transcript.split('\n').map(l => l.trim()).filter(Boolean)
+  const labelledRegex = /^(?:\[.*?\]\s*)?(Agent|User|System):\s*(.+)/i
+
+  let hasLabels = false
+  for (const line of lines) {
+    const match = line.match(labelledRegex)
+    if (match) {
+      hasLabels = true
+      const speaker = match[1].toLowerCase()
+      const content = match[2].trim()
+      if (!content) continue
+      messages.push({
+        role: speaker === 'agent' || speaker === 'system' ? 'assistant' : 'user',
+        content,
+        timestamp: null,
+      })
+    }
+  }
+
+  if (hasLabels && messages.length > 0) return messages
+
+  // Fallback: split by sentence and alternate
   const sentences = transcript
-    .split(/[.!?]\s+|\.\n+/)
+    .split(/[.!?]\s+|\n+/)
     .map(s => s.trim())
     .filter(s => s.length > 3)
-  
-  // Alternate between user and agent
-  let isAgentTurn = direction === 'outbound' // Outbound starts with agent
-  
+
+  let isAgentTurn = direction === 'outbound'
   for (const sentence of sentences) {
     messages.push({
       role: isAgentTurn ? 'assistant' : 'user',
       content: sentence,
-      timestamp: null
+      timestamp: null,
     })
     isAgentTurn = !isAgentTurn
   }
-  
+
   return messages
 }
 
