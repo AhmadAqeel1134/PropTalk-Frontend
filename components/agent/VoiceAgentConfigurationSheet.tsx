@@ -6,10 +6,13 @@
 import React, { useState } from 'react';
 import { 
   X, Save, Mic, Volume2, Sparkles, Settings, 
-  User, MessageSquare, List, Eye, AlertCircle 
+  User, MessageSquare, List, Eye, AlertCircle, Mic2, ChevronRight
 } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTheme } from '@/contexts/ThemeContext';
+import { invalidateVoiceAgentQueries } from '@/hooks/useAgent';
+import VoiceStudioModal from './VoiceStudioModal';
+import voices from '@/lib/voice/elevenlabsVoices';
 
 interface VoiceAgentConfigProps {
   isOpen: boolean;
@@ -53,7 +56,7 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
       return updateVoiceAgent(data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['voice-agent'] });
+      invalidateVoiceAgentQueries(queryClient);
       onClose();
     }
   });
@@ -374,140 +377,13 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
             )}
 
             {activeTab === 'voice' && (
-              <>
-                <div className="space-y-6">
-                  <div>
-                    <label className={`block text-sm font-medium mb-3 ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                      Voice Gender
-                    </label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {(['female', 'male'] as const).map(gender => (
-                        <button
-                          key={gender}
-                          onClick={() => setConfig({
-                            ...config,
-                            settings: { ...config.settings, voice_gender: gender }
-                          })}
-                          className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                            config.settings.voice_gender === gender
-                              ? theme === 'dark'
-                                ? 'border-purple-500 bg-purple-500/10'
-                                : 'border-purple-500 bg-purple-50'
-                              : theme === 'dark'
-                              ? 'border-gray-700 bg-gray-800 hover:border-gray-600'
-                              : 'border-gray-200 bg-white hover:border-gray-300 shadow-sm'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div
-                              className={`p-2 rounded-lg ${
-                                config.settings.voice_gender === gender
-                                  ? theme === 'dark'
-                                    ? 'bg-purple-500/20'
-                                    : 'bg-purple-100'
-                                  : theme === 'dark'
-                                  ? 'bg-gray-700'
-                                  : 'bg-gray-100'
-                              }`}
-                            >
-                              <User
-                                className={
-                                  config.settings.voice_gender === gender
-                                    ? theme === 'dark'
-                                      ? 'text-purple-400'
-                                      : 'text-purple-600'
-                                    : theme === 'dark'
-                                    ? 'text-gray-400'
-                                    : 'text-gray-500'
-                                }
-                                size={20}
-                              />
-                            </div>
-                            <span className={`font-medium capitalize ${
-                              config.settings.voice_gender === gender
-                                ? theme === 'dark'
-                                  ? 'text-purple-400'
-                                  : 'text-purple-700'
-                                : theme === 'dark'
-                                ? 'text-gray-300'
-                                : 'text-gray-700'
-                            }`}>
-                              {gender}
-                            </span>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm font-medium mb-3 ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                      Voice Speed
-                    </label>
-                    <div className="grid grid-cols-3 gap-3">
-                      {(['slow', 'normal', 'fast'] as const).map(speed => (
-                        <button
-                          key={speed}
-                          onClick={() => setConfig({
-                            ...config,
-                            settings: { ...config.settings, voice_speed: speed }
-                          })}
-                          className={`p-4 rounded-xl border-2 transition-all duration-300 ${
-                            config.settings.voice_speed === speed
-                              ? theme === 'dark'
-                                ? 'border-blue-500 bg-blue-500/10'
-                                : 'border-blue-500 bg-blue-50'
-                              : theme === 'dark'
-                              ? 'border-gray-700 bg-gray-800 hover:border-gray-600'
-                              : 'border-gray-200 bg-white hover:border-gray-300 shadow-sm'
-                          }`}
-                        >
-                          <span className={`font-medium capitalize ${
-                            config.settings.voice_speed === speed
-                              ? theme === 'dark'
-                                ? 'text-blue-400'
-                                : 'text-blue-700'
-                              : theme === 'dark'
-                              ? 'text-gray-300'
-                              : 'text-gray-700'
-                          }`}>
-                            {speed}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className={`block text-sm font-medium mb-2 ${
-                      theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                      Language
-                    </label>
-                    <select
-                      value={config.settings.language}
-                      onChange={(e) => setConfig({
-                        ...config,
-                        settings: { ...config.settings, language: e.target.value }
-                      })}
-                      className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${
-                        theme === 'dark'
-                          ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500/20'
-                          : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm'
-                      }`}
-                    >
-                      <option value="en-US">English (US)</option>
-                      <option value="en-GB">English (UK)</option>
-                      <option value="es-ES">Spanish</option>
-                      <option value="fr-FR">French</option>
-                    </select>
-                  </div>
-                </div>
-              </>
+              <VoiceTabContent
+                theme={theme}
+                currentVoiceId={(currentAgent?.settings as any)?.elevenlabs_voice_id}
+                currentSettings={currentAgent?.settings as any}
+                config={config}
+                setConfig={setConfig}
+              />
             )}
 
             {activeTab === 'advanced' && (
@@ -652,3 +528,143 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
   );
 }
 
+
+function VoiceTabContent({
+  theme,
+  currentVoiceId,
+  currentSettings,
+  config,
+  setConfig,
+}: {
+  theme: string
+  currentVoiceId?: string
+  currentSettings?: any
+  config: any
+  setConfig: (fn: any) => void
+}) {
+  const isDark = theme === 'dark'
+  const [studioOpen, setStudioOpen] = useState(false)
+
+  const activeVoice = currentVoiceId
+    ? voices.find((v) => v.id === currentVoiceId)
+    : undefined
+  const displayName =
+    activeVoice?.name ||
+    (currentVoiceId ? `Custom voice` : 'Default (server)')
+  const displaySub =
+    activeVoice != null
+      ? `${activeVoice.gender === 'female' ? 'Female' : 'Male'} \u00b7 ${activeVoice.accent} \u00b7 ${activeVoice.tags[0]}`
+      : currentVoiceId
+        ? `ID …${currentVoiceId.slice(-8)}`
+        : 'No saved voice in profile — ElevenLabs default from env is used'
+
+  return (
+    <>
+      <div className="space-y-6">
+        {/* Current voice summary card */}
+        <div
+          className={`p-5 rounded-xl border-2 transition-all ${
+            isDark
+              ? 'bg-gradient-to-br from-blue-500/5 to-purple-500/5 border-blue-500/20'
+              : 'bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200'
+          }`}
+        >
+          <div className="flex items-center gap-4">
+            <div
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-lg font-bold ${
+                activeVoice?.gender === 'female'
+                  ? isDark
+                    ? 'bg-pink-500/15 text-pink-400'
+                    : 'bg-pink-100 text-pink-600'
+                  : isDark
+                  ? 'bg-sky-500/15 text-sky-400'
+                  : 'bg-sky-100 text-sky-600'
+              }`}
+            >
+              {(activeVoice?.name?.[0] || displayName[0] || '?').toUpperCase()}
+            </div>
+            <div className="flex-1">
+              <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {displayName}
+              </p>
+              <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                {displaySub}
+              </p>
+            </div>
+            <Mic2 className={isDark ? 'text-blue-400' : 'text-blue-600'} size={24} />
+          </div>
+        </div>
+
+        {/* Open Voice Studio button */}
+        <button
+          onClick={() => setStudioOpen(true)}
+          className={`w-full group flex items-center justify-between p-4 rounded-xl border-2 border-dashed transition-all duration-300 ${
+            isDark
+              ? 'border-gray-700 hover:border-blue-500/40 hover:bg-blue-500/5'
+              : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-gray-100'}`}>
+              <Volume2
+                className={`transition-colors ${
+                  isDark
+                    ? 'text-gray-400 group-hover:text-blue-400'
+                    : 'text-gray-500 group-hover:text-blue-600'
+                }`}
+                size={20}
+              />
+            </div>
+            <div className="text-left">
+              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                Open Voice Studio
+              </p>
+              <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                Browse, preview, and select from premium AI voices
+              </p>
+            </div>
+          </div>
+          <ChevronRight
+            className={`transition-transform group-hover:translate-x-1 ${
+              isDark ? 'text-gray-600' : 'text-gray-400'
+            }`}
+            size={20}
+          />
+        </button>
+
+        {/* Language selector */}
+        <div>
+          <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            Language
+          </label>
+          <select
+            value={config.settings.language}
+            onChange={(e) =>
+              setConfig((prev: any) => ({
+                ...prev,
+                settings: { ...prev.settings, language: e.target.value },
+              }))
+            }
+            className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 transition-all ${
+              isDark
+                ? 'bg-gray-800 border-gray-700 text-white focus:border-blue-500 focus:ring-blue-500/20'
+                : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500 focus:ring-blue-500/20 shadow-sm'
+            }`}
+          >
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (UK)</option>
+            <option value="es-ES">Spanish</option>
+            <option value="fr-FR">French</option>
+          </select>
+        </div>
+      </div>
+
+      <VoiceStudioModal
+        isOpen={studioOpen}
+        onClose={() => setStudioOpen(false)}
+        currentVoiceId={currentVoiceId}
+        currentSettings={currentSettings}
+      />
+    </>
+  )
+}
