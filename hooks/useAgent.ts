@@ -229,8 +229,15 @@ export function useDocumentContacts(documentId: string) {
 export function useUploadDocument() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: ({ file, description }: { file: File; description?: string }) =>
-      uploadDocument(file, description),
+    mutationFn: ({
+      file,
+      description,
+      uploadKind,
+    }: {
+      file: File
+      description?: string
+      uploadKind?: 'property_import' | 'knowledge_base'
+    }) => uploadDocument(file, description, uploadKind ?? 'property_import'),
     onSuccess: () => {
       // Invalidate all related queries to refresh data after upload
       queryClient.invalidateQueries({ queryKey: ['agent', 'documents'] })

@@ -170,10 +170,15 @@ export const getDocumentById = async (id: string) => {
   return authenticatedFetch(`/documents/${id}`)
 }
 
-export const uploadDocument = async (file: File, description?: string) => {
+export const uploadDocument = async (
+  file: File,
+  description?: string,
+  uploadKind: 'property_import' | 'knowledge_base' = 'property_import'
+) => {
   const formData = new FormData()
   formData.append('file', file)
   if (description) formData.append('description', description)
+  formData.append('upload_kind', uploadKind)
   
   const token = getAgentToken()
   if (!token) throw new Error('No authentication token found')
