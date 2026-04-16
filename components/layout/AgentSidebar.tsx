@@ -15,6 +15,7 @@ import {
   Phone,
   Radio,
   CalendarCheck,
+  BrainCircuit,
 } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import ThemeToggle from '@/components/admin/ThemeToggle'
@@ -60,6 +61,11 @@ const AgentSidebar: React.FC = () => {
       name: 'Voice Agent',
       href: '/agent/voice-agent',
       icon: Radio,
+    },
+    {
+      name: 'RAG Analytics',
+      href: '/agent/rag-analytics',
+      icon: BrainCircuit,
     },
     {
       name: 'Profile',

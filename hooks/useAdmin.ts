@@ -11,6 +11,14 @@ import {
   getAgentDocumentsPaginated,
   getAgentContacts,
   getAgentPhoneNumber,
+  getAdminRagAgents,
+  getAdminRagOverview,
+  getAdminRagTimeseries,
+  getAdminRagQueries,
+  getAdminRagTopSources,
+  getAdminRagFailures,
+  getAdminRagEmbeddingOverview,
+  getAdminRagEmbeddingJobs,
 } from '@/lib/api';
 import type {
   DashboardStats,
@@ -125,5 +133,91 @@ export function useAgentPhoneNumber(agentId: string) {
     enabled: !!agentId,
     staleTime: 30000,
   });
+}
+
+export function useAdminRagAgents() {
+  return useQuery({
+    queryKey: ['admin', 'rag', 'agents'],
+    queryFn: getAdminRagAgents,
+    staleTime: 30000,
+  })
+}
+
+export function useAdminRagOverview(agentId: string, window: '7d' | '30d' | '90d' = '30d') {
+  return useQuery({
+    queryKey: ['admin', 'rag', 'overview', agentId, window],
+    queryFn: () => getAdminRagOverview(agentId, window),
+    enabled: !!agentId,
+    staleTime: 30000,
+  })
+}
+
+export function useAdminRagTimeseries(
+  agentId: string,
+  window: '7d' | '30d' | '90d' = '30d',
+  bucket: 'day' | 'week' = 'day'
+) {
+  return useQuery({
+    queryKey: ['admin', 'rag', 'timeseries', agentId, window, bucket],
+    queryFn: () => getAdminRagTimeseries(agentId, window, bucket),
+    enabled: !!agentId,
+    staleTime: 30000,
+  })
+}
+
+export function useAdminRagQueries(
+  agentId: string,
+  params?: { window?: '7d' | '30d' | '90d'; page?: number; page_size?: number }
+) {
+  return useQuery({
+    queryKey: ['admin', 'rag', 'queries', agentId, params?.window || '30d', params?.page || 1, params?.page_size || 20],
+    queryFn: () => getAdminRagQueries(agentId, params),
+    enabled: !!agentId,
+    staleTime: 15000,
+  })
+}
+
+export function useAdminRagTopSources(
+  agentId: string,
+  window: '7d' | '30d' | '90d' = '30d',
+  limit = 10
+) {
+  return useQuery({
+    queryKey: ['admin', 'rag', 'sources', agentId, window, limit],
+    queryFn: () => getAdminRagTopSources(agentId, window, limit),
+    enabled: !!agentId,
+    staleTime: 30000,
+  })
+}
+
+export function useAdminRagFailures(
+  agentId: string,
+  window: '7d' | '30d' | '90d' = '30d',
+  limit = 20
+) {
+  return useQuery({
+    queryKey: ['admin', 'rag', 'failures', agentId, window, limit],
+    queryFn: () => getAdminRagFailures(agentId, window, limit),
+    enabled: !!agentId,
+    staleTime: 30000,
+  })
+}
+
+export function useAdminRagEmbeddingOverview(agentId: string) {
+  return useQuery({
+    queryKey: ['admin', 'rag', 'embedding', 'overview', agentId],
+    queryFn: () => getAdminRagEmbeddingOverview(agentId),
+    enabled: !!agentId,
+    staleTime: 30000,
+  })
+}
+
+export function useAdminRagEmbeddingJobs(agentId: string, limit = 20) {
+  return useQuery({
+    queryKey: ['admin', 'rag', 'embedding', 'jobs', agentId, limit],
+    queryFn: () => getAdminRagEmbeddingJobs(agentId, limit),
+    enabled: !!agentId,
+    staleTime: 15000,
+  })
 }
 

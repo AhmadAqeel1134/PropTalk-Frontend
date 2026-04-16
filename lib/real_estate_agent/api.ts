@@ -76,6 +76,50 @@ export const getAgentDashboard = async () => {
   return authenticatedFetch('/agent/dashboard')
 }
 
+export const getAgentRagOverview = async (window: '7d' | '30d' | '90d' = '30d') => {
+  return authenticatedFetch(`/agent/rag/metrics/overview?window=${window}`)
+}
+
+export const getAgentRagTimeseries = async (
+  window: '7d' | '30d' | '90d' = '30d',
+  bucket: 'day' | 'week' = 'day'
+) => {
+  return authenticatedFetch(`/agent/rag/metrics/timeseries?window=${window}&bucket=${bucket}`)
+}
+
+export const getAgentRagFailures = async (
+  window: '7d' | '30d' | '90d' = '30d',
+  limit: number = 20
+) => {
+  return authenticatedFetch(`/agent/rag/metrics/failures?window=${window}&limit=${limit}`)
+}
+
+export const getAgentRagTopSources = async (
+  window: '7d' | '30d' | '90d' = '30d',
+  limit: number = 10
+) => {
+  return authenticatedFetch(`/agent/rag/metrics/top-sources?window=${window}&limit=${limit}`)
+}
+
+export const getAgentRagQueries = async (
+  params?: { window?: '7d' | '30d' | '90d'; page?: number; page_size?: number }
+) => {
+  const window = params?.window || '30d'
+  const page = params?.page || 1
+  const pageSize = params?.page_size || 20
+  return authenticatedFetch(
+    `/agent/rag/metrics/queries?window=${window}&page=${page}&page_size=${pageSize}`
+  )
+}
+
+export const getAgentRagEmbeddingOverview = async () => {
+  return authenticatedFetch('/agent/rag/metrics/embedding/overview')
+}
+
+export const getAgentRagEmbeddingJobs = async (limit: number = 20) => {
+  return authenticatedFetch(`/agent/rag/metrics/embedding/jobs?limit=${limit}`)
+}
+
 // Contacts
 export const getMyContacts = async (search?: string, hasProperties?: boolean) => {
   const params = new URLSearchParams()

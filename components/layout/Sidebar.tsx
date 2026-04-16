@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   Building2,
+  BrainCircuit,
 } from 'lucide-react';
 import { useTheme } from '@/contexts/ThemeContext';
 import ThemeToggle from '@/components/admin/ThemeToggle';
@@ -41,6 +42,11 @@ const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
       name: 'Agents',
       href: '/admin/agents',
       icon: Users,
+    },
+    {
+      name: 'RAG Analytics',
+      href: '/admin/rag-analytics',
+      icon: BrainCircuit,
     },
     {
       name: 'Settings',

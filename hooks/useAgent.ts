@@ -3,6 +3,13 @@
 import { useQuery, useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import {
   getAgentDashboard,
+  getAgentRagOverview,
+  getAgentRagTimeseries,
+  getAgentRagFailures,
+  getAgentRagTopSources,
+  getAgentRagQueries,
+  getAgentRagEmbeddingOverview,
+  getAgentRagEmbeddingJobs,
   getMyContacts,
   getContactById,
   createContact,
@@ -47,6 +54,69 @@ export function useAgentDashboard() {
     refetchOnMount: 'always',
     refetchInterval: SMART_REFETCH_INTERVAL,
     refetchIntervalInBackground: false,
+  })
+}
+
+export function useAgentRagOverview(window: '7d' | '30d' | '90d' = '30d') {
+  return useQuery({
+    queryKey: ['agent', 'rag', 'overview', window],
+    queryFn: () => getAgentRagOverview(window),
+    staleTime: 30000,
+  })
+}
+
+export function useAgentRagTimeseries(
+  window: '7d' | '30d' | '90d' = '30d',
+  bucket: 'day' | 'week' = 'day'
+) {
+  return useQuery({
+    queryKey: ['agent', 'rag', 'timeseries', window, bucket],
+    queryFn: () => getAgentRagTimeseries(window, bucket),
+    staleTime: 30000,
+  })
+}
+
+export function useAgentRagFailures(window: '7d' | '30d' | '90d' = '30d', limit = 20) {
+  return useQuery({
+    queryKey: ['agent', 'rag', 'failures', window, limit],
+    queryFn: () => getAgentRagFailures(window, limit),
+    staleTime: 30000,
+  })
+}
+
+export function useAgentRagTopSources(window: '7d' | '30d' | '90d' = '30d', limit = 10) {
+  return useQuery({
+    queryKey: ['agent', 'rag', 'sources', window, limit],
+    queryFn: () => getAgentRagTopSources(window, limit),
+    staleTime: 30000,
+  })
+}
+
+export function useAgentRagQueries(params?: {
+  window?: '7d' | '30d' | '90d'
+  page?: number
+  page_size?: number
+}) {
+  return useQuery({
+    queryKey: ['agent', 'rag', 'queries', params?.window || '30d', params?.page || 1, params?.page_size || 20],
+    queryFn: () => getAgentRagQueries(params),
+    staleTime: 15000,
+  })
+}
+
+export function useAgentRagEmbeddingOverview() {
+  return useQuery({
+    queryKey: ['agent', 'rag', 'embedding', 'overview'],
+    queryFn: getAgentRagEmbeddingOverview,
+    staleTime: 30000,
+  })
+}
+
+export function useAgentRagEmbeddingJobs(limit = 20) {
+  return useQuery({
+    queryKey: ['agent', 'rag', 'embedding', 'jobs', limit],
+    queryFn: () => getAgentRagEmbeddingJobs(limit),
+    staleTime: 15000,
   })
 }
 
