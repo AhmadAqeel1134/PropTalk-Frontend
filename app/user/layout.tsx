@@ -26,7 +26,7 @@ function UserLayoutContent({ children }: { children: React.ReactNode }) {
       }
     >
       <EndUserSidebar />
-      <main className="lg:ml-[280px] p-6 lg:p-10">{children}</main>
+      <main className="min-h-screen lg:ml-[280px] p-6 md:p-8 lg:p-10">{children}</main>
     </div>
   )
 }

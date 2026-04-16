@@ -10,7 +10,7 @@ import { loadGoogleScript, initializeGoogleSignIn, loginWithGoogle } from '@/lib
 interface LoginLayoutProps {
   title: string
   subtitle: string
-  userType: 'admin' | 'agent' | 'user'
+  userType: 'admin' | 'agent' | 'user' // maps to API user_type: admin | agent | end_user
   onSubmit: (email: string, password: string) => Promise<void>
   onForgotPassword?: () => void
   showSignUp?: boolean
@@ -48,7 +48,7 @@ export default function LoginLayout({
     }
     
     // Load Google script and initialize
-    if (userType === 'admin' || userType === 'agent') {
+    if (userType === 'admin' || userType === 'agent' || userType === 'user') {
       const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID
       if (clientId) {
         loadGoogleScript()
@@ -108,10 +108,11 @@ export default function LoginLayout({
   }
 
   const handleGoogleSuccess = async (credential: string) => {
-    if (userType !== 'admin' && userType !== 'agent') return
-    
+    if (userType !== 'admin' && userType !== 'agent' && userType !== 'user') return
+
     setIsGoogleLoading(true)
     try {
+      const apiUserType = userType === 'user' ? 'end_user' : userType
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google/login`, {
         method: 'POST',
         headers: {
@@ -119,7 +120,7 @@ export default function LoginLayout({
         },
         body: JSON.stringify({
           token: credential,
-          user_type: userType,
+          user_type: apiUserType,
         }),
       })
 
@@ -137,6 +138,9 @@ export default function LoginLayout({
       } else if (userType === 'agent') {
         localStorage.setItem('agent_token', data.access_token)
         router.push('/agent/dashboard')
+      } else if (userType === 'user') {
+        localStorage.setItem('user_token', data.access_token)
+        router.push('/user')
       }
     } catch (error: any) {
       console.error('Google login error:', error)
@@ -310,7 +314,7 @@ export default function LoginLayout({
           </form>
 
           {/* Divider */}
-          {(userType === 'admin' || userType === 'agent') && (
+          {(userType === 'admin' || userType === 'agent' || userType === 'user') && (
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t" style={{ borderColor: 'rgba(77, 184, 255, 0.2)' }}></div>
@@ -324,7 +328,7 @@ export default function LoginLayout({
           )}
 
           {/* Google Sign In Button - Custom Styled */}
-          {(userType === 'admin' || userType === 'agent') && (
+          {(userType === 'admin' || userType === 'agent' || userType === 'user') && (
             <div className="mb-6">
               <button
                 type="button"

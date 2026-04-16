@@ -139,6 +139,24 @@ export async function listUserShowingsForAgent(agentId: string, page = 1, pageSi
   }>(`/user/agents/${agentId}/showings?page=${page}&page_size=${pageSize}`)
 }
 
+/** Single call (full transcript / metadata) scoped to the signed-in user’s phone + agent */
+export async function getUserCallForAgent(agentId: string, callId: string) {
+  return userFetch<Record<string, unknown>>(`/user/agents/${agentId}/calls/${callId}`)
+}
+
+export async function getUserCallRecordingMeta(agentId: string, callId: string) {
+  return userFetch<{
+    recording_url: string
+    recording_sid?: string
+    duration_seconds: number
+  }>(`/user/agents/${agentId}/calls/${callId}/recording`)
+}
+
+/** Single showing scoped to the signed-in user’s phone + agent */
+export async function getUserShowingForAgent(agentId: string, showingId: string) {
+  return userFetch<Record<string, unknown>>(`/user/agents/${agentId}/showings/${showingId}`)
+}
+
 export async function userChat(agentId: string, message: string) {
   return userFetch<{ answer: string; sources: string[]; rag_enabled: boolean }>(
     `/user/agents/${agentId}/chat`,
