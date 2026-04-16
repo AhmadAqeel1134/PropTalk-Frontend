@@ -13,6 +13,7 @@ export default function UploadDocumentForm({ onClose }: UploadDocumentFormProps)
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
   const [description, setDescription] = useState('')
+  const [uploadKind, setUploadKind] = useState<'property_import' | 'knowledge_base'>('property_import')
   const [preview, setPreview] = useState<string | null>(null)
   const [csvPreview, setCsvPreview] = useState<string[][]>([])
   const [isMounted, setIsMounted] = useState(false)
@@ -106,7 +107,7 @@ export default function UploadDocumentForm({ onClose }: UploadDocumentFormProps)
     if (!file) return
 
     uploadMutation.mutate(
-      { file, description: description || undefined },
+      { file, description: description || undefined, uploadKind },
       {
         onSuccess: (data) => {
           // Redirect to document details to show extracted audience
@@ -179,6 +180,27 @@ export default function UploadDocumentForm({ onClose }: UploadDocumentFormProps)
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="rounded-lg border border-gray-700 bg-gray-800/40 p-4 space-y-3">
+            <p className="text-sm font-medium text-gray-200">Upload purpose</p>
+            <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+              <input
+                type="radio"
+                name="uploadKind"
+                checked={uploadKind === 'property_import'}
+                onChange={() => setUploadKind('property_import')}
+              />
+              Import properties and contacts (parsed from file)
+            </label>
+            <label className="flex items-center gap-2 text-sm text-gray-300 cursor-pointer">
+              <input
+                type="radio"
+                name="uploadKind"
+                checked={uploadKind === 'knowledge_base'}
+                onChange={() => setUploadKind('knowledge_base')}
+              />
+              Knowledge base only (stored for future RAG; no property/contact import)
+            </label>
+          </div>
           <div className="grid md:grid-cols-2 gap-8">
             {/* Left Column - File Upload */}
             <div className="space-y-6">

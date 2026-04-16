@@ -179,3 +179,55 @@ export async function getCallStatistics(agentId: string, period: 'day' | 'week' 
   return authenticatedFetch(`/admin/voice-agents/${agentId}/call-stats?period=${period}`)
 }
 
+export async function getAdminRagAgents() {
+  return authenticatedFetch('/admin/rag/metrics/agents')
+}
+
+export async function getAdminRagOverview(agentId: string, window: '7d' | '30d' | '90d' = '30d') {
+  return authenticatedFetch(`/admin/rag/metrics/${agentId}/overview?window=${window}`)
+}
+
+export async function getAdminRagTimeseries(
+  agentId: string,
+  window: '7d' | '30d' | '90d' = '30d',
+  bucket: 'day' | 'week' = 'day'
+) {
+  return authenticatedFetch(`/admin/rag/metrics/${agentId}/timeseries?window=${window}&bucket=${bucket}`)
+}
+
+export async function getAdminRagQueries(
+  agentId: string,
+  params?: { window?: '7d' | '30d' | '90d'; page?: number; page_size?: number }
+) {
+  const window = params?.window || '30d'
+  const page = params?.page || 1
+  const pageSize = params?.page_size || 20
+  return authenticatedFetch(
+    `/admin/rag/metrics/${agentId}/queries?window=${window}&page=${page}&page_size=${pageSize}`
+  )
+}
+
+export async function getAdminRagTopSources(
+  agentId: string,
+  window: '7d' | '30d' | '90d' = '30d',
+  limit: number = 10
+) {
+  return authenticatedFetch(`/admin/rag/metrics/${agentId}/top-sources?window=${window}&limit=${limit}`)
+}
+
+export async function getAdminRagFailures(
+  agentId: string,
+  window: '7d' | '30d' | '90d' = '30d',
+  limit: number = 20
+) {
+  return authenticatedFetch(`/admin/rag/metrics/${agentId}/failures?window=${window}&limit=${limit}`)
+}
+
+export async function getAdminRagEmbeddingOverview(agentId: string) {
+  return authenticatedFetch(`/admin/rag/metrics/${agentId}/embedding/overview`)
+}
+
+export async function getAdminRagEmbeddingJobs(agentId: string, limit: number = 20) {
+  return authenticatedFetch(`/admin/rag/metrics/${agentId}/embedding/jobs?limit=${limit}`)
+}
+

@@ -13,10 +13,12 @@ const PageTransition: React.FC<PageTransitionProps> = ({ children }) => {
     setIsMounted(true);
   }, []);
 
+  // Opacity-only: any `transform` on an ancestor breaks `position: fixed` (sheets, modals)
+  // by creating a new containing block, so they appear clipped to the content column.
   return (
     <div
-      className={`transition-all duration-500 ease-out ${
-        isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+      className={`transition-opacity duration-500 ease-out ${
+        isMounted ? 'opacity-100' : 'opacity-0'
       }`}
     >
       {children}
