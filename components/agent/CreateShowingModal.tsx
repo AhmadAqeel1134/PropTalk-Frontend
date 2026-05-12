@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, CalendarCheck, Loader2, MapPin, Clock, FileText } from 'lucide-react'
 import { useCreateShowing, useMyContacts, useMyProperties } from '@/hooks/useAgent'
 import { useTheme } from '@/contexts/ThemeContext'
+import type { Property } from '@/types/agent.types'
 
 interface Props {
   onClose: () => void
@@ -187,7 +188,7 @@ export default function CreateShowingModal({ onClose }: Props) {
                   <option value="" className={optionClass}>
                     Select a property (optional)
                   </option>
-                  {(Array.isArray(properties) ? properties : []).map((p: { id: string; address?: string; city?: string }) => (
+                  {(Array.isArray(properties) ? properties : []).map((p: Property) => (
                     <option key={p.id} value={p.id} className={optionClass}>
                       {p.address}
                       {p.city ? `, ${p.city}` : ''}
