@@ -35,7 +35,7 @@ export default function VoiceAgentRequestForm() {
             Request Submitted!
           </h3>
           <p className="text-gray-400 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-            Your voice agent request is being reviewed by our team. We'll notify you once it's approved.
+            Your voice agent request is being reviewed by our team. We&apos;ll notify you once it&apos;s approved.
           </p>
           <div className="grid grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
             <div className="p-4 rounded-xl bg-gray-800/50 border border-gray-700">

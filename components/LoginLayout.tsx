@@ -387,7 +387,7 @@ export default function LoginLayout({
           {showSignUp && signUpLink && (
             <div className="mt-6 text-center">
               <p className="text-blue-200 text-sm">
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <Link href={signUpLink} className="text-blue-400 hover:text-blue-300 font-semibold transition-colors">
                   Sign Up
                 </Link>

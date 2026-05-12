@@ -148,7 +148,7 @@ export default function VoiceAgentConfigurationSheet({ isOpen, onClose }: VoiceA
                 <p className={`text-sm ${
                   theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                 }`}>
-                  Customize your AI assistant's behavior
+                  Customize your AI assistant&apos;s behavior
                 </p>
               </div>
               <button

@@ -91,10 +91,10 @@ export default function VoiceChatUI() {
               {/* Text */}
               <div className="text-center space-y-1 mb-6 fade-in-stagger-2">
                 <p className="text-white text-lg md:text-xl font-medium">
-                  I'm listening, Armando...
+                  I&apos;m listening, Armando...
                 </p>
                 <p className="text-slate-400 text-base md:text-lg">
-                  What's on your mind?
+                  What&apos;s on your mind?
                 </p>
               </div>
 

@@ -132,7 +132,7 @@ export default function VoiceAgentRequestSheet({ isOpen, onClose }: VoiceAgentRe
                   <p className={`mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200 ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                   }`}>
-                    Your voice agent request is being reviewed by our team. We'll notify you once it's approved.
+                    Your voice agent request is being reviewed by our team. We&apos;ll notify you once it&apos;s approved.
                   </p>
                   <div className="grid grid-cols-3 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
                     {[

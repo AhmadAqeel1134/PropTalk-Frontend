@@ -117,7 +117,7 @@ const AgentPhoneNumber: React.FC<AgentPhoneNumberProps> = ({ agentId, agentName,
               No Phone Number Assigned
             </h2>
             <p className="text-xl text-blue-200 mb-8 max-w-2xl mx-auto">
-              This agent doesn't have a Twilio phone number assigned yet. Contact the system 
+              This agent doesn&apos;t have a Twilio phone number assigned yet. Contact the system 
               administrator to provision a phone number for this agent.
             </p>
 

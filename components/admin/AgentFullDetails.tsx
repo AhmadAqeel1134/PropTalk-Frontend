@@ -472,7 +472,7 @@ const PropertiesTab: React.FC<PropertiesTabProps> = ({
           No Properties Listed
         </h3>
         <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}>
-          This agent hasn't added any properties yet
+          This agent hasn&apos;t added any properties yet
         </p>
       </div>
     );
@@ -798,7 +798,7 @@ const DocumentsTab: React.FC<DocumentsTabProps> = ({ documents, total, page, pag
           No Documents
         </h3>
         <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}>
-          This agent hasn't uploaded any documents yet
+          This agent hasn&apos;t uploaded any documents yet
         </p>
       </div>
     );
@@ -955,7 +955,7 @@ const ContactsTab: React.FC<{ contacts: any[]; theme: 'dark' | 'light' }> = ({ c
           No Contacts
         </h3>
         <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}>
-          This agent hasn't added any contacts yet
+          This agent hasn&apos;t added any contacts yet
         </p>
       </div>
     );
@@ -1040,7 +1040,7 @@ const PhoneTab: React.FC<{ phoneNumber: any; theme: 'dark' | 'light' }> = ({ pho
           No Phone Number
         </h3>
         <p className={theme === 'dark' ? 'text-gray-500' : 'text-gray-600'}>
-          This agent doesn't have a Twilio phone number assigned
+          This agent doesn&apos;t have a Twilio phone number assigned
         </p>
       </div>
     );
