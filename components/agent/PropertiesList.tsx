@@ -45,7 +45,7 @@ export default function PropertiesList() {
     page_size: pageSize,
   })
 
-  const properties = data?.items ?? []
+  const properties = useMemo(() => data?.items ?? [], [data])
   const total = data?.total ?? 0
   const totalPages = Math.max(1, Math.ceil(total / pageSize))
 

@@ -17,6 +17,7 @@ import {
   deleteContact,
   getContactProperties,
   getMyProperties,
+  type MyPropertiesFilters,
   getPropertyById,
   createProperty,
   updateProperty,
@@ -203,13 +204,7 @@ export function useDeleteContact() {
 }
 
 // Properties
-export function useMyProperties(filters?: {
-  search?: string
-  property_type?: string
-  city?: string
-  is_available?: boolean
-  contact_id?: string
-}) {
+export function useMyProperties(filters?: MyPropertiesFilters) {
   return useQuery<PaginatedProperties>({
     queryKey: ['agent', 'properties', filters],
     queryFn: () => getMyProperties(filters),

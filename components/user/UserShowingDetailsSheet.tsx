@@ -104,7 +104,7 @@ export default function UserShowingDetailsSheet({ agentId, showingId, isOpen, on
 
   const { data: showing, isLoading } = useQuery<Showing>({
     queryKey: ['endUser', 'showing', agentId, showingId],
-    queryFn: () => getUserShowingForAgent(agentId, showingId) as Promise<Showing>,
+    queryFn: () => getUserShowingForAgent(agentId, showingId),
     enabled: isOpen && !!agentId && !!showingId,
   })
 

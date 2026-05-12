@@ -159,7 +159,7 @@ export const getContactProperties = async (contactId: string) => {
 }
 
 // Properties
-export const getMyProperties = async (filters?: {
+export type MyPropertiesFilters = {
   search?: string
   property_type?: string
   city?: string
@@ -167,7 +167,9 @@ export const getMyProperties = async (filters?: {
   contact_id?: string
   page?: number
   page_size?: number
-}) => {
+}
+
+export const getMyProperties = async (filters?: MyPropertiesFilters) => {
   const params = new URLSearchParams()
   if (filters?.search) params.append('search', filters.search)
   if (filters?.property_type) params.append('property_type', filters.property_type)

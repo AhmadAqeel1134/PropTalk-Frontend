@@ -1,3 +1,5 @@
+import type { Showing } from '@/types/agent.types'
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 function getUserToken(): string | null {
@@ -154,7 +156,7 @@ export async function getUserCallRecordingMeta(agentId: string, callId: string) 
 
 /** Single showing scoped to the signed-in user’s phone + agent */
 export async function getUserShowingForAgent(agentId: string, showingId: string) {
-  return userFetch<Record<string, unknown>>(`/user/agents/${agentId}/showings/${showingId}`)
+  return userFetch<Showing>(`/user/agents/${agentId}/showings/${showingId}`)
 }
 
 export async function userChat(agentId: string, message: string) {

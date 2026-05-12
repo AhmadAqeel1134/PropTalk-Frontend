@@ -46,6 +46,9 @@ export interface Property {
   state: string | null
   property_type: string | null
   price: string | null
+  description?: string | null
+  amenities?: string | null
+  zip_code?: string | null
   bedrooms: number | null
   bathrooms: number | null
   square_feet: number | null

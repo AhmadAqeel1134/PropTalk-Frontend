@@ -630,7 +630,7 @@ export default function UserCallDetailsSheet({
                     Structured Transcript
                   </h3>
                   <div className="space-y-3">
-                    {c.transcript_json.map((message: Record<string, unknown>, idx: number) => {
+                    {(c.transcript_json as Record<string, unknown>[]).map((message, idx) => {
                       const role = message?.role
                       const isAssistant = role === 'assistant'
                       const colors = isAssistant
@@ -651,11 +651,11 @@ export default function UserCallDetailsSheet({
                         <div key={`${String(message?.timestamp ?? '')}-${idx}`} className="flex flex-col gap-1">
                           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide">
                             <span className={colors.text}>{colors.label}</span>
-                            {message?.timestamp && (
+                            {message?.timestamp != null && String(message.timestamp).trim() !== '' ? (
                               <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}>
                                 {new Date(String(message.timestamp)).toLocaleString()}
                               </span>
-                            )}
+                            ) : null}
                           </div>
                           <div className={`rounded-lg border p-3 ${colors.bg} ${colors.border} ${colors.text}`}>
                             <p className="leading-relaxed whitespace-pre-wrap">

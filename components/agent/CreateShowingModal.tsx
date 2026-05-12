@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { X, CalendarCheck, Loader2, MapPin, Clock, FileText } from 'lucide-react'
 import { useCreateShowing, useMyContacts, useMyProperties } from '@/hooks/useAgent'
 import { useTheme } from '@/contexts/ThemeContext'
-import type { Property } from '@/types/agent.types'
+import type { Property, Contact } from '@/types/agent.types'
 
 interface Props {
   onClose: () => void
@@ -206,7 +206,7 @@ export default function CreateShowingModal({ onClose }: Props) {
                   <option value="" className={optionClass}>
                     Select a contact (optional)
                   </option>
-                  {contacts.map((c: { id: string; name: string; phone_number: string }) => (
+                  {contacts.map((c: Contact) => (
                     <option key={c.id} value={c.id} className={optionClass}>
                       {c.name} — {c.phone_number}
                     </option>
