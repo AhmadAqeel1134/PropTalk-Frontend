@@ -58,6 +58,7 @@ export default function AgentDashboard() {
 
   if (isLoading) return <LoadingSpinner text="Loading dashboard..." fullScreen />
   if (error) return <ErrorMessage message={(error as Error).message} fullScreen />
+  if (!dashboard) return <LoadingSpinner text="Loading dashboard..." fullScreen />
 
   return (
     <PageTransition>
