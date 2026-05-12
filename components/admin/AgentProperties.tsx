@@ -34,7 +34,11 @@ const AgentProperties: React.FC<AgentPropertiesProps> = ({ agentId, agentName, o
   // Get unique property types for filter
   const propertyTypes = useMemo(() => {
     if (!properties) return [];
-    const types = new Set(properties.map(p => p.property_type).filter(Boolean));
+    const types = new Set<string>();
+    for (const p of properties) {
+      const t = p.property_type;
+      if (typeof t === 'string' && t.length > 0) types.add(t);
+    }
     return Array.from(types);
   }, [properties]);
 
@@ -332,4 +336,3 @@ const AgentProperties: React.FC<AgentPropertiesProps> = ({ agentId, agentName, o
 };
 
 export default AgentProperties;
-
