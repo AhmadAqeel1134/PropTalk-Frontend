@@ -192,7 +192,7 @@ export function useDeleteContact() {
     onError: (_err, _id, context) => {
       // Rollback if something goes wrong
       if (context?.previous) {
-        queryClient.setQueriesData(['agent','contacts', '', undefined], context.previous)
+        queryClient.setQueryData(['agent', 'contacts', '', undefined], context.previous)
       }
     },
     onSettled: () => {
